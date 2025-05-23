@@ -7,7 +7,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  base: '/juvelina/',
+  base: '/', // ← Mudança aqui!
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
