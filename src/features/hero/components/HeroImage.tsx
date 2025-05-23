@@ -117,27 +117,27 @@ const HeroImage: React.FC = () => {
 
         {/* SELOS - Versão Mobile (Com Texto e Posições Ajustadas) */}
         <div className="md:hidden">
-          {/* Selo 100% Natural - Mobile (topo esquerdo, mais para dentro) */}
+          {/* Selo 100% Natural - Mobile (mais para direita e sobrepondo levemente o frasco) */}
           <motion.div 
-            className="absolute top-4 left-4"
+            className="absolute top-0 left-16"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 0.8 }}
             transition={{ delay: 1.2, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              className="bg-white rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1.5 shadow-md"
               animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { duration: 3.5, repeat: Infinity, repeatType: "reverse" }
               }}
               style={{
-                fontSize: '11px',
-                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                fontSize: '12px',
+                boxShadow: "0 6px 15px rgba(169,104,61,0.25)",
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-100">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-100">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
               </div>
@@ -145,27 +145,27 @@ const HeroImage: React.FC = () => {
             </motion.div>
           </motion.div>
           
-          {/* Selo Pureza Certificada - Mobile (bottom direito, mais para dentro) */}
+          {/* Selo Pureza Certificada - Mobile (mais abaixo para não ser tampado) */}
           <motion.div
-            className="absolute bottom-16 right-4"
+            className="absolute bottom-1 right-12"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 0.9 }}
             transition={{ delay: 1, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              className="bg-white rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1.5 shadow-md"
               animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { delay: 1.5, duration: 4, repeat: Infinity, repeatType: "reverse" }
               }}
               style={{
-                fontSize: '11px',
-                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                fontSize: '12px',
+                boxShadow: "0 6px 15px rgba(169,104,61,0.25)",
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-juvelina-gold/20">
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="#A9683D">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-juvelina-gold/20">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="#A9683D">
                   <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -173,59 +173,59 @@ const HeroImage: React.FC = () => {
             </motion.div>
           </motion.div>
           
-          {/* Selo Dermatologicamente Testado - Mobile (bottom esquerdo, mais para dentro) */}
+          {/* Selo Dermatologicamente Testado - Mobile (mantém posição) */}
           <motion.div
-            className="absolute bottom-8 left-4 z-10"
+            className="absolute bottom-8 left-5 z-10"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              className="bg-white rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1.5 shadow-md"
               animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
               }}
               style={{
-                fontSize: '11px',
-                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                fontSize: '12px',
+                boxShadow: "0 6px 15px rgba(169,104,61,0.25)",
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-green-100">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-100">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-medium text-gray-700">Dermatolog.</span>
-                <span className="font-medium text-gray-700 text-[10px]">Testado</span>
+                <span className="font-medium text-gray-700 text-[11px]">Testado</span>
               </div>
             </motion.div>
           </motion.div>
           
-          {/* Selo Absorção 5x - Mobile (centro direito, abaixo do TikTok) */}
+          {/* Selo Absorção 5x - Mobile (ajustado para melhor posição) */}
           <motion.div
-            className="absolute top-20 right-4"
+            className="absolute top-1/4 right-6 z-10"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 0.8 }}
             transition={{ delay: 1.4, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              className="bg-white rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1.5 shadow-md"
               animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { delay: 1.9, duration: 3.7, repeat: Infinity, repeatType: "reverse" }
               }}
               style={{
-                fontSize: '11px',
-                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                fontSize: '12px',
+                boxShadow: "0 6px 15px rgba(169,104,61,0.25)",
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-juvelina-gold/20">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A9683D" strokeWidth="2">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-juvelina-gold/20">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A9683D" strokeWidth="2">
                   <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
               </div>
