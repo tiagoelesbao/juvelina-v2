@@ -11,43 +11,59 @@ export interface StatItem {
 export function useCountUp(statsArray: StatItem[], inView: boolean) {
   const [stats, setStats] = useState<StatItem[]>(statsArray);
 
-  // Animação de contagem para estatísticas - otimizada
+  // Animação de contagem para estatísticas
   useEffect(() => {
     if (inView) {
       console.log("Starting counter animations");
       
-      // Ajuste para garantir que os incrementos sejam proporcionais aos valores alvo
-      const interval = setInterval(() => {
-        let allCompleted = true;
-        
-        setStats(prev => 
-          prev.map(stat => {
-            if (stat.value < stat.target) {
-              allCompleted = false;
-              
-              // Ajuste dinâmico de incremento baseado no tamanho do target
-              const increment = stat.target > 1000 ? 
-                Math.ceil(stat.target / 40) : 
-                Math.max(1, Math.ceil(stat.target / 15));
-              
-              return {
-                ...stat,
-                value: Math.min(stat.value + increment, stat.target)
-              };
-            }
-            return stat;
-          })
-        );
-        
-        if (allCompleted) {
-          console.log("Counter animations completed");
-          clearInterval(interval);
-        }
-      }, 30);
+      // Reset valores para 0 antes de começar a animação
+      setStats(statsArray.map(stat => ({ ...stat, value: 0 })));
       
-      return () => clearInterval(interval);
+      // Começar animação após um pequeno delay
+      const timeout = setTimeout(() => {
+        const interval = setInterval(() => {
+          let allCompleted = true;
+          
+          setStats(prev => 
+            prev.map(stat => {
+              if (stat.value < stat.target) {
+                allCompleted = false;
+                
+                // Ajuste dinâmico de incremento baseado no tamanho do target
+                let increment;
+                if (stat.target > 10000) {
+                  increment = Math.ceil(stat.target / 50);
+                } else if (stat.target > 1000) {
+                  increment = Math.ceil(stat.target / 40);
+                } else if (stat.target > 100) {
+                  increment = Math.ceil(stat.target / 30);
+                } else {
+                  increment = Math.max(1, Math.ceil(stat.target / 20));
+                }
+                
+                const newValue = stat.value + increment;
+                
+                return {
+                  ...stat,
+                  value: newValue > stat.target ? stat.target : newValue
+                };
+              }
+              return stat;
+            })
+          );
+          
+          if (allCompleted) {
+            console.log("Counter animations completed");
+            clearInterval(interval);
+          }
+        }, 40);
+        
+        return () => clearInterval(interval);
+      }, 100);
+      
+      return () => clearTimeout(timeout);
     }
-  }, [inView]);
+  }, [inView, statsArray]);
 
   return { stats };
 }
@@ -59,5 +75,5 @@ export function formatNumber(num: number): string {
   } else if (num >= 1000) {
     return `+${(num / 1000).toFixed(1)}mil`.replace('.', ',');
   }
-  return `${num}%`;
+  return num.toString();
 }

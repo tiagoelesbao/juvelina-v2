@@ -361,4 +361,48 @@ section[id] {
   position: relative;
   z-index: 1;
 }
+
+/* Adicione este CSS ao seu arquivo index.css */
+
+/* Gradientes de texto otimizados */
+.text-gradient-gold {
+  background: linear-gradient(90deg, #A9683D, #D4B26A);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+}
+
+.text-gradient-gold-emerald {
+  background: linear-gradient(135deg, #A9683D 0%, #357266 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+}
+
+/* Suporte para prefixos de navegadores */
+@supports (-webkit-background-clip: text) {
+  .text-gradient-gold,
+  .text-gradient-gold-emerald {
+    color: transparent;
+  }
+}
+
+/* Fallback para navegadores sem suporte */
+@supports not (-webkit-background-clip: text) {
+  .text-gradient-gold {
+    color: #A9683D;
+  }
+  
+  .text-gradient-gold-emerald {
+    color: #357266;
+  }
+}
+
+/* Animação de shimmer removida para melhor performance */
+.animate-shimmer {
+  animation: none;
+}
+
 }

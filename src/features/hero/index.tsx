@@ -17,11 +17,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   const [inView, setInView] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
   
-  // Dados iniciais das estatísticas
+  // Dados iniciais das estatísticas com valores mais adequados
   const initialStats: StatItem[] = [
-    { id: 1, value: 0, target: 12500, label: 'Clientes Satisfeitos', icon: '👥' },
+    { id: 1, value: 0, target: 12500, label: 'Clientes Satisfeitos', icon: '✨' },
     { id: 2, value: 0, target: 25, label: 'Nutrientes Premium', icon: '🌿' },
-    { id: 3, value: 0, target: 100, label: 'Garantia de Satisfação', icon: '✓' },
+    { id: 3, value: 0, target: 98, label: 'Taxa de Satisfação', icon: '💚' },
   ];
   
   // Hook customizado para animação de contagem
@@ -120,7 +120,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
           >
             <HeroHeading />
             <HeroButtons onCtaClick={onCtaClick} />
-            <HeroStats stats={stats} inView={inView} />
+            
+            {/* Estatísticas com espaçamento melhorado */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.7 }}
+            >
+              <HeroStats stats={stats} inView={inView} />
+            </motion.div>
           </motion.div>
           
           {/* ===== COLUNA DA IMAGEM - DIREITA ===== */}
