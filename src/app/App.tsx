@@ -1,261 +1,224 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Menu, X, ArrowUp } from 'lucide-react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronUp, ShoppingCart, Package } from 'lucide-react';
 
-// Componentes principais (carregados imediatamente)
-import HeroSection from './features/hero';
-import VideoTestimonialsSection from './features/testimonials/VideoTestimonialsSection';
-import Footer from './components/layout/Footer';
-import ScrollProgressBar from './components/ui/ScrollProgressBar';
-import LoadingSection from './components/ui/LoadingSection';
+// Imports corrigidos - subindo um nível (..)
+import HeroSection from '../features/hero';
+import VideoTestimonialsSection from '../features/testimonials/VideoTestimonialsSection';
+import Footer from '../components/product/Footer';
+import ScrollProgressBar from '../components/ui/ScrollProgressBar';
+import LoadingSection from '../components/ui/LoadingSection';
 
-// Lazy loading para seções secundárias
-const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
-const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
-const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
-const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
-const PricingSection = lazy(() => import('./features/product/PricingSection'));
-const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
-const PurchaseModal = lazy(() => import('./components/common/PurchaseModal'));
-const IngredientsList = lazy(() => import('./components/ui/IngredientsList'));
+// Lazy loading dos componentes
+const BenefitsSection = lazy(() => import('../features/benefits/BenefitsSection'));
+const AbsorptionSection = lazy(() => import('../features/benefits/AbsorptionSection'));
+const UGCGallerySection = lazy(() => import('../features/testimonials/UGCGallerySection'));
+const GuaranteeSection = lazy(() => import('../features/testimonials/GuaranteeSection'));
+const ViralOfferSection = lazy(() => import('../features/product/ViralOfferSection'));
+const PricingSection = lazy(() => import('../features/product/PricingSection'));
+const FaqSection = lazy(() => import('../features/testimonials/FaqSection'));
+const PurchaseModal = lazy(() => import('../components/common/PurchaseModal'));
+const IngredientsList = lazy(() => import('../components/ui/IngredientsList'));
 
-// Hooks personalizados
-import { useScrollPosition } from './hooks/ui/useScrollPosition';
-import { useModalState } from './hooks/ui/useModalState';
+// Componentes de notificação
+const CreatorBadge = lazy(() => import('../components/ui/CreatorBadge'));
+const RecentActivityNotification = lazy(() => import('../components/ui/RecentActivityNotification'));
+const VisitorCounter = lazy(() => import('../components/ui/VisitorCounter'));
+const OnlineUsersCounter = lazy(() => import('../components/ui/OnlineUsersCounter'));
 
+// Custom hooks
+import { useScrollPosition } from '../hooks/ui/useScrollPosition';
+import { useModalState } from '../hooks/ui/useModalState';
+
+// Componente principal
 function App() {
-  // Estados principais
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { showScrollTop } = useScrollPosition();
+  const { showModal, modalVariant, openModal, closeModal } = useModalState();
   const [showIngredients, setShowIngredients] = useState(false);
-  const { scrollPosition, showScrollTop } = useScrollPosition();
-  const { showModal, openModal, closeModal } = useModalState();
+  const [exitIntentShown, setExitIntentShown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState({
+    creator: false,
+    activity: false,
+    visitors: false,
+    users: false
+  });
 
-  // Timer de urgência
-  const [timer, setTimer] = useState({ hours: 4, minutes: 59, seconds: 59 });
-
-  // Navegação
-  const navigationItems = [
-    { id: 'video-depoimentos', label: 'Resultados' },
-    { id: 'beneficios', label: 'Benefícios' },
-    { id: 'garantia', label: 'Garantia' },
-    { id: 'planos', label: 'Planos' },
-    { id: 'faq', label: 'FAQ' }
-  ];
-
-  // Timer countdown
+  // Gerenciamento de notificações
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { hours: prev.hours, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 4, minutes: 59, seconds: 59 }; // Reinicia
-      });
-    }, 1000);
+    const timers = [
+      setTimeout(() => setShowNotifications(prev => ({ ...prev, creator: true })), 15000),
+      setTimeout(() => setShowNotifications(prev => ({ ...prev, activity: true })), 8000),
+      setTimeout(() => setShowNotifications(prev => ({ ...prev, visitors: true })), 3000),
+      setTimeout(() => setShowNotifications(prev => ({ ...prev, users: true })), 12000)
+    ];
 
-    return () => clearInterval(interval);
+    return () => timers.forEach(timer => clearTimeout(timer));
   }, []);
 
-  const handleCtaClick = () => {
+  // Exit intent detection
+  useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && !exitIntentShown && !showModal) {
+        setExitIntentShown(true);
+        openModal('exit-intent');
+      }
+    };
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [exitIntentShown, showModal, openModal]);
+
+  // Handler para abrir o modal de compra
+  const handleCtaClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
     openModal('default');
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
-    }
+  // Handler para scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-white">
       {/* Barra de Progresso */}
-      <ScrollProgressBar />
+      <ScrollProgressBar color="#A9683D" height={3} />
       
-      {/* Barra de Urgência */}
-      <div className="bg-juvelina-gold text-white py-2 text-center sticky top-0 z-50">
-        <p className="text-sm md:text-base px-4">
-          🔥 OFERTA ESPECIAL: 30% OFF + Frete Grátis | 
-          ⏰ {String(timer.hours).padStart(2, '0')}:
-          {String(timer.minutes).padStart(2, '0')}:
-          {String(timer.seconds).padStart(2, '0')} | 
-          📦 Apenas 54 unidades!
-        </p>
-      </div>
-
-      {/* Header */}
-      <header className={`bg-white sticky top-10 z-40 transition-shadow ${
-        scrollPosition > 50 ? 'shadow-md' : 'shadow-sm'
-      }`}>
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            {/* Logo */}
-            <div 
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <div className="text-juvelina-gold">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-              </div>
-              <span className="font-['Ws_Paradose'] text-2xl text-juvelina-gold">Juvelina</span>
-            </div>
-
-            {/* Desktop Menu */}
-            <nav className="hidden md:flex gap-6 items-center">
-              {navigationItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="text-gray-600 hover:text-juvelina-gold transition font-medium"
-                >
-                  {item.label}
-                </button>
-              ))}
-              <button
-                onClick={() => setShowIngredients(true)}
-                className="text-gray-600 hover:text-juvelina-gold transition font-medium"
-              >
-                Ingredientes
-              </button>
-              <button
-                onClick={handleCtaClick}
-                className="bg-juvelina-gold text-white px-6 py-2 rounded-full hover:bg-opacity-90 transition flex items-center gap-2"
-              >
-                <ShoppingCart size={18} />
-                Comprar
-              </button>
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden bg-white border-t"
-            >
-              <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-                {navigationItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className="text-left py-2 text-gray-600 hover:text-juvelina-gold transition"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setShowIngredients(true)}
-                  className="text-left py-2 text-gray-600 hover:text-juvelina-gold transition"
-                >
-                  Ingredientes
-                </button>
-                <button
-                  onClick={handleCtaClick}
-                  className="bg-juvelina-gold text-white px-6 py-3 rounded-full w-full mt-2"
-                >
-                  Comprar Agora
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-
-      {/* Main Content */}
+      {/* Conteúdo Principal */}
       <main>
-        {/* Hero Section */}
+        {/* Hero Section - Sempre carregada */}
         <HeroSection onCtaClick={handleCtaClick} />
         
-        {/* Video Testimonials - Logo após Hero */}
-        <VideoTestimonialsSection />
-        
-        {/* Benefits Section */}
+        {/* Seções com Lazy Loading */}
         <Suspense fallback={<LoadingSection />}>
-          <BenefitsSection />
-        </Suspense>
-        
-        {/* Absorption Section */}
-        <Suspense fallback={<LoadingSection />}>
-          <AbsorptionSection />
-        </Suspense>
-        
-        {/* UGC Gallery */}
-        <Suspense fallback={<LoadingSection />}>
-          <UGCGallerySection />
-        </Suspense>
-        
-        {/* Guarantee Section */}
-        <Suspense fallback={<LoadingSection />}>
-          <GuaranteeSection />
-        </Suspense>
-        
-        {/* Viral Offer */}
-        <Suspense fallback={<LoadingSection />}>
-          <ViralOfferSection onCtaClick={handleCtaClick} />
-        </Suspense>
-        
-        {/* Pricing Section */}
-        <Suspense fallback={<LoadingSection />}>
-          <PricingSection onCtaClick={handleCtaClick} />
-        </Suspense>
-        
-        {/* FAQ */}
-        <Suspense fallback={<LoadingSection />}>
-          <FaqSection />
+          <VideoTestimonialsSection />
+          
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-juvelina-mint/5 py-4">
+                <div className="container mx-auto px-4">
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-center">
+                    <div className="flex items-center gap-2">
+                      <Package className="text-juvelina-gold" size={20} />
+                      <span className="text-sm font-medium">Frete Grátis em Todo Brasil</span>
+                    </div>
+                    <div className="hidden sm:block w-px h-4 bg-gray-300" />
+                    <span className="text-sm">🔒 Pagamento 100% Seguro</span>
+                    <div className="hidden sm:block w-px h-4 bg-gray-300" />
+                    <span className="text-sm">✨ Garantia de 30 dias</span>
+                  </div>
+                </div>
+              </div>
+              
+              <BenefitsSection />
+              
+              <div className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
+                <div className="container mx-auto px-4 text-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <h3 className="text-2xl font-bold mb-4">Descubra Nossa Fórmula Exclusiva</h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      25 nutrientes essenciais cuidadosamente selecionados para máxima eficácia e absorção superior.
+                    </p>
+                    <button
+                      onClick={() => setShowIngredients(true)}
+                      className="bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-colors font-medium"
+                    >
+                      Ver Todos os Ingredientes
+                    </button>
+                  </motion.div>
+                </div>
+              </div>
+              
+              <AbsorptionSection />
+              <UGCGallerySection />
+              
+              <div className="py-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80">
+                <div className="container mx-auto px-4 text-center text-white">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <h3 className="text-3xl font-bold mb-4">
+                      Junte-se a Mais de 12.500 Pessoas Transformadas
+                    </h3>
+                    <p className="text-xl mb-8 opacity-90">
+                      Comece sua jornada de bem-estar hoje mesmo!
+                    </p>
+                    <button
+                      onClick={handleCtaClick}
+                      className="bg-white text-juvelina-gold px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-lg"
+                    >
+                      <ShoppingCart size={24} />
+                      Quero Transformar Minha Saúde
+                    </button>
+                  </motion.div>
+                </div>
+              </div>
+              
+              <GuaranteeSection />
+              <ViralOfferSection onCtaClick={handleCtaClick} />
+              <PricingSection onCtaClick={handleCtaClick} />
+              <FaqSection />
+            </motion.div>
+          </AnimatePresence>
         </Suspense>
       </main>
-
+      
       {/* Footer */}
       <Footer />
-
-      {/* Modals */}
+      
+      {/* Modais */}
       <Suspense fallback={null}>
-        {showModal && (
-          <PurchaseModal 
-            isOpen={showModal} 
-            onClose={closeModal}
-          />
-        )}
+        <AnimatePresence>
+          {showModal && (
+            <PurchaseModal
+              isOpen={showModal}
+              onClose={closeModal}
+              variant={modalVariant}
+            />
+          )}
+          
+          {showIngredients && (
+            <IngredientsList onClose={() => setShowIngredients(false)} />
+          )}
+        </AnimatePresence>
       </Suspense>
-
-      <Suspense fallback={null}>
-        {showIngredients && (
-          <IngredientsList onClose={() => setShowIngredients(false)} />
-        )}
-      </Suspense>
-
-      {/* Scroll to Top */}
+      
+      {/* Botão Voltar ao Topo */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-20 right-5 w-12 h-12 bg-juvelina-gold text-white rounded-full shadow-lg flex items-center justify-center z-40"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 bg-juvelina-gold text-white p-3 rounded-full shadow-lg hover:bg-juvelina-gold/90 transition-colors z-40"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <ArrowUp size={20} />
+            <ChevronUp size={24} />
           </motion.button>
         )}
       </AnimatePresence>
+      
+      {/* Componentes de Notificação */}
+      <Suspense fallback={null}>
+        {showNotifications.creator && <CreatorBadge />}
+        {showNotifications.activity && <RecentActivityNotification />}
+        {showNotifications.visitors && <VisitorCounter />}
+        {showNotifications.users && <OnlineUsersCounter />}
+      </Suspense>
     </div>
   );
 }

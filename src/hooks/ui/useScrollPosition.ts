@@ -1,23 +1,33 @@
 import { useState, useEffect } from 'react';
 
 export function useScrollPosition() {
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const position = window.scrollY;
-      setScrollPosition(position);
       setShowScrollTop(position > 600);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Chamada inicial
+    // Adicionar throttle para melhor performance
+    let ticking = false;
+    const scrollHandler = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    handleScroll(); // Verificação inicial
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', scrollHandler);
     };
   }, []);
 
-  return { scrollPosition, showScrollTop };
+  return { showScrollTop };
 }
