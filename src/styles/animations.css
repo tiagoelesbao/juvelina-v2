@@ -1,0 +1,70 @@
+/* animations.css - Arquivo de animações específicas para o Hero Section */
+
+/* Efeito de texto gradiente animado */
+.text-gradient-gold {
+  background: linear-gradient(90deg, #A9683D 0%, #D4B26A 50%, #A9683D 100%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Animação de flutuação para elementos */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Pulsação suave para badges e elementos interativos */
+.animate-pulse-slow {
+  animation: pulseSlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+/* Efeito de coração explodindo para likes */
+.animate-heart {
+  position: absolute;
+  animation: heart 1s ease-out forwards;
+}
+
+@keyframes heart {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2) translateY(-20px);
+  }
+}
