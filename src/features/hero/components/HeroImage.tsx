@@ -115,106 +115,133 @@ const HeroImage: React.FC = () => {
           />
         </motion.div>
 
-        {/* SELOS - Versão Mobile (Hidden no Desktop) */}
+        {/* SELOS - Versão Mobile (Com Texto e Posições Ajustadas) */}
         <div className="md:hidden">
-          {/* Selo Dermatologicamente Testado - Mobile */}
+          {/* Selo 100% Natural - Mobile (topo esquerdo, mais para dentro) */}
           <motion.div 
-            className="absolute top-0 left-0"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-          >
-            <motion.div
-              className="bg-white rounded-full p-1.5 shadow-md"
-              animate={{ y: [0, -3, 0] }}
-              transition={{ 
-                y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
-              }}
-            >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-100">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              </div>
-            </motion.div>
-          </motion.div>
-          
-          {/* Selo Pureza Certificada - Mobile */}
-          <motion.div
-            className="absolute bottom-0 right-0"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-          >
-            <motion.div
-              className="bg-white rounded-full p-1.5 shadow-md"
-              animate={{ y: [0, -3, 0] }}
-              transition={{ 
-                y: { delay: 1.5, duration: 4, repeat: Infinity, repeatType: "reverse" }
-              }}
-            >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-juvelina-gold/20">
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="#A9683D">
-                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </motion.div>
-          </motion.div>
-          
-          {/* Selo 100% Natural - Mobile */}
-          <motion.div
-            className="absolute bottom-0 left-0"
+            className="absolute top-4 left-4"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.2, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full p-1.5 shadow-md"
-              animate={{ y: [0, -3, 0] }}
+              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              animate={{ y: [0, -2, 0] }}
               transition={{ 
-                y: { delay: 1.7, duration: 3.5, repeat: Infinity, repeatType: "reverse" }
+                y: { duration: 3.5, repeat: Infinity, repeatType: "reverse" }
+              }}
+              style={{
+                fontSize: '11px',
+                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-100">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-100">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
               </div>
+              <span className="font-medium text-gray-700 pr-1">100% Natural</span>
             </motion.div>
           </motion.div>
           
-          {/* Selo Absorção 5x - Mobile */}
+          {/* Selo Pureza Certificada - Mobile (bottom direito, mais para dentro) */}
           <motion.div
-            className="absolute top-0 right-0"
+            className="absolute bottom-16 right-4"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1, duration: 0.5 }}
+          >
+            <motion.div
+              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              animate={{ y: [0, -2, 0] }}
+              transition={{ 
+                y: { delay: 1.5, duration: 4, repeat: Infinity, repeatType: "reverse" }
+              }}
+              style={{
+                fontSize: '11px',
+                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                border: "1px solid rgba(169,104,61,0.1)"
+              }}
+            >
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-juvelina-gold/20">
+                <svg width="12" height="12" viewBox="0 0 20 20" fill="#A9683D">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="font-medium text-gray-700 pr-1">Pureza Certificada</span>
+            </motion.div>
+          </motion.div>
+          
+          {/* Selo Dermatologicamente Testado - Mobile (bottom esquerdo, mais para dentro) */}
+          <motion.div
+            className="absolute bottom-8 left-4 z-10"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+          >
+            <motion.div
+              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              animate={{ y: [0, -2, 0] }}
+              transition={{ 
+                y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
+              }}
+              style={{
+                fontSize: '11px',
+                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                border: "1px solid rgba(169,104,61,0.1)"
+              }}
+            >
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-green-100">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="font-medium text-gray-700">Dermatolog.</span>
+                <span className="font-medium text-gray-700 text-[10px]">Testado</span>
+              </div>
+            </motion.div>
+          </motion.div>
+          
+          {/* Selo Absorção 5x - Mobile (centro direito, abaixo do TikTok) */}
+          <motion.div
+            className="absolute top-20 right-4"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.4, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full p-1.5 shadow-md"
-              animate={{ y: [0, -3, 0] }}
+              className="bg-white rounded-full pl-1.5 pr-2.5 py-1 flex items-center gap-1 shadow-md"
+              animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { delay: 1.9, duration: 3.7, repeat: Infinity, repeatType: "reverse" }
               }}
+              style={{
+                fontSize: '11px',
+                boxShadow: "0 4px 10px rgba(169,104,61,0.2)",
+                border: "1px solid rgba(169,104,61,0.1)"
+              }}
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-juvelina-gold/20">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center bg-juvelina-gold/20">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A9683D" strokeWidth="2">
                   <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
               </div>
+              <span className="font-medium text-gray-700 pr-1">Absorção 5x</span>
             </motion.div>
           </motion.div>
         </div>
 
         {/* SELOS - Versão Desktop (Hidden no Mobile) */}
         <div className="hidden md:block">
-          {/* Selo Dermatologicamente Testado - Desktop (Reposicionado) */}
+          {/* Selo 100% Natural - Desktop (posição superior esquerda) */}
           <motion.div 
             className="absolute top-10 -left-20 transform"
             initial={{ opacity: 0, scale: 0.8, x: -20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
           >
             <motion.div
               className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg"
@@ -225,17 +252,16 @@ const HeroImage: React.FC = () => {
               whileHover={{ y: -3, boxShadow: "0 12px 30px rgba(169,104,61,0.3)" }}
               animate={{ y: [0, -5, 0] }}
               transition={{ 
-                y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
+                y: { duration: 3.5, repeat: Infinity, repeatType: "reverse" }
               }}
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-100">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
               </div>
-              <span className="font-medium text-sm text-gray-700 whitespace-nowrap">
-                Dermatologicamente<br/>Testado
+              <span className="font-medium text-sm text-gray-700">
+                100% Natural
               </span>
             </motion.div>
           </motion.div>
@@ -279,35 +305,35 @@ const HeroImage: React.FC = () => {
             </span>
           </motion.div>
           
-          {/* Selo 100% Natural - Desktop */}
-          <motion.div
-            className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute bottom-1/3 -left-16"
-            style={{
-              boxShadow: "0 10px 25px rgba(169,104,61,0.2)",
-              border: "1px solid rgba(169,104,61,0.1)"
-            }}
+          {/* Selo Dermatologicamente Testado - Desktop (SOBREPONDO O FRASCO) */}
+          <motion.div 
+            className="absolute bottom-4 -left-10 z-20"
             initial={{ opacity: 0, scale: 0.8, x: -20 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
-              x: 0,
-              y: [0, -5, 0]
-            }}
-            transition={{ 
-              delay: 1.2, 
-              duration: 0.5,
-              y: { delay: 1.7, duration: 3.5, repeat: Infinity, repeatType: "reverse" }
-            }}
-            whileHover={{ y: -3, boxShadow: "0 12px 30px rgba(169,104,61,0.3)" }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </div>
-            <span className="font-medium text-sm text-gray-700">
-              100% Natural
-            </span>
+            <motion.div
+              className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg"
+              style={{
+                boxShadow: "0 10px 25px rgba(169,104,61,0.3)",
+                border: "1px solid rgba(169,104,61,0.1)"
+              }}
+              whileHover={{ y: -3, boxShadow: "0 12px 30px rgba(169,104,61,0.4)" }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ 
+                y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
+              }}
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-100">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <span className="font-medium text-sm text-gray-700 whitespace-nowrap">
+                Dermatologicamente<br/>Testado
+              </span>
+            </motion.div>
           </motion.div>
           
           {/* Selo "Absorção 5x" - Desktop */}
