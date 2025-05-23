@@ -1,23 +1,26 @@
-// src/components/ui/WaveTransition.tsx (novo componente)
+// src/components/ui/WaveTransition.tsx
 import React from 'react';
 
 interface WaveTransitionProps {
   color?: string;
   className?: string;
+  height?: number;
 }
 
 const WaveTransition: React.FC<WaveTransitionProps> = ({ 
   color = '#C2F7BC', 
-  className = '' 
+  className = '',
+  height = 120
 }) => {
   return (
-    <div className={`relative w-full overflow-hidden ${className}`}>
+    <div className={`w-full overflow-hidden ${className}`} style={{ marginTop: '-1px', marginBottom: '-1px' }}>
       <svg 
-        viewBox="0 0 1440 120" 
+        viewBox={`0 0 1440 ${height}`}
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-auto block"
         preserveAspectRatio="none"
+        style={{ height: `${height}px` }}
       >
         <path 
           d="M0,40 C240,80 480,20 720,40 C960,60 1200,30 1440,40 L1440,120 L0,120 Z" 
@@ -35,14 +38,6 @@ const WaveTransition: React.FC<WaveTransitionProps> = ({
           fillOpacity="0.2"
         />
       </svg>
-      {/* Efeito de tinta/pintura */}
-      <div 
-        className="absolute bottom-0 left-0 w-full h-1"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, ${color}40 20%, ${color}60 50%, ${color}40 80%, transparent 100%)`,
-          filter: 'blur(2px)'
-        }}
-      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import HeroButtons from './components/HeroButtons';
 import HeroStats from './components/HeroStats';
 import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
+import WaveTransition from '../../components/ui/WaveTransition';
 import { useCountUp, StatItem } from './hooks/useCountUp';
 
 interface HeroSectionProps {
@@ -28,7 +29,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          console.log("Hero section in view - activating animations");
           setInView(true);
           observer.disconnect();
         }
@@ -50,12 +50,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden pb-20 md:pb-0"
       style={{
         background: "linear-gradient(135deg, rgba(255,253,244,0.8) 0%, rgba(255,255,255,0.9) 50%, rgba(194,247,188,0.2) 100%)",
       }}
     >
-      {/* ===== ELEMENTOS DE FUNDO ===== */}
+      {/* Elementos de fundo - mantém como estão */}
       <motion.div 
         className="absolute rounded-full opacity-20"
         style={{
@@ -106,7 +106,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
       
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* ===== COLUNA DE TEXTO - ESQUERDA ===== */}
           <motion.div 
             className="order-2 md:order-1"
             initial={{ opacity: 0 }}
@@ -116,18 +115,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
             <HeroHeading />
             <HeroButtons onCtaClick={onCtaClick} />
             
-            {/* Estatísticas com espaçamento melhorado */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.7 }}
-              className="mb-20 md:mb-0" 
             >
               <HeroStats stats={stats} inView={inView} />
             </motion.div>
           </motion.div>
           
-          {/* ===== COLUNA DA IMAGEM - DIREITA ===== */}
           <motion.div 
             className="md:col-span-1 order-1 md:order-2 relative"
             initial={{ opacity: 0 }}
@@ -139,8 +135,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         </div>
       </div>
       
-      {/* Indicador de scroll */}
-      <ScrollIndicator />
+      {/* Indicador de scroll com mais espaço no mobile */}
+      <div className="mb-16 md:mb-0">
+        <ScrollIndicator />
+      </div>
+      
+      {/* Transição ondulada para a próxima seção */}
+      <WaveTransition 
+        color="#C2F7BC" 
+        className="absolute bottom-0 left-0 w-full -mb-1"
+      />
     </section>
   );
 };
