@@ -2,58 +2,86 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronUp, ShoppingCart, Package } from 'lucide-react';
 
-// Imports corrigidos - subindo um nível (..)
-import HeroSection from '../features/hero';
-import VideoTestimonialsSection from '../features/testimonials/VideoTestimonialsSection';
-import Footer from '../components/product/Footer';
-import ScrollProgressBar from '../components/ui/ScrollProgressBar';
-import LoadingSection from '../components/ui/LoadingSection';
+// Imports diretos (não lazy) para componentes críticos
+import HeroSection from './features/hero';
+import ScrollProgressBar from './components/ui/ScrollProgressBar';
+import LoadingSection from './components/ui/LoadingSection';
 
-// Lazy loading dos componentes
-const BenefitsSection = lazy(() => import('../features/benefits/BenefitsSection'));
-const AbsorptionSection = lazy(() => import('../features/benefits/AbsorptionSection'));
-const UGCGallerySection = lazy(() => import('../features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('../features/testimonials/GuaranteeSection'));
-const ViralOfferSection = lazy(() => import('../features/product/ViralOfferSection'));
-const PricingSection = lazy(() => import('../features/product/PricingSection'));
-const FaqSection = lazy(() => import('../features/testimonials/FaqSection'));
-const PurchaseModal = lazy(() => import('../components/common/PurchaseModal'));
-const IngredientsList = lazy(() => import('../components/ui/IngredientsList'));
+// Lazy loading dos componentes secundários
+const VideoTestimonialsSection = lazy(() => import('./features/testimonials/VideoTestimonialsSection'));
+const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
+const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
+const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
+const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
+const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
+const PricingSection = lazy(() => import('./features/product/PricingSection'));
+const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
+const Footer = lazy(() => import('./components/product/Footer'));
 
-// Componentes de notificação
-const CreatorBadge = lazy(() => import('../components/ui/CreatorBadge'));
-const RecentActivityNotification = lazy(() => import('../components/ui/RecentActivityNotification'));
-const VisitorCounter = lazy(() => import('../components/ui/VisitorCounter'));
-const OnlineUsersCounter = lazy(() => import('../components/ui/OnlineUsersCounter'));
+// Modais e componentes auxiliares
+const PurchaseModal = lazy(() => import('./components/common/PurchaseModal'));
+const IngredientsList = lazy(() => import('./components/ui/IngredientsList'));
+const CreatorBadge = lazy(() => import('./components/ui/CreatorBadge'));
+const RecentActivityNotification = lazy(() => import('./components/ui/RecentActivityNotification'));
+const VisitorCounter = lazy(() => import('./components/ui/VisitorCounter'));
 
 // Custom hooks
-import { useScrollPosition } from '../hooks/ui/useScrollPosition';
-import { useModalState } from '../hooks/ui/useModalState';
+import { useScrollPosition } from './hooks/ui/useScrollPosition';
+import { useModalState } from './hooks/ui/useModalState';
 
-// Componente principal
 function App() {
   const { showScrollTop } = useScrollPosition();
   const { showModal, modalVariant, openModal, closeModal } = useModalState();
   const [showIngredients, setShowIngredients] = useState(false);
   const [exitIntentShown, setExitIntentShown] = useState(false);
+  const [isInPricingSection, setIsInPricingSection] = useState(false);
   const [showNotifications, setShowNotifications] = useState({
     creator: false,
     activity: false,
-    visitors: false,
-    users: false
+    visitors: false
   });
 
-  // Gerenciamento de notificações
+  // Detectar quando o usuário está na seção de preços
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setShowNotifications(prev => ({ ...prev, creator: true })), 15000),
-      setTimeout(() => setShowNotifications(prev => ({ ...prev, activity: true })), 8000),
-      setTimeout(() => setShowNotifications(prev => ({ ...prev, visitors: true })), 3000),
-      setTimeout(() => setShowNotifications(prev => ({ ...prev, users: true })), 12000)
-    ];
+    const handleScroll = () => {
+      const pricingSection = document.getElementById('planos');
+      const offerSection = document.getElementById('oferta');
+      
+      if (pricingSection || offerSection) {
+        const rect = pricingSection?.getBoundingClientRect() || offerSection?.getBoundingClientRect();
+        if (rect) {
+          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+          setIsInPricingSection(isVisible);
+        }
+      }
+    };
 
-    return () => timers.forEach(timer => clearTimeout(timer));
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Verificar posição inicial
+    
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Gerenciamento de notificações baseado na seção
+  useEffect(() => {
+    if (isInPricingSection) {
+      // Mostrar notificações quando estiver na seção de preços
+      const timers = [
+        setTimeout(() => setShowNotifications(prev => ({ ...prev, creator: true })), 2000),
+        setTimeout(() => setShowNotifications(prev => ({ ...prev, activity: true })), 5000),
+        setTimeout(() => setShowNotifications(prev => ({ ...prev, visitors: true })), 1000)
+      ];
+
+      return () => timers.forEach(timer => clearTimeout(timer));
+    } else {
+      // Esconder notificações quando sair da seção
+      setShowNotifications({
+        creator: false,
+        activity: false,
+        visitors: false
+      });
+    }
+  }, [isInPricingSection]);
 
   // Exit intent detection
   useEffect(() => {
@@ -99,6 +127,7 @@ function App() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Barra de benefícios */}
               <div className="bg-juvelina-mint/5 py-4">
                 <div className="container mx-auto px-4">
                   <div className="flex flex-wrap items-center justify-center gap-4 text-center">
@@ -116,6 +145,7 @@ function App() {
               
               <BenefitsSection />
               
+              {/* Seção de ingredientes */}
               <div className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
                 <div className="container mx-auto px-4 text-center">
                   <motion.div
@@ -141,6 +171,7 @@ function App() {
               <AbsorptionSection />
               <UGCGallerySection />
               
+              {/* CTA intermediário */}
               <div className="py-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80">
                 <div className="container mx-auto px-4 text-center text-white">
                   <motion.div
@@ -172,11 +203,11 @@ function App() {
               <FaqSection />
             </motion.div>
           </AnimatePresence>
+          
+          {/* Footer */}
+          <Footer />
         </Suspense>
       </main>
-      
-      {/* Footer */}
-      <Footer />
       
       {/* Modais */}
       <Suspense fallback={null}>
@@ -212,12 +243,11 @@ function App() {
         )}
       </AnimatePresence>
       
-      {/* Componentes de Notificação */}
+      {/* Componentes de Notificação - Aparecem apenas na seção de preços */}
       <Suspense fallback={null}>
         {showNotifications.creator && <CreatorBadge />}
         {showNotifications.activity && <RecentActivityNotification />}
         {showNotifications.visitors && <VisitorCounter />}
-        {showNotifications.users && <OnlineUsersCounter />}
       </Suspense>
     </div>
   );
