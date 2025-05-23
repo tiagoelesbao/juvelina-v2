@@ -1,3 +1,4 @@
+// src/features/hero/index.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import HeroHeading from './components/HeroHeading';
@@ -7,27 +8,22 @@ import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
 import { useCountUp, StatItem } from './hooks/useCountUp';
 
-// Definindo a interface para as props
 interface HeroSectionProps {
   onCtaClick: (e?: React.MouseEvent) => void;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
-  // Estado para controlar a visibilidade de elementos com base na visualização
   const [inView, setInView] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
   
-  // Dados iniciais das estatísticas com valores mais adequados
   const initialStats: StatItem[] = [
     { id: 1, value: 0, target: 12500, label: 'Clientes Satisfeitos', icon: '✨' },
     { id: 2, value: 0, target: 25, label: 'Nutrientes Premium', icon: '🌿' },
     { id: 3, value: 0, target: 98, label: 'Taxa de Satisfação', icon: '💚' },
   ];
   
-  // Hook customizado para animação de contagem
   const { stats } = useCountUp(initialStats, inView);
   
-  // Rastreamento de scroll para animações
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -95,7 +91,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         }}
       />
       
-      {/* Efeito de luz central */}
       <div 
         className="absolute rounded-full opacity-30"
         style={{
@@ -126,6 +121,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.7 }}
+              className="mb-20 md:mb-0" 
             >
               <HeroStats stats={stats} inView={inView} />
             </motion.div>

@@ -1,18 +1,17 @@
-// src/App.tsx - VERSÃO ATUALIZADA COM HEADERS
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+// src/App.tsx - VERSÃO OTIMIZADA COM LAZY LOADING DISCRETO
+import React, { useState, useEffect, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronUp, ShoppingCart, Package } from 'lucide-react';
 
-// Imports diretos (não lazy) para componentes críticos
+// Imports diretos para componentes críticos (sem lazy loading)
 import HeroSection from './features/hero';
 import AnnouncementBar from './components/common/AnnouncementBar';
 import Header from './components/common/Header';
 import ScrollProgressBar from './components/ui/ScrollProgressBar';
-import LoadingSection from './components/ui/LoadingSection';
+import VideoTestimonialsSection from './features/testimonials/VideoTestimonialsSection';
+import BenefitsSection from './features/benefits/BenefitsSection';
 
-// Lazy loading dos componentes secundários
-const VideoTestimonialsSection = lazy(() => import('./features/testimonials/VideoTestimonialsSection'));
-const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
+// Lazy loading APENAS para componentes secundários (sem Suspense)
 const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
 const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
 const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
@@ -22,16 +21,31 @@ const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
 const Footer = lazy(() => import('./components/product/Footer'));
 
 // Modais e componentes auxiliares
-const PurchaseModal = lazy(() => import('./components/common/PurchaseModal'));
-const IngredientsList = lazy(() => import('./components/ui/IngredientsList'));
-const CreatorBadge = lazy(() => import('./components/ui/CreatorBadge'));
-const RecentActivityNotification = lazy(() => import('./components/ui/RecentActivityNotification'));
-const VisitorCounter = lazy(() => import('./components/ui/VisitorCounter'));
-const OnlineUsersCounter = lazy(() => import('./components/ui/OnlineUsersCounter'));
+import PurchaseModal from './components/common/PurchaseModal';
+import IngredientsList from './components/ui/IngredientsList';
+import CreatorBadge from './components/ui/CreatorBadge';
+import RecentActivityNotification from './components/ui/RecentActivityNotification';
+import VisitorCounter from './components/ui/VisitorCounter';
+import OnlineUsersCounter from './components/ui/OnlineUsersCounter';
 
 // Custom hooks
 import { useScrollPosition } from './hooks/ui/useScrollPosition';
 import { useModalState } from './hooks/ui/useModalState';
+
+// Componente wrapper para lazy loading discreto
+const LazySection: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-[200px] flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">
+          {/* Placeholder discreto sem spinner */}
+        </div>
+      </div>
+    }>
+      {children}
+    </React.Suspense>
+  );
+};
 
 function App() {
   const { showScrollTop } = useScrollPosition();
@@ -153,114 +167,130 @@ function App() {
         {/* Hero Section - Sempre carregada */}
         <HeroSection onCtaClick={handleCtaClick} />
         
-        {/* Seções com Lazy Loading */}
-        <Suspense fallback={<LoadingSection />}>
-          <VideoTestimonialsSection />
-          
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              {/* Barra de benefícios */}
-              <div className="bg-juvelina-mint/5 py-4">
-                <div className="container mx-auto px-4">
-                  <div className="flex flex-wrap items-center justify-center gap-4 text-center">
-                    <div className="flex items-center gap-2">
-                      <Package className="text-juvelina-gold" size={20} />
-                      <span className="text-sm font-medium">Frete Grátis em Todo Brasil</span>
-                    </div>
-                    <div className="hidden sm:block w-px h-4 bg-gray-300" />
-                    <span className="text-sm">🔒 Pagamento 100% Seguro</span>
-                    <div className="hidden sm:block w-px h-4 bg-gray-300" />
-                    <span className="text-sm">✨ Garantia de 30 dias</span>
+        {/* Video Testimonials - Sempre carregado */}
+        <VideoTestimonialsSection />
+        
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Barra de benefícios */}
+            <div className="bg-juvelina-mint/5 py-4">
+              <div className="container mx-auto px-4">
+                <div className="flex flex-wrap items-center justify-center gap-4 text-center">
+                  <div className="flex items-center gap-2">
+                    <Package className="text-juvelina-gold" size={20} />
+                    <span className="text-sm font-medium">Frete Grátis em Todo Brasil</span>
                   </div>
+                  <div className="hidden sm:block w-px h-4 bg-gray-300" />
+                  <span className="text-sm">🔒 Pagamento 100% Seguro</span>
+                  <div className="hidden sm:block w-px h-4 bg-gray-300" />
+                  <span className="text-sm">✨ Garantia de 30 dias</span>
                 </div>
               </div>
-              
-              <BenefitsSection />
-              
-              {/* Seção de ingredientes */}
-              <section id="ingredientes" className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
-                <div className="container mx-auto px-4 text-center">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
+            </div>
+            
+            {/* Benefits Section - Sempre carregado */}
+            <BenefitsSection />
+            
+            {/* Seção de ingredientes */}
+            <section id="ingredientes" className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
+              <div className="container mx-auto px-4 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <h3 className="text-2xl font-bold mb-4">Descubra Nossa Fórmula Exclusiva</h3>
+                  <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                    25 nutrientes essenciais cuidadosamente selecionados para máxima eficácia e absorção superior.
+                  </p>
+                  <button
+                    onClick={() => setShowIngredients(true)}
+                    className="bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-colors font-medium"
                   >
-                    <h3 className="text-2xl font-bold mb-4">Descubra Nossa Fórmula Exclusiva</h3>
-                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                      25 nutrientes essenciais cuidadosamente selecionados para máxima eficácia e absorção superior.
-                    </p>
-                    <button
-                      onClick={() => setShowIngredients(true)}
-                      className="bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-colors font-medium"
-                    >
-                      Ver Todos os Ingredientes
-                    </button>
-                  </motion.div>
-                </div>
-              </section>
-              
+                    Ver Todos os Ingredientes
+                  </button>
+                </motion.div>
+              </div>
+            </section>
+            
+            {/* Seções com lazy loading discreto */}
+            <LazySection>
               <AbsorptionSection />
+            </LazySection>
+            
+            <LazySection>
               <UGCGallerySection />
-              
-              {/* CTA intermediário */}
-              <div className="py-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80">
-                <div className="container mx-auto px-4 text-center text-white">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
+            </LazySection>
+            
+            {/* CTA intermediário */}
+            <div className="py-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80">
+              <div className="container mx-auto px-4 text-center text-white">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <h3 className="text-3xl font-bold mb-4">
+                    Junte-se a Mais de 12.500 Pessoas Transformadas
+                  </h3>
+                  <p className="text-xl mb-8 opacity-90">
+                    Comece sua jornada de bem-estar hoje mesmo!
+                  </p>
+                  <button
+                    onClick={handleCtaClick}
+                    className="bg-white text-juvelina-gold px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-lg"
                   >
-                    <h3 className="text-3xl font-bold mb-4">
-                      Junte-se a Mais de 12.500 Pessoas Transformadas
-                    </h3>
-                    <p className="text-xl mb-8 opacity-90">
-                      Comece sua jornada de bem-estar hoje mesmo!
-                    </p>
-                    <button
-                      onClick={handleCtaClick}
-                      className="bg-white text-juvelina-gold px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-lg"
-                    >
-                      <ShoppingCart size={24} />
-                      Quero Transformar Minha Saúde
-                    </button>
-                  </motion.div>
-                </div>
+                    <ShoppingCart size={24} />
+                    Quero Transformar Minha Saúde
+                  </button>
+                </motion.div>
               </div>
-              
+            </div>
+            
+            <LazySection>
               <GuaranteeSection />
+            </LazySection>
+            
+            <LazySection>
               <ViralOfferSection onCtaClick={handleCtaClick} />
+            </LazySection>
+            
+            <LazySection>
               <PricingSection onCtaClick={handleCtaClick} />
+            </LazySection>
+            
+            <LazySection>
               <FaqSection />
-            </motion.div>
-          </AnimatePresence>
-          
-          {/* Footer */}
+            </LazySection>
+          </motion.div>
+        </AnimatePresence>
+        
+        {/* Footer */}
+        <LazySection>
           <Footer />
-        </Suspense>
+        </LazySection>
       </main>
       
       {/* Modais */}
-      <Suspense fallback={null}>
-        <AnimatePresence>
-          {showModal && (
-            <PurchaseModal
-              isOpen={showModal}
-              onClose={closeModal}
-              variant={modalVariant}
-            />
-          )}
-          
-          {showIngredients && (
-            <IngredientsList onClose={() => setShowIngredients(false)} />
-          )}
-        </AnimatePresence>
-      </Suspense>
+      <AnimatePresence>
+        {showModal && (
+          <PurchaseModal
+            isOpen={showModal}
+            onClose={closeModal}
+            variant={modalVariant}
+          />
+        )}
+        
+        {showIngredients && (
+          <IngredientsList onClose={() => setShowIngredients(false)} />
+        )}
+      </AnimatePresence>
       
       {/* Botão Voltar ao Topo */}
       <AnimatePresence>
@@ -280,12 +310,10 @@ function App() {
       </AnimatePresence>
       
       {/* Componentes de Notificação - Aparecem apenas na seção de preços */}
-      <Suspense fallback={null}>
-        {showNotifications.creator && <CreatorBadge />}
-        {showNotifications.activity && <RecentActivityNotification />}
-        {showNotifications.visitors && <VisitorCounter />}
-        {showNotifications.onlineUsers && <OnlineUsersCounter />}
-      </Suspense>
+      {showNotifications.creator && <CreatorBadge />}
+      {showNotifications.activity && <RecentActivityNotification />}
+      {showNotifications.visitors && <VisitorCounter />}
+      {showNotifications.onlineUsers && <OnlineUsersCounter />}
     </div>
   );
 }

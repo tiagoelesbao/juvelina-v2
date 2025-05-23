@@ -1,4 +1,4 @@
-// src/components/common/Header.tsx - VERSÃO CORRIGIDA
+// src/components/common/Header.tsx - VERSÃO CORRIGIDA COM MELHOR RESPONSIVIDADE
 import React, { useState, useEffect } from 'react';
 import { Menu, ShoppingCart } from 'lucide-react';
 
@@ -11,7 +11,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Navigation items - ORDEM CORRETA CONFORME ESTRUTURA DO SITE
+  // Navigation items
   const navItems = [
     { id: 'hero', label: 'Home' },
     { id: 'video-depoimentos', label: 'Depoimentos' },
@@ -24,19 +24,17 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
     { id: 'faq', label: 'FAQ' }
   ];
 
-  // Handle scroll effects
+  // Handle scroll effects (mantém o código existente)
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 10);
 
-      // Se estiver no topo, marca Home como ativo
       if (scrollPosition < 100) {
         setActiveSection('hero');
         return;
       }
 
-      // Update active section based on scroll position
       const sections = navItems.slice(1).map(item => {
         const element = document.getElementById(item.id);
         return {
@@ -46,11 +44,9 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
         };
       });
 
-      // Find the current section
       let currentSection = { id: 'hero' };
       
       for (const section of sections) {
-        // Check if we're in this section (with offset for sticky headers)
         if (scrollPosition >= section.offset - 150) {
           currentSection = section;
         }
@@ -60,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -68,7 +64,6 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
     if (sectionId === 'hero') {
-      // Scroll to top for hero section
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
@@ -76,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
     } else {
       const element = document.getElementById(sectionId);
       if (element) {
-        const headerOffset = 120; // Account for sticky headers
+        const headerOffset = 120;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -111,13 +106,13 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
               <span className="font-['Ws_Paradose'] text-2xl text-juvelina-gold">Juvelina</span>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex gap-6 items-center">
+            {/* Desktop Navigation - Mudando de md: para lg: ou xl: */}
+            <nav className="hidden xl:flex gap-4 items-center">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`text-gray-600 hover:text-juvelina-gold transition font-medium relative ${
+                  className={`text-gray-600 hover:text-juvelina-gold transition font-medium relative text-sm ${
                     activeSection === item.id ? 'text-juvelina-gold' : ''
                   }`}
                 >
@@ -134,17 +129,17 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
               {/* CTA Button */}
               <button
                 onClick={onCtaClick}
-                className="bg-juvelina-gold text-white px-6 py-2 rounded-full hover:bg-opacity-90 transition-all flex items-center gap-2 shadow-md hover:shadow-lg ml-4"
+                className="bg-juvelina-gold text-white px-5 py-2 rounded-full hover:bg-opacity-90 transition-all flex items-center gap-2 shadow-md hover:shadow-lg ml-4 text-sm"
               >
-                <ShoppingCart size={18} />
+                <ShoppingCart size={16} />
                 <span>Comprar</span>
               </button>
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Aparece antes (xl:hidden ao invés de md:hidden) */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-juvelina-gold"
+              className="xl:hidden text-juvelina-gold"
             >
               <Menu size={24} />
             </button>
@@ -152,9 +147,9 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Agora aparece em telas menores que xl */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 xl:hidden">
           <div className="bg-white w-80 h-full ml-auto shadow-xl">
             <div className="p-4">
               <div className="flex justify-between items-center mb-6">

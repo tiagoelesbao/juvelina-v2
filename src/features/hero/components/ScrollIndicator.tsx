@@ -1,3 +1,4 @@
+// src/features/hero/components/ScrollIndicator.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -5,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
 const ScrollIndicator: React.FC = () => {
   return (
     <motion.div
-      className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center z-10"
+      className="absolute bottom-8 md:bottom-8 left-1/2 transform -translate-x-1/2 text-center z-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 1, duration: 0.5 }}
