@@ -1,9 +1,12 @@
+// src/App.tsx - VERSÃO ATUALIZADA COM HEADERS
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronUp, ShoppingCart, Package } from 'lucide-react';
 
 // Imports diretos (não lazy) para componentes críticos
 import HeroSection from './features/hero';
+import AnnouncementBar from './components/common/AnnouncementBar';
+import Header from './components/common/Header';
 import ScrollProgressBar from './components/ui/ScrollProgressBar';
 import LoadingSection from './components/ui/LoadingSection';
 
@@ -24,6 +27,7 @@ const IngredientsList = lazy(() => import('./components/ui/IngredientsList'));
 const CreatorBadge = lazy(() => import('./components/ui/CreatorBadge'));
 const RecentActivityNotification = lazy(() => import('./components/ui/RecentActivityNotification'));
 const VisitorCounter = lazy(() => import('./components/ui/VisitorCounter'));
+const OnlineUsersCounter = lazy(() => import('./components/ui/OnlineUsersCounter'));
 
 // Custom hooks
 import { useScrollPosition } from './hooks/ui/useScrollPosition';
@@ -35,10 +39,12 @@ function App() {
   const [showIngredients, setShowIngredients] = useState(false);
   const [exitIntentShown, setExitIntentShown] = useState(false);
   const [isInPricingSection, setIsInPricingSection] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [showNotifications, setShowNotifications] = useState({
     creator: false,
     activity: false,
-    visitors: false
+    visitors: false,
+    onlineUsers: false
   });
 
   // Detectar quando o usuário está na seção de preços
@@ -74,31 +80,55 @@ function App() {
 
       return () => timers.forEach(timer => clearTimeout(timer));
     } else {
-      // Esconder notificações quando sair da seção
-      setShowNotifications({
+      // Esconder notificações quando sair da seção (exceto onlineUsers)
+      setShowNotifications(prev => ({
         creator: false,
         activity: false,
-        visitors: false
-      });
+        visitors: false,
+        onlineUsers: prev.onlineUsers // Manter online users sempre visível
+      }));
     }
   }, [isInPricingSection]);
 
+  // Mostrar contador de usuários online após 10 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowNotifications(prev => ({ ...prev, onlineUsers: true }));
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Exit intent detection
   useEffect(() => {
+    let timeBasedTimer: NodeJS.Timeout;
+    
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !exitIntentShown && !showModal) {
+      if (e.clientY <= 0 && !exitIntentShown && !showModal && !hasInteracted) {
         setExitIntentShown(true);
         openModal('exit-intent');
       }
     };
 
+    // Time-based popup (apenas se o usuário não interagiu)
+    timeBasedTimer = setTimeout(() => {
+      if (!hasInteracted && !showModal && !exitIntentShown) {
+        openModal('time-based');
+      }
+    }, 45000); // 45 segundos
+
     document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [exitIntentShown, showModal, openModal]);
+    
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(timeBasedTimer);
+    };
+  }, [exitIntentShown, showModal, openModal, hasInteracted]);
 
   // Handler para abrir o modal de compra
   const handleCtaClick = (e?: React.MouseEvent) => {
     e?.preventDefault();
+    setHasInteracted(true);
     openModal('default');
   };
 
@@ -109,6 +139,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Barra de Anúncio - Sticky no topo */}
+      <AnnouncementBar initialUnits={54} discountPercentage={30} />
+      
+      {/* Header Principal - Sticky abaixo do announcement */}
+      <Header onCtaClick={handleCtaClick} />
+      
       {/* Barra de Progresso */}
       <ScrollProgressBar color="#A9683D" height={3} />
       
@@ -146,7 +182,7 @@ function App() {
               <BenefitsSection />
               
               {/* Seção de ingredientes */}
-              <div className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
+              <section id="ingredientes" className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
                 <div className="container mx-auto px-4 text-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -166,7 +202,7 @@ function App() {
                     </button>
                   </motion.div>
                 </div>
-              </div>
+              </section>
               
               <AbsorptionSection />
               <UGCGallerySection />
@@ -248,6 +284,7 @@ function App() {
         {showNotifications.creator && <CreatorBadge />}
         {showNotifications.activity && <RecentActivityNotification />}
         {showNotifications.visitors && <VisitorCounter />}
+        {showNotifications.onlineUsers && <OnlineUsersCounter />}
       </Suspense>
     </div>
   );
