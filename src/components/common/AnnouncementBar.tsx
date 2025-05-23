@@ -64,6 +64,7 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
             🌿 OFERTA ESPECIAL: {discountPercentage}% OFF + Frete Grátis | 
             Restam {formatTime(timeLeft.hours)}h:{formatTime(timeLeft.minutes)}m:{formatTime(timeLeft.seconds)}s | 
             Apenas {unitsLeft} unidades! 🌿
+             <span className="inline-block w-2 h-2 bg-white rounded-full animate-pulse" />
           </p>
 
           {/* Language selector (desktop only) */}
