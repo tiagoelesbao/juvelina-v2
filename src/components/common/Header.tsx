@@ -1,4 +1,4 @@
-// src/components/common/Header.tsx
+// src/components/common/Header.tsx - VERSÃO CORRIGIDA
 import React, { useState, useEffect } from 'react';
 import { Menu, ShoppingCart } from 'lucide-react';
 
@@ -7,19 +7,21 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
-  const [activeSection, setActiveSection] = useState('');
+  const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Navigation items
+  // Navigation items - ORDEM CORRETA CONFORME ESTRUTURA DO SITE
   const navItems = [
+    { id: 'hero', label: 'Home' },
+    { id: 'video-depoimentos', label: 'Depoimentos' },
     { id: 'beneficios', label: 'Benefícios' },
+    { id: 'ingredientes', label: 'Ingredientes' },
     { id: 'absorpcao', label: 'Como Funciona' },
-    { id: 'video-depoimentos', label: 'Resultados em Vídeo' },
     { id: 'ugc-gallery', label: 'Comunidade' },
-    { id: 'depoimentos', label: 'Depoimentos' },
     { id: 'garantia', label: 'Garantia' },
-    { id: 'ingredientes', label: 'Ingredientes' }
+    { id: 'planos', label: 'Planos' },
+    { id: 'faq', label: 'FAQ' }
   ];
 
   // Handle scroll effects
@@ -28,18 +30,31 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 10);
 
-      // Update active section based on scroll position
-      const sections = navItems.map(item => ({
-        id: item.id,
-        offset: document.getElementById(item.id)?.offsetTop || 0
-      }));
+      // Se estiver no topo, marca Home como ativo
+      if (scrollPosition < 100) {
+        setActiveSection('hero');
+        return;
+      }
 
-      const currentSection = sections.reduce((prev, curr) => {
-        if (scrollPosition >= curr.offset - 100) {
-          return curr;
+      // Update active section based on scroll position
+      const sections = navItems.slice(1).map(item => {
+        const element = document.getElementById(item.id);
+        return {
+          id: item.id,
+          offset: element?.offsetTop || 0,
+          height: element?.offsetHeight || 0
+        };
+      });
+
+      // Find the current section
+      let currentSection = { id: 'hero' };
+      
+      for (const section of sections) {
+        // Check if we're in this section (with offset for sticky headers)
+        if (scrollPosition >= section.offset - 150) {
+          currentSection = section;
         }
-        return prev;
-      }, sections[0]);
+      }
 
       setActiveSection(currentSection.id);
     };
@@ -52,16 +67,24 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerOffset = 120; // Account for sticky header
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
+    if (sectionId === 'hero') {
+      // Scroll to top for hero section
       window.scrollTo({
-        top: offsetPosition,
+        top: 0,
         behavior: 'smooth'
       });
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const headerOffset = 120; // Account for sticky headers
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
     setIsMobileMenuOpen(false);
   };
@@ -78,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
             {/* Logo */}
             <div 
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => scrollToSection('hero')}
             >
               <div className="text-juvelina-gold">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
                   {item.label}
                   {activeSection === item.id && (
                     <div 
-                      className="absolute bottom-0 left-0 w-full h-0.5 bg-juvelina-gold"
+                      className="absolute -bottom-1 left-0 w-full h-0.5 bg-juvelina-gold"
                       style={{ opacity: 1 }}
                     />
                   )}
@@ -111,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
               {/* CTA Button */}
               <button
                 onClick={onCtaClick}
-                className="bg-juvelina-gold text-white px-6 py-2 rounded-full hover:bg-opacity-90 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                className="bg-juvelina-gold text-white px-6 py-2 rounded-full hover:bg-opacity-90 transition-all flex items-center gap-2 shadow-md hover:shadow-lg ml-4"
               >
                 <ShoppingCart size={18} />
                 <span>Comprar</span>
