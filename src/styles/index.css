@@ -405,4 +405,64 @@ section[id] {
   animation: none;
 }
 
+/* Adicione este CSS ao seu arquivo index.css para garantir que os selos não sejam cortados */
+
+/* Fix para o Hero Section */
+.hero-section {
+  overflow: visible !important;
+}
+
+/* Container da imagem do produto */
+.hero-image-container {
+  position: relative;
+  overflow: visible;
+  /* Adiciona padding para acomodar os selos */
+  padding: 2rem;
+}
+
+/* Mobile: padding reduzido */
+@media (max-width: 768px) {
+  .hero-image-container {
+    padding: 1rem;
+  }
+  
+  /* Garante que o hero tenha espaço suficiente */
+  .hero-section {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Desktop: espaço extra para os selos laterais */
+@media (min-width: 768px) {
+  .hero-image-container {
+    /* Margem extra para acomodar selos */
+    margin-left: 120px;
+    margin-right: 120px;
+  }
+  
+  /* Container principal com overflow visível */
+  .hero-grid {
+    overflow: visible;
+  }
+}
+
+/* Previne corte de elementos posicionados absolutamente */
+.relative {
+  overflow: visible !important;
+}
+
+/* Z-index para garantir ordem correta */
+.hero-badge {
+  z-index: 10;
+}
+
+.hero-image {
+  z-index: 5;
+}
+
+.hero-background {
+  z-index: 1;
+}
+
 }
