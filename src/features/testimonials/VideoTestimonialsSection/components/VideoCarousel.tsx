@@ -121,17 +121,6 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
           ))}
         </motion.div>
       </div>
-      
-      {/* Controles do carrossel */}
-      <VideoCarouselControls
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onPlayPause={() => onPauseChange(!isPaused)}
-        isPaused={isPaused}
-        currentIndex={currentIndex}
-        totalItems={videos.length}
-        onDotClick={scrollToIndex}
-      />
     </div>
   );
 };

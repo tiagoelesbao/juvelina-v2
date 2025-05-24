@@ -1,319 +1,269 @@
-// src/App.tsx - VERSÃO OTIMIZADA COM LAZY LOADING DISCRETO
-import React, { useState, useEffect, lazy } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronUp, ShoppingCart, Package } from 'lucide-react';
+// src/App.tsx
+import React, { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 
-// Imports diretos para componentes críticos (sem lazy loading)
+// Importações de componentes comuns
+import { 
+  AnnouncementBar, 
+  Header, 
+  PurchaseModal 
+} from './components/common';
+
+// Importações de componentes UI
+import { ScrollProgressBar } from './components/ui';
+
+// Importações de hooks customizados
+import { useModalState } from './hooks/ui/useModalState';
+import { useScrollPosition } from './hooks/ui/useScrollPosition';
+
+// Importações das seções - sem lazy loading para evitar efeito de carregamento
 import HeroSection from './features/hero';
-import AnnouncementBar from './components/common/AnnouncementBar';
-import Header from './components/common/Header';
-import ScrollProgressBar from './components/ui/ScrollProgressBar';
 import VideoTestimonialsSection from './features/testimonials/VideoTestimonialsSection';
 import BenefitsSection from './features/benefits/BenefitsSection';
+import AbsorptionSection from './features/benefits/AbsorptionSection';
+import UGCGallerySection from './features/testimonials/UGCGallerySection';
+import GuaranteeSection from './features/testimonials/GuaranteeSection';
+import PricingSection from './features/product/PricingSection';
+import ViralOfferSection from './features/product/ViralOfferSection';
+import FaqSection from './features/testimonials/FaqSection';
+import Footer from './components/product/Footer';
 
-// Lazy loading APENAS para componentes secundários (sem Suspense)
-const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
-const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
-const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
-const PricingSection = lazy(() => import('./features/product/PricingSection'));
-const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
-const Footer = lazy(() => import('./components/product/Footer'));
+// Componente de Scroll to Top
+import { ChevronUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-// Modais e componentes auxiliares
-import PurchaseModal from './components/common/PurchaseModal';
-import IngredientsList from './components/ui/IngredientsList';
-import CreatorBadge from './components/ui/CreatorBadge';
-import RecentActivityNotification from './components/ui/RecentActivityNotification';
-import VisitorCounter from './components/ui/VisitorCounter';
-import OnlineUsersCounter from './components/ui/OnlineUsersCounter';
+const ScrollToTop: React.FC = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
-// Custom hooks
-import { useScrollPosition } from './hooks/ui/useScrollPosition';
-import { useModalState } from './hooks/ui/useModalState';
-
-// Componente wrapper para lazy loading discreto
-const LazySection: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <React.Suspense fallback={
-      <div className="min-h-[200px] flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">
-          {/* Placeholder discreto sem spinner */}
+    <motion.button
+      className="fixed bottom-8 right-8 z-40 bg-juvelina-gold text-white p-3 rounded-full shadow-lg hover:bg-juvelina-gold/90 transition-colors group"
+      onClick={scrollToTop}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      aria-label="Voltar ao topo"
+    >
+      <ChevronUp 
+        size={24} 
+        className="group-hover:-translate-y-1 transition-transform duration-200"
+      />
+      
+      {/* Efeito de pulso */}
+      <motion.div
+        className="absolute inset-0 rounded-full bg-juvelina-gold"
+        animate={{
+          scale: [1, 1.5, 1.5],
+          opacity: [0.5, 0, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeOut"
+        }}
+      />
+    </motion.button>
+  );
+};
+
+// Seção de Ingredientes temporária até criar o arquivo separado
+const IngredientsSection: React.FC = () => {
+  const [showIngredientsList, setShowIngredientsList] = useState(false);
+  
+  return (
+    <section id="ingredientes" className="py-20 bg-gradient-to-b from-white to-juvelina-mint/5">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <span className="inline-block bg-juvelina-mint/30 px-4 py-1 rounded-full text-juvelina-gold font-medium mb-4">
+            Fórmula Exclusiva
+          </span>
+          <h2 className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-black">
+            25 Nutrientes Premium em <span className="text-juvelina-gold">Perfeita Sinergia</span>
+          </h2>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Cada ingrediente foi cuidadosamente selecionado para trabalhar em harmonia.
+          </p>
+        </div>
+        
+        <div className="text-center">
+          <button
+            onClick={() => setShowIngredientsList(true)}
+            className="inline-flex items-center gap-2 bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-all font-medium"
+          >
+            Ver Composição Completa
+          </button>
         </div>
       </div>
-    }>
-      {children}
-    </React.Suspense>
+      
+      {/* Modal com lista de ingredientes */}
+      {showIngredientsList && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowIngredientsList(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl p-6 max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold">Composição Completa</h3>
+              <button 
+                onClick={() => setShowIngredientsList(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-center text-gray-600">
+              Lista completa de ingredientes disponível em breve.
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 
 function App() {
-  const { showScrollTop } = useScrollPosition();
   const { showModal, modalVariant, openModal, closeModal } = useModalState();
-  const [showIngredients, setShowIngredients] = useState(false);
-  const [exitIntentShown, setExitIntentShown] = useState(false);
-  const [isInPricingSection, setIsInPricingSection] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [showNotifications, setShowNotifications] = useState({
-    creator: false,
-    activity: false,
-    visitors: false,
-    onlineUsers: false
-  });
+  const { showScrollTop } = useScrollPosition();
+  const [exitIntentTriggered, setExitIntentTriggered] = useState(false);
 
-  // Detectar quando o usuário está na seção de preços
-  useEffect(() => {
-    const handleScroll = () => {
-      const pricingSection = document.getElementById('planos');
-      const offerSection = document.getElementById('oferta');
-      
-      if (pricingSection || offerSection) {
-        const rect = pricingSection?.getBoundingClientRect() || offerSection?.getBoundingClientRect();
-        if (rect) {
-          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-          setIsInPricingSection(isVisible);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Verificar posição inicial
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Gerenciamento de notificações baseado na seção
-  useEffect(() => {
-    if (isInPricingSection) {
-      // Mostrar notificações quando estiver na seção de preços
-      const timers = [
-        setTimeout(() => setShowNotifications(prev => ({ ...prev, creator: true })), 2000),
-        setTimeout(() => setShowNotifications(prev => ({ ...prev, activity: true })), 5000),
-        setTimeout(() => setShowNotifications(prev => ({ ...prev, visitors: true })), 1000)
-      ];
-
-      return () => timers.forEach(timer => clearTimeout(timer));
-    } else {
-      // Esconder notificações quando sair da seção (exceto onlineUsers)
-      setShowNotifications(prev => ({
-        creator: false,
-        activity: false,
-        visitors: false,
-        onlineUsers: prev.onlineUsers // Manter online users sempre visível
-      }));
-    }
-  }, [isInPricingSection]);
-
-  // Mostrar contador de usuários online após 10 segundos
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNotifications(prev => ({ ...prev, onlineUsers: true }));
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Exit intent detection
-  useEffect(() => {
-    let timeBasedTimer: NodeJS.Timeout;
-    
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !exitIntentShown && !showModal && !hasInteracted) {
-        setExitIntentShown(true);
-        openModal('exit-intent');
-      }
-    };
-
-    // Time-based popup (apenas se o usuário não interagiu)
-    timeBasedTimer = setTimeout(() => {
-      if (!hasInteracted && !showModal && !exitIntentShown) {
-        openModal('time-based');
-      }
-    }, 45000); // 45 segundos
-
-    document.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      clearTimeout(timeBasedTimer);
-    };
-  }, [exitIntentShown, showModal, openModal, hasInteracted]);
-
-  // Handler para abrir o modal de compra
+  // Handler para CTA clicks
   const handleCtaClick = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    setHasInteracted(true);
+    if (e) e.preventDefault();
     openModal('default');
   };
 
-  // Handler para scroll to top
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Exit Intent Detection
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Detecta saída pela parte superior da tela
+      if (e.clientY <= 10 && !exitIntentTriggered && !showModal) {
+        setExitIntentTriggered(true);
+        
+        // Pequeno delay para evitar triggers acidentais
+        timeoutId = setTimeout(() => {
+          openModal('exit-intent');
+        }, 100);
+      }
+    };
+    
+    // Também detectar quando o mouse está próximo ao topo
+    const handleMouseMove = (e: MouseEvent) => {
+      // Se o mouse estiver muito próximo ao topo e movendo-se para cima
+      if (e.clientY <= 50 && e.movementY < 0 && !exitIntentTriggered && !showModal) {
+        setExitIntentTriggered(true);
+        openModal('exit-intent');
+      }
+    };
+    
+    // Adicionar listeners
+    document.addEventListener('mouseout', handleMouseLeave);
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      document.removeEventListener('mouseout', handleMouseLeave);
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [exitIntentTriggered, showModal, openModal]);
+
+  // Time-based modal trigger - após 90 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!showModal && !exitIntentTriggered) {
+        openModal('time-based');
+      }
+    }, 90000); // 90 segundos
+    
+    return () => clearTimeout(timer);
+  }, [showModal, exitIntentTriggered, openModal]);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Barra de Anúncio - Sticky no topo */}
-      <AnnouncementBar initialUnits={54} discountPercentage={30} />
+      {/* Barra de Progresso do Scroll */}
+      <ScrollProgressBar 
+        color="#A9683D" 
+        height={3} 
+        showPercentage={false}
+        position="top"
+      />
       
-      {/* Header Principal - Sticky abaixo do announcement */}
+      {/* Barra de Anúncio */}
+      <AnnouncementBar 
+        initialUnits={54} 
+        discountPercentage={30}
+      />
+      
+      {/* Header Principal */}
       <Header onCtaClick={handleCtaClick} />
       
-      {/* Barra de Progresso */}
-      <ScrollProgressBar color="#A9683D" height={3} />
+      {/* Hero Section */}
+      <HeroSection onCtaClick={handleCtaClick} />
       
-      {/* Conteúdo Principal */}
-      <main>
-        {/* Hero Section - Sempre carregada */}
-        <HeroSection onCtaClick={handleCtaClick} />
-        
-        {/* Video Testimonials - Sempre carregado */}
-        <VideoTestimonialsSection onCtaClick={handleCtaClick} />
-        
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Barra de benefícios */}
-            <div className="bg-juvelina-mint/5 py-4">
-              <div className="container mx-auto px-4">
-                <div className="flex flex-wrap items-center justify-center gap-4 text-center">
-                  <div className="flex items-center gap-2">
-                    <Package className="text-juvelina-gold" size={20} />
-                    <span className="text-sm font-medium">Frete Grátis em Todo Brasil</span>
-                  </div>
-                  <div className="hidden sm:block w-px h-4 bg-gray-300" />
-                  <span className="text-sm">🔒 Pagamento 100% Seguro</span>
-                  <div className="hidden sm:block w-px h-4 bg-gray-300" />
-                  <span className="text-sm">✨ Garantia de 30 dias</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Benefits Section - Sempre carregado */}
-            <BenefitsSection />
-            
-            {/* Seção de ingredientes */}
-            <section id="ingredientes" className="py-12 bg-gradient-to-b from-white to-juvelina-mint/10">
-              <div className="container mx-auto px-4 text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <h3 className="text-2xl font-bold mb-4">Descubra Nossa Fórmula Exclusiva</h3>
-                  <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                    25 nutrientes essenciais cuidadosamente selecionados para máxima eficácia e absorção superior.
-                  </p>
-                  <button
-                    onClick={() => setShowIngredients(true)}
-                    className="bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-colors font-medium"
-                  >
-                    Ver Todos os Ingredientes
-                  </button>
-                </motion.div>
-              </div>
-            </section>
-            
-            {/* Seções com lazy loading discreto */}
-            <LazySection>
-              <AbsorptionSection />
-            </LazySection>
-            
-            <LazySection>
-              <UGCGallerySection />
-            </LazySection>
-            
-            {/* CTA intermediário */}
-            <div className="py-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80">
-              <div className="container mx-auto px-4 text-center text-white">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <h3 className="text-3xl font-bold mb-4">
-                    Junte-se a Mais de 12.500 Pessoas Transformadas
-                  </h3>
-                  <p className="text-xl mb-8 opacity-90">
-                    Comece sua jornada de bem-estar hoje mesmo!
-                  </p>
-                  <button
-                    onClick={handleCtaClick}
-                    className="bg-white text-juvelina-gold px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-lg"
-                  >
-                    <ShoppingCart size={24} />
-                    Quero Transformar Minha Saúde
-                  </button>
-                </motion.div>
-              </div>
-            </div>
-            
-            <LazySection>
-              <GuaranteeSection />
-            </LazySection>
-            
-            <LazySection>
-              <ViralOfferSection onCtaClick={handleCtaClick} />
-            </LazySection>
-            
-            <LazySection>
-              <PricingSection onCtaClick={handleCtaClick} />
-            </LazySection>
-            
-            <LazySection>
-              <FaqSection />
-            </LazySection>
-          </motion.div>
-        </AnimatePresence>
-        
-        {/* Footer */}
-        <LazySection>
-          <Footer />
-        </LazySection>
-      </main>
+      {/* Seção de Depoimentos em Vídeo */}
+      <VideoTestimonialsSection onCtaClick={handleCtaClick} />
       
-      {/* Modais */}
+      {/* Seção de Benefícios */}
+      <BenefitsSection />
+      
+      {/* Seção de Ingredientes */}
+      <IngredientsSection />
+      
+      {/* Seção de Absorção */}
+      <AbsorptionSection />
+      
+      {/* Galeria de UGC */}
+      <UGCGallerySection />
+      
+      {/* Seção de Garantia */}
+      <GuaranteeSection />
+      
+      {/* Seção de Preços */}
+      <PricingSection onCtaClick={handleCtaClick} />
+      
+      {/* Seção de Oferta Viral */}
+      <ViralOfferSection onCtaClick={handleCtaClick} />
+      
+      {/* FAQ */}
+      <FaqSection />
+      
+      {/* Footer */}
+      <Footer />
+      
+      {/* Modal de Compra */}
       <AnimatePresence>
         {showModal && (
-          <PurchaseModal
-            isOpen={showModal}
+          <PurchaseModal 
+            isOpen={showModal} 
             onClose={closeModal}
             variant={modalVariant}
+            personalizedTitle={
+              modalVariant === 'exit-intent' 
+                ? "Espere! Temos uma Oferta Especial"
+                : modalVariant === 'time-based'
+                ? "Oferta por Tempo Limitado!"
+                : undefined
+            }
           />
         )}
-        
-        {showIngredients && (
-          <IngredientsList onClose={() => setShowIngredients(false)} />
-        )}
       </AnimatePresence>
       
-      {/* Botão Voltar ao Topo */}
+      {/* Botão Scroll to Top */}
       <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            onClick={scrollToTop}
-            className="fixed bottom-8 right-8 bg-juvelina-gold text-white p-3 rounded-full shadow-lg hover:bg-juvelina-gold/90 transition-colors z-40"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <ChevronUp size={24} />
-          </motion.button>
-        )}
+        {showScrollTop && <ScrollToTop />}
       </AnimatePresence>
-      
-      {/* Componentes de Notificação - Aparecem apenas na seção de preços */}
-      {showNotifications.creator && <CreatorBadge />}
-      {showNotifications.activity && <RecentActivityNotification />}
-      {showNotifications.visitors && <VisitorCounter />}
-      {showNotifications.onlineUsers && <OnlineUsersCounter />}
     </div>
   );
 }
