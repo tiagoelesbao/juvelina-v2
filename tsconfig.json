@@ -4,5 +4,10 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-  "include": ["types/**/*.d.ts"]
+  "include": [
+    "src",
+    "src/types/**/*.d.ts",
+    "types/**/*.d.ts",
+    "vite.config.ts"
+  ],
 }

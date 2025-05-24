@@ -14,7 +14,7 @@ export default {
   mode: 'jit',
   
   // Dark mode desabilitado (se não usar)
-  darkMode: false,
+  darkMode: media,
   
   theme: {
     extend: {
