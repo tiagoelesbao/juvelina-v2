@@ -47,14 +47,6 @@ body {
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Zap';
-  src: local('Inter'), local('Helvetica'), sans-serif;
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* =================================
    TAILWIND BASE
    ================================= */
@@ -63,45 +55,31 @@ body {
 @tailwind utilities;
 
 /* =================================
-   CORREÇÃO DE TRANSPARÊNCIA
-   ================================= */
-section {
-  background-color: #ffffff;
-  position: relative;
-  isolation: isolate;
-}
-
-.hero-section {
-  background-color: #ffffff !important;
-  min-height: 100vh;
-}
-
-/* =================================
    COMPONENTES GLOBAIS
    ================================= */
 @layer components {
   /* Container responsivo */
-  .container {
-    width: 100%;
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .section-container {
+    @apply container mx-auto px-4;
   }
 
-  @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
+  /* Headings */
+  .heading-primary {
+    @apply text-4xl md:text-5xl lg:text-6xl font-['Ws_Paradose'] font-bold leading-tight;
   }
 
-  @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
+  .heading-secondary {
+    @apply text-3xl md:text-4xl font-['Ws_Paradose'] font-bold;
+  }
+
+  /* Badges */
+  .badge-accent {
+    @apply inline-block bg-juvelina-mint bg-opacity-30 px-4 py-1 rounded-full text-juvelina-gold font-medium mb-4;
+  }
+
+  /* Cards */
+  .card-testimonial {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 relative;
   }
 
   /* Scrollbar customizada */
@@ -123,7 +101,7 @@ section {
     background: #8a5430;
   }
 
-  /* Scroll suave em iOS */
+  /* Hide scrollbar mantendo funcionalidade */
   .hide-scrollbar {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -139,35 +117,14 @@ section {
    UTILITÁRIOS CUSTOMIZADOS
    ================================= */
 @layer utilities {
-  /* GPU Acceleration */
-  .gpu {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000;
-  }
-
-  /* Contain para performance */
-  .contain-layout {
-    contain: layout;
-  }
-
-  .contain-paint {
-    contain: paint;
-  }
-
-  .contain-strict {
-    contain: strict;
-  }
-
-  /* Text rendering otimizado */
-  .text-optimize {
-    text-rendering: optimizeSpeed;
-  }
-
-  /* Animações simples */
+  /* Animações suaves */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { 
+      opacity: 0; 
+    }
+    to { 
+      opacity: 1; 
+    }
   }
 
   @keyframes fadeInUp {
@@ -181,6 +138,57 @@ section {
     }
   }
 
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes heart {
+    0% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2) translateY(-40px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
   .animate-fadeIn {
     animation: fadeIn 0.5s ease-out;
   }
@@ -188,144 +196,94 @@ section {
   .animate-fadeInUp {
     animation: fadeInUp 0.7s ease-out;
   }
+
+  .animate-slideInRight {
+    animation: slideInRight 0.5s ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .animate-heart {
+    animation: heart 1s ease-out forwards;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
 }
 
 /* =================================
-   MOBILE FIRST OPTIMIZATIONS
+   HERO SECTION ESPECÍFICA
+   ================================= */
+.hero-section {
+  background-color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* =================================
+   VIDEO TESTIMONIALS SECTION
+   ================================= */
+#video-depoimentos {
+  position: relative;
+  background-color: #C2F7BC;
+}
+
+/* =================================
+   TRANSIÇÕES SUAVES ENTRE SEÇÕES
+   ================================= */
+.section-transition {
+  position: relative;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+
+/* =================================
+   MOBILE ESPECÍFICO
    ================================= */
 @media (max-width: 768px) {
-  /* Desabilitar filtros pesados */
-  * {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+  /* Ajustes de texto para mobile */
+  .heading-primary {
+    @apply text-3xl;
   }
 
-  /* Simplificar sombras */
-  [class*="shadow"] {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  .heading-secondary {
+    @apply text-2xl;
   }
 
-  /* Desabilitar animações de hover */
-  [class*="hover:"]:hover {
-    transform: none !important;
-  }
-
-  /* Otimizar transições */
-  * {
-    transition-duration: 0.2s !important;
+  /* Container mobile */
+  .section-container {
+    @apply px-4;
   }
 
   /* Hero mobile */
   .hero-section {
-    padding-top: 4rem;
-    padding-bottom: 2rem;
+    padding-top: 5rem;
+    padding-bottom: 3rem;
+    min-height: auto;
   }
 
+  /* Imagem hero mobile */
   .hero-image-container {
     max-width: 320px;
     margin: 0 auto;
   }
 
-  /* Tamanhos de texto responsivos */
-  .text-4xl {
-    font-size: 1.875rem;
-  }
-
-  .text-5xl,
-  .text-6xl {
-    font-size: 2.25rem;
-  }
-
-  /* Otimizar grids */
+  /* Ajustes de grid mobile */
   .grid {
     gap: 1rem;
   }
 
-  /* Remover animações pesadas */
-  .animate-float,
-  .animate-pulse,
-  .animate-bounce,
-  .animate-spin {
-    animation: none !important;
-  }
-}
-
-/* =================================
-   PREFERÊNCIAS DE ACESSIBILIDADE
-   ================================= */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Classe para forçar reduced motion */
-.reduce-motion *,
-.reduce-motion *::before,
-.reduce-motion *::after {
-  animation: none !important;
-  transition: none !important;
-}
-
-/* =================================
-   FIXES DE OVERFLOW
-   ================================= */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-section {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-.absolute,
-.fixed {
-  max-width: 100vw;
-}
-
-/* =================================
-   PERFORMANCE CRÍTICA
-   ================================= */
-/* Evitar layout shifts */
-img, video {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Lazy loading placeholders */
-.lazy-placeholder {
-  background: #f3f4f6;
-  position: relative;
-  overflow: hidden;
-}
-
-.lazy-placeholder::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  to {
-    left: 100%;
+  /* Scroll suave mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -346,12 +304,13 @@ img, video {
   background-color: #ffffff;
 }
 
+/* Ajuste de scroll para sections com header sticky */
 section[id] {
   scroll-margin-top: 120px;
 }
 
 /* =================================
-   MODAL OPTIMIZATIONS
+   MODAL STYLES
    ================================= */
 .modal-backdrop {
   position: fixed;
@@ -367,25 +326,13 @@ section[id] {
 }
 
 /* =================================
-   CRITICAL CSS - INLINE NO HTML
+   LOADING & SKELETON
    ================================= */
-/* Cores principais do tema */
-:root {
-  --juvelina-gold: #a9683d;
-  --juvelina-mint: #c2f7bc;
-  --juvelina-emerald: #357266;
-  --juvelina-aqua: #9bd0d2;
-  --white: #ffffff;
-  --black: #000000;
-}
-
-/* Loading state */
 .loading {
   opacity: 0.6;
   pointer-events: none;
 }
 
-/* Skeleton loader */
 .skeleton {
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
@@ -393,8 +340,81 @@ section[id] {
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% { 
+    background-position: 200% 0; 
+  }
+  100% { 
+    background-position: -200% 0; 
+  }
+}
+
+/* =================================
+   PERFORMANCE OTIMIZAÇÕES
+   ================================= */
+/* Forçar GPU para elementos críticos */
+.gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* =================================
+   ACESSIBILIDADE
+   ================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible para acessibilidade */
+:focus-visible {
+  outline: 2px solid #a9683d;
+  outline-offset: 2px;
+}
+
+/* =================================
+   UTILITÁRIOS EXTRAS
+   ================================= */
+/* Contain para performance */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Text rendering otimizado */
+.text-optimize {
+  text-rendering: optimizeSpeed;
+}
+
+/* Cores principais como variáveis CSS */
+:root {
+  --juvelina-gold: #a9683d;
+  --juvelina-mint: #c2f7bc;
+  --juvelina-emerald: #357266;
+  --juvelina-aqua: #9bd0d2;
+  --white: #ffffff;
+  --black: #000000;
 }
 
 /* Import das otimizações mobile */

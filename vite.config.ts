@@ -12,34 +12,41 @@ export default defineConfig({
     react({
       babel: {
         plugins: [
-          // Remove prop-types em produção
+          // Remove prop-types em produção (opcional)
+          process.env.NODE_ENV === 'production' && 
           ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }]
-        ]
+        ].filter(Boolean)
       }
     }),
     
-    // Compressão Gzip e Brotli
+    // Compressão Gzip
     viteCompression({
       verbose: true,
       disable: false,
       threshold: 10240, // Comprimir arquivos > 10kb
       algorithm: 'gzip',
       ext: '.gz',
+      deleteOriginFile: false
     }),
     
+    // Compressão Brotli (melhor que gzip)
     viteCompression({
       verbose: true,
       disable: false,
       threshold: 10240,
       algorithm: 'brotliCompress',
       ext: '.br',
+      deleteOriginFile: false
     }),
     
     // PWA para cache e offline
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        cleanupOutdatedCaches: true,
+        sourcemap: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
@@ -68,38 +75,92 @@ export default defineConfig({
                 statuses: [0, 200]
               }
             }
+          },
+          {
+            urlPattern: /\.(js|css|png|jpg|jpeg|svg|webp)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-assets-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 7 * 24 * 60 * 60 // 7 dias
+              }
+            }
           }
         ]
       },
       manifest: {
         name: 'Juvelina Organics',
         short_name: 'Juvelina',
-        description: 'Suplemento Multivitamínico Líquido Premium',
+        description: 'Suplemento Multivitamínico Líquido Premium com 25 nutrientes essenciais',
         theme_color: '#A9683D',
         background_color: '#ffffff',
         display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
         icons: [
+          {
+            src: '/icon-72x72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
+          {
+            src: '/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
+          {
+            src: '/icon-128x128.png',
+            sizes: '128x128',
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
+          {
+            src: '/icon-144x144.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
+          {
+            src: '/icon-152x152.png',
+            sizes: '152x152',
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
           {
             src: '/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'maskable any'
+          },
+          {
+            src: '/icon-384x384.png',
+            sizes: '384x384',
+            type: 'image/png',
+            purpose: 'maskable any'
           },
           {
             src: '/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'maskable any'
           }
         ]
       }
     }),
     
-    // Visualizador de bundle (comentar em produção)
+    // Visualizador de bundle (apenas quando ANALYZE=true)
     process.env.ANALYZE && visualizer({
       open: true,
+      filename: 'dist/stats.html',
       gzipSize: true,
       brotliSize: true,
+      template: 'treemap' // ou 'sunburst', 'network'
     })
-  ],
+  ].filter(Boolean),
   
   resolve: {
     alias: {
@@ -116,27 +177,29 @@ export default defineConfig({
   // Otimizações de Build
   build: {
     outDir: 'dist',
-    sourcemap: false, // Desabilitar em produção para reduzir tamanho
+    sourcemap: process.env.NODE_ENV === 'development',
     
     // Minificação agressiva com Terser
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log em produção
-        drop_debugger: true, // Remove debugger
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
-        passes: 2, // Duas passadas para melhor compressão
+        drop_console: process.env.NODE_ENV === 'production',
+        drop_debugger: true,
+        pure_funcs: process.env.NODE_ENV === 'production' 
+          ? ['console.log', 'console.info', 'console.debug', 'console.trace'] 
+          : [],
+        passes: 2,
       },
       mangle: {
-        safari10: true, // Compatibilidade com Safari antigo
+        safari10: true,
       },
       format: {
-        comments: false, // Remove comentários
+        comments: false,
       },
     },
     
     // Limite de aviso de chunk
-    chunkSizeWarningLimit: 500, // 500kb
+    chunkSizeWarningLimit: 500,
     
     // Otimizar CSS
     cssCodeSplit: true,
@@ -179,16 +242,21 @@ export default defineConfig({
           if (id.includes('src/features/product/')) {
             return 'product';
           }
+          
+          if (id.includes('src/features/ingredients/')) {
+            return 'ingredients';
+          }
         },
         
         // Nomes de arquivos otimizados
-        entryFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/js/[name].[hash].js',
         chunkFileNames: (chunkInfo) => {
           const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
-          return `assets/[name].[hash].js`;
+          return `assets/js/[name].[hash].js`;
         },
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
+          const name = assetInfo.name || 'asset';
+          const info = name.split('.');
           const ext = info[info.length - 1];
           
           // Organizar assets por tipo
@@ -198,6 +266,10 @@ export default defineConfig({
           
           if (/woff|woff2|eot|ttf|otf/i.test(ext)) {
             return `assets/fonts/[name].[hash][extname]`;
+          }
+          
+          if (/css/i.test(ext)) {
+            return `assets/css/[name].[hash][extname]`;
           }
           
           return `assets/[name].[hash][extname]`;
@@ -212,15 +284,17 @@ export default defineConfig({
     },
     
     // Melhorar performance de build
-    reportCompressedSize: false, // Mais rápido sem relatório de compressão
+    reportCompressedSize: process.env.NODE_ENV === 'production',
   },
   
   // Otimizações de Dev Server
   server: {
     port: 3000,
     host: true,
+    open: true,
+    cors: true,
     hmr: {
-      overlay: false, // Desabilitar overlay de erro em dev (performance)
+      overlay: true,
     },
     // Pre-bundling de dependências
     warmup: {
@@ -254,10 +328,9 @@ export default defineConfig({
     },
     preprocessorOptions: {
       css: {
-        charset: false, // Evitar avisos de charset
+        charset: false,
       }
     },
-    // PostCSS já está configurado no postcss.config.js
     postcss: './postcss.config.js',
   },
   
@@ -265,13 +338,16 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: true,
+    open: true,
+    cors: true,
     headers: {
       // Headers de segurança e performance
-      'Cache-Control': 'public, max-age=31536000',
+      'Cache-Control': 'public, max-age=31536000, immutable',
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
     }
   },
   

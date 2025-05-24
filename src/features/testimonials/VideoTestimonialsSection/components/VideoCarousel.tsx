@@ -23,16 +23,14 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
   
   // Limitar vídeos em mobile para performance
   const displayVideos = isMobile ? videos.slice(0, 6) : videos;
   
-  // Versão Mobile Otimizada - Scroll nativo CSS
+  // Versão Mobile - Scroll nativo CSS
   if (isMobile || isLowEnd) {
     return (
-      <div className="relative mt-8">
+      <div className="relative mt-8 px-4">
         {/* Container com scroll nativo */}
         <div 
           ref={carouselRef}
@@ -42,15 +40,15 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
             scrollBehavior: 'smooth'
           }}
         >
-          <div className="flex gap-4 px-4 pb-4">
-            {displayVideos.map((video, index) => (
+          <div className="flex gap-4 pb-4">
+            {displayVideos.map((video) => (
               <div
                 key={video.id}
                 className="min-w-[280px] snap-center"
                 onClick={() => onVideoClick(video)}
               >
                 {/* Versão simplificada do item */}
-                <div className="relative bg-white rounded-xl shadow-md overflow-hidden h-[500px] cursor-pointer">
+                <div className="relative bg-white rounded-xl shadow-md overflow-hidden h-[500px] cursor-pointer transform transition-transform hover:scale-[1.02]">
                   {/* Thumbnail com lazy loading nativo */}
                   <img 
                     src={video.thumbnail}
@@ -59,27 +57,32 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
                     className="w-full h-full object-cover"
                   />
                   
-                  {/* Overlay simplificado */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  {/* Overlay com gradiente */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   
                   {/* Play button */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-110">
                       <svg className="w-7 h-7 text-juvelina-gold ml-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                       </svg>
                     </div>
                   </div>
                   
-                  {/* Info básica */}
+                  {/* Badge de views */}
+                  <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <span className="text-white text-xs font-medium">{video.views}</span>
+                  </div>
+                  
+                  {/* Info do vídeo */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-10 h-10 bg-juvelina-gold rounded-full flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 bg-gradient-to-br from-juvelina-gold to-juvelina-mint rounded-full flex items-center justify-center font-bold text-white shadow-md">
                         {video.name.charAt(0)}
                       </div>
                       <div>
                         <p className="font-bold text-sm">{video.name}</p>
-                        <p className="text-xs opacity-90">{video.views} views</p>
+                        <p className="text-xs opacity-90">{video.username}</p>
                       </div>
                     </div>
                     <p className="text-sm line-clamp-2">{video.caption}</p>
@@ -90,9 +93,9 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
           </div>
         </div>
         
-        {/* Indicadores simples */}
+        {/* Indicadores simples para mobile */}
         <div className="flex justify-center gap-1.5 mt-4">
-          {displayVideos.map((_, index) => (
+          {displayVideos.slice(0, 5).map((_, index) => (
             <button
               key={index}
               className={`w-2 h-2 rounded-full transition-colors ${
@@ -111,15 +114,25 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
               aria-label={`Ir para vídeo ${index + 1}`}
             />
           ))}
+          {displayVideos.length > 5 && (
+            <span className="text-xs text-gray-500">...</span>
+          )}
         </div>
       </div>
     );
   }
   
-  // Versão Desktop com animações (mantém a original)
-  const totalWidth = videos.length * 304; // largura do item + gap
+  // Versão Desktop com animações
+  const scrollToIndex = (index: number) => {
+    const newPosition = -index * 304; // largura do item + gap
+    controls.start({
+      x: newPosition,
+      transition: { type: "spring", stiffness: 300, damping: 30 }
+    });
+    setCurrentIndex(index);
+  };
   
-  // Auto-scroll apenas em desktop
+  // Auto-scroll apenas em desktop e se não estiver pausado
   useEffect(() => {
     if (!isPaused && !isMobile && !reduceMotion) {
       const interval = setInterval(() => {
@@ -130,15 +143,6 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       return () => clearInterval(interval);
     }
   }, [isPaused, currentIndex, videos.length, isMobile, reduceMotion]);
-  
-  const scrollToIndex = (index: number) => {
-    const newPosition = -index * 304;
-    controls.start({
-      x: newPosition,
-      transition: { type: "spring", stiffness: 300, damping: 30 }
-    });
-    setCurrentIndex(index);
-  };
   
   const handlePrevious = () => {
     const newIndex = currentIndex > 0 ? currentIndex - 1 : videos.length - 1;
@@ -151,10 +155,10 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
   };
   
   return (
-    <div className="relative mt-12">
-      {/* Gradientes laterais */}
-      <div className="absolute left-0 top-0 w-32 h-full z-10 pointer-events-none bg-gradient-to-r from-white to-transparent" />
-      <div className="absolute right-0 top-0 w-32 h-full z-10 pointer-events-none bg-gradient-to-l from-white to-transparent" />
+    <div className="relative mt-12 container mx-auto">
+      {/* Gradientes laterais apenas em desktop */}
+      <div className="absolute left-0 top-0 w-32 h-full z-10 pointer-events-none bg-gradient-to-r from-white via-white/50 to-transparent opacity-50" />
+      <div className="absolute right-0 top-0 w-32 h-full z-10 pointer-events-none bg-gradient-to-l from-white via-white/50 to-transparent opacity-50" />
       
       {/* Container do carrossel */}
       <div 
@@ -167,7 +171,8 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
           className="flex gap-6"
           animate={controls}
           drag="x"
-          dragConstraints={{ left: -totalWidth + window.innerWidth, right: 0 }}
+          dragConstraints={{ left: -(videos.length * 304 - window.innerWidth), right: 0 }}
+          dragElastic={0.1}
           onDragEnd={(e, { offset, velocity }) => {
             const swipe = Math.abs(offset.x) * velocity.x;
             if (swipe < -10000) {
@@ -190,16 +195,18 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
         </motion.div>
       </div>
       
-      {/* Controles */}
-      <VideoCarouselControls
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onPlayPause={() => onPauseChange(!isPaused)}
-        isPaused={isPaused}
-        currentIndex={currentIndex}
-        totalItems={videos.length}
-        onDotClick={scrollToIndex}
-      />
+      {/* Controles apenas desktop */}
+      <div className="hidden md:block">
+        <VideoCarouselControls
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onPlayPause={() => onPauseChange(!isPaused)}
+          isPaused={isPaused}
+          currentIndex={currentIndex}
+          totalItems={videos.length}
+          onDotClick={scrollToIndex}
+        />
+      </div>
     </div>
   );
 };

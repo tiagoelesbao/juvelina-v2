@@ -29,7 +29,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   // Observer otimizado
   useEffect(() => {
     if (isLowEnd) {
-      setInView(true); // Pular animação em dispositivos fracos
+      setInView(true);
       return;
     }
 
@@ -54,30 +54,28 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
     };
   }, [isLowEnd]);
 
-  // Variantes de animação baseadas no dispositivo
+  // Background style baseado no dispositivo
   const getBackgroundStyle = () => {
-    // IMPORTANTE: Garantir que sempre tenha um fundo sólido
-    const baseBackground = '#ffffff'; // Fundo branco sólido como base
+    const baseBackground = '#ffffff';
     
     if (isMobile || isLowEnd) {
-      // Mobile: gradiente simples e sólido
       return {
         backgroundColor: baseBackground,
         backgroundImage: `linear-gradient(180deg, 
           #ffffff 0%, 
-          #fffdf4 40%, 
-          #f5fdf3 80%, 
-          #e8fbe5 100%)`
+          #fffdf8 30%,
+          #fafdf9 60%, 
+          #f2fcf1 100%)`
       };
     }
     
-    // Desktop: gradiente mais complexo mas ainda sólido
     return {
       backgroundColor: baseBackground,
       backgroundImage: `linear-gradient(135deg, 
-        #fffdf4 0%, 
-        #ffffff 30%, 
-        #f8fef6 60%, 
+        #fffdf8 0%, 
+        #ffffff 25%,
+        #fafdf9 50%,
+        #f2fcf1 75%,
         #e8fbe5 100%)`
     };
   };
@@ -85,35 +83,53 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden pb-20 md:pb-0 hero-section"
+      className="relative min-h-screen flex items-center overflow-hidden hero-section"
       style={getBackgroundStyle()}
     >
-      {/* Elementos de fundo - Apenas Desktop e não low-end */}
+      {/* Background decorativo - Desktop only */}
       {!isMobile && !isTablet && !isLowEnd && !reduceMotion && (
         <>
-          {/* Blob 1 - Superior direito (sem animação se reduceMotion) */}
-          <div 
+          {/* Blob 1 - Superior direito */}
+          <motion.div 
             className="absolute rounded-full opacity-10"
             style={{
-              width: '500px',
-              height: '500px',
+              width: '600px',
+              height: '600px',
               background: "radial-gradient(circle, rgba(169,104,61,0.15) 0%, transparent 70%)",
-              top: '-100px',
-              right: '-150px',
-              filter: 'blur(40px)'
+              top: '-200px',
+              right: '-200px',
+              filter: 'blur(60px)'
+            }}
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.1, 0.15, 0.1]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
           />
           
           {/* Blob 2 - Inferior esquerdo */}
-          <div 
+          <motion.div 
             className="absolute rounded-full opacity-10"
             style={{
-              width: '400px',
-              height: '400px',
+              width: '500px',
+              height: '500px',
               background: "radial-gradient(circle, rgba(194,247,188,0.2) 0%, transparent 70%)",
-              bottom: '-100px',
-              left: '-100px',
-              filter: 'blur(40px)'
+              bottom: '-150px',
+              left: '-150px',
+              filter: 'blur(60px)'
+            }}
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.1, 0.2, 0.1]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
           />
         </>
@@ -128,12 +144,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
               radial-gradient(
                 ellipse at top right,
                 rgba(169,104,61,0.05) 0%,
-                transparent 40%
+                transparent 50%
               ),
               radial-gradient(
                 ellipse at bottom left,
                 rgba(194,247,188,0.08) 0%,
-                transparent 40%
+                transparent 50%
               )
             `,
             pointerEvents: 'none'
@@ -141,43 +157,47 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         />
       )}
       
-      <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Conteúdo com animações condicionais */}
+      {/* Container principal com padding adequado */}
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-20 md:py-24 lg:py-32 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+          {/* Conteúdo textual */}
           <motion.div 
-            className="order-2 md:order-1"
-            initial={reduceMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
+            className="order-2 md:order-1 text-center md:text-left"
+            initial={reduceMotion ? {} : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={reduceMotion ? {} : { duration: 0.5 }}
           >
             <HeroHeading />
             <HeroButtons onCtaClick={onCtaClick} />
             
-            {/* Stats com animação reduzida em mobile */}
+            {/* Stats com espaçamento adequado */}
             <motion.div
-              initial={reduceMotion ? {} : { opacity: 0 }}
-              animate={{ opacity: 1 }}
+              className="mt-8 md:mt-10"
+              initial={reduceMotion ? {} : { opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={reduceMotion ? {} : { delay: 0.6, duration: 0.5 }}
             >
               <HeroStats stats={stats} inView={inView} />
             </motion.div>
           </motion.div>
           
-          {/* Imagem do Hero */}
+          {/* Imagem do Hero com padding adequado */}
           <motion.div 
-            className="md:col-span-1 order-1 md:order-2 relative hero-image-container"
-            initial={reduceMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
+            className="order-1 md:order-2 relative"
+            initial={reduceMotion ? {} : { opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={reduceMotion ? {} : { duration: 0.5 }}
           >
-            <HeroImage />
+            <div className="relative mx-auto max-w-md md:max-w-lg lg:max-w-xl">
+              <HeroImage />
+            </div>
           </motion.div>
         </div>
       </div>
       
-      {/* Indicador de scroll - ocultar em mobile se motion reduzido */}
-      {(!isMobile || !reduceMotion) && (
-        <div className="mb-16 md:mb-0">
+      {/* Indicador de scroll com espaçamento */}
+      {!isMobile && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <ScrollIndicator />
         </div>
       )}
