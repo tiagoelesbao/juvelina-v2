@@ -1,6 +1,5 @@
-// src/features/testimonials/VideoTestimonialsSection/index.tsx
 import React, { useState, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useScroll, useTransform } from 'framer-motion';
 import { VideoTestimonial } from './types';
 import { videoTestimonials } from './data';
 import VideoSectionHeader from './components/VideoSectionHeader';
@@ -8,6 +7,7 @@ import VideoCarousel from './components/VideoCarousel';
 import VideoModal from './components/VideoModal';
 import LiveViewersIndicator from './components/LiveViewersIndicator';
 import VideoBackground from './components/VideoBackground';
+import VideoParticlesBackground from './components/VideoParticlesBackground';
 import SmoothGradientTransition from './components/SmoothGradientTransition';
 
 interface VideoTestimonialsSectionProps {
@@ -18,24 +18,22 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
   const [selectedVideo, setSelectedVideo] = useState<VideoTestimonial | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  
+
   // Hook para animação baseada em scroll
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
   });
-  
-  // Transformações baseadas no scroll para o fundo
+
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
 
   return (
     <div className="relative">
-      {/* Transição suave e harmônica */}
+      {/* Transição suave topo da dobra */}
       <SmoothGradientTransition 
         fromColor="#ffffff"
         toColor="#C2F7BC"
         height={200}
-        variant="organic"
       />
 
       <section 
@@ -43,7 +41,6 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
         id="video-depoimentos" 
         className="relative overflow-hidden"
         style={{
-          // Gradiente mais suave e harmônico
           background: `
             linear-gradient(
               180deg, 
@@ -57,32 +54,31 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
             )
           `,
           marginTop: '-200px',
-          paddingTop: '180px',
+          paddingTop: '90px',
           paddingBottom: '80px'
         }}
       >
-        {/* Background animado */}
+        {/* BASE SÓLIDA + CAMADA DE LUZ (sempre o primeiro!) */}
         <VideoBackground 
           scrollYProgress={scrollYProgress}
           backgroundY={backgroundY}
         />
-        
-        {/* Header da seção */}
+
+        {/* ANIMAÇÕES DE PARTÍCULAS/BLOBS (sempre acima do fundo) */}
+        <VideoParticlesBackground 
+          scrollYProgress={scrollYProgress}
+        />
+
+        {/* Conteúdo do bloco */}
         <VideoSectionHeader />
-        
-        {/* Carrossel de vídeos */}
         <VideoCarousel
           videos={videoTestimonials}
           onVideoClick={setSelectedVideo}
           isPaused={isPaused}
           onPauseChange={setIsPaused}
         />
-        
-        {/* Indicador de visualizadores ao vivo */}
         <LiveViewersIndicator />
       </section>
-      
-      {/* Modal de vídeo */}
       <VideoModal
         video={selectedVideo}
         onClose={() => setSelectedVideo(null)}

@@ -10,5 +10,4 @@ export { default as TestimonialCard } from './TestimonialCard';
 export { default as TikTokIcon } from './TikTokIcon';
 export { default as TikTokViralBadge } from './TikTokViralBadge';
 export { default as VideoCarousel } from './VideoCarousel';
-export { default as SmoothWaveTransition } from './SmoothWaveTransition';
 export { default as ScrollToTop } from './ScrollToTop';
