@@ -1,6 +1,15 @@
+// src/features/hero/components/HeroImage.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import juvelinaBottle from '../../../assets/images/juvelina-bottle.png';
+
+// Importação da imagem - use uma das opções abaixo:
+
+// Opção 1: Se você tem a imagem física
+// import juvelinaBottle from '../../../assets/images/juvelina-bottle.png';
+import juvelinaBottle from '../../../assets/images/juvelina-bottle.png'
+
+// Opção 2: Usar URL diretamente (temporário)
+// const juvelinaBottle = 'https://images.unsplash.com/photo-1607006333439-505849ef4f76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80'; //
 
 const HeroImage: React.FC = () => {
   return (
@@ -88,7 +97,7 @@ const HeroImage: React.FC = () => {
           style={{
             background: "radial-gradient(circle, rgba(169,104,61,0.15) 0%, transparent 70%)",
             filter: "blur(30px)",
-            transform: "scale(1.2)"
+            transform: "translate(-50%, -50%) scale(1.2)"
           }}
         />
         

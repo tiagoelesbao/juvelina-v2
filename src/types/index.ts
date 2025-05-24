@@ -1,34 +1,46 @@
-// Tipos de produto
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice: number;
-  description: string;
-  benefits: string[];
+// src/types/index.ts
+export interface PerformanceContextType {
+  isMobile: boolean;
+  isTablet: boolean;
+  isLowEnd: boolean;
+  reduceMotion: boolean;
 }
 
-// Tipos de depoimento
+export interface StatItem {
+  id: number;
+  value: number;
+  target: number;
+  label: string;
+  icon: string;
+}
+
+export interface VideoTestimonial {
+  id: number;
+  name: string;
+  username: string;
+  thumbnail: string;
+  videoUrl?: string;
+  caption: string;
+  views: string;
+  rating: number;
+  likes?: string;
+  comments?: string;
+  category?: 'energia' | 'imunidade' | 'beleza';
+  platform?: 'instagram' | 'tiktok' | 'youtube';
+  verified?: boolean;
+  date?: string;
+}
+
 export interface Testimonial {
   id: number;
   name: string;
   username: string;
   avatar: string;
-  content: string;
+  text: string;
   rating: number;
-  platform: 'instagram' | 'tiktok';
-  category: 'energia' | 'imunidade' | 'beleza';
-  verified?: boolean;
   date: string;
-}
-
-// Tipos de notificação
-export interface Notification {
-  id: number;
-  type: 'purchase' | 'review' | 'creator' | 'stock' | 'discount';
-  name?: string;
-  avatar?: string;
-  message: string;
-  time: string;
-  location?: string;
+  platform?: 'instagram' | 'tiktok';
+  category?: 'energia' | 'imunidade' | 'beleza';
+  highlight?: boolean;
+  verified?: boolean;
 }
