@@ -52,7 +52,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
       ref={sectionRef}
       className="relative min-h-screen flex items-center overflow-hidden pb-20 md:pb-0"
       style={{
-        background: "linear-gradient(135deg, rgba(255,253,244,0.8) 0%, rgba(255,255,255,0.9) 50%, rgba(194,247,188,0.2) 100%)",
+        background: "linear-gradient(135deg, rgba(255,253,244,0.8) 0%, rgba(255,255,255,0.9) 40%, rgba(194,247,188,0.15) 70%, rgba(194,247,188,0.2) 100%)",
       }}
     >
       {/* Elementos de fundo - mantém como estão */}

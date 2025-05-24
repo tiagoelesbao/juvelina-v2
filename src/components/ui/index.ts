@@ -14,3 +14,4 @@ export { default as TikTokViralBadge } from './TikTokViralBadge';
 export { default as VideoCarousel } from './VideoCarousel';
 export { default as VisitorCounter } from './VisitorCounter';
 export { default as SmoothWaveTransition } from './SmoothWaveTransition';
+export { default as DynamicWaveTransition } from './DynamicWaveTransition';
