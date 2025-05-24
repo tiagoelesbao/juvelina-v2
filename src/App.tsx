@@ -191,10 +191,8 @@ function App() {
           )}
         </AnimatePresence>
         
-        {/* Scroll to top button */}
-        <AnimatePresence>
-          {showScrollTop && <ScrollToTop />}
-        </AnimatePresence>
+        {/* Scroll to top button - CORRIGIDO */}
+        <ScrollToTop show={showScrollTop} />
         
         {/* Creator Badge - apenas desktop */}
         {!performanceSettings.isMobile && !performanceSettings.isLowEnd && <CreatorBadge />}
