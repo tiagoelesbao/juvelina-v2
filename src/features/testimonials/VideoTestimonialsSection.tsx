@@ -1,192 +1,481 @@
-// src/components/sections/VideoTestimonialsSection.tsx - IMPROVED VERSION
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import VideoCarousel from '../../components/ui/VideoCarousel';
+// src/features/testimonials/VideoTestimonialsSection.tsx
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, ShoppingCart, X, Star } from 'lucide-react';
 
-// Dados de exemplo de vídeo depoimentos
+// Imagem do produto
+const juvelinaBottle = "https://images.unsplash.com/photo-1607006333439-505849ef4f76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80";
+
+// Dados dos vídeos
 const videoTestimonials = [
   {
     id: 1,
     name: "Amanda Silva",
     username: "@amandasilva_fit",
-    avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    platform: "tiktok" as const,
-    category: "energia" as const,
-    caption: "Estou completamente impressionada com a Juvelina! Depois de apenas 3 semanas, minha energia mudou completamente. Acordo disposta e mantenho o foco o dia todo. Não é como energéticos que te dão pico e depois queda. É uma energia constante e natural! ✨",
-    date: "28/04/2025"
+    thumbnail: "https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "3 semanas com Juvelina e minha energia mudou completamente!",
+    views: "2.3M",
+    rating: 5
   },
   {
     id: 2,
     name: "Carlos Mendes",
-    username: "@carlosmendes.trainer",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1450&q=80",
-    platform: "tiktok" as const,
-    category: "energia" as const,
-    caption: "Como treinador, já testei vários suplementos, mas nenhum com absorção tão rápida quanto Juvelina. No treino de força, aguentei 30% mais carga! Meus clientes também já estão percebendo a diferença em suas rotinas. Não tem volta! 💪",
-    date: "15/04/2025"
+    username: "@carlosmendes",
+    thumbnail: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1450&q=80",
+    caption: "Como treinador, recomendo Juvelina para todos meus alunos!",
+    views: "1.8M",
+    rating: 5
   },
   {
     id: 3,
     name: "Patrícia Alves",
-    username: "@patriciaalvesoficial",
-    avatar: "https://images.unsplash.com/photo-1491349174775-aaafddd81942?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1607606116242-357a0d503b6a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    platform: "instagram" as const,
-    category: "beleza" as const,
-    caption: "Aos 42 anos, estava difícil manter a pele bonita e cabelos fortes, até encontrar Juvelina! Em apenas 1 mês, minhas amigas começaram a perguntar meu segredo. Meu dermatologista notou a diferença e até pediu para ver o produto! A elasticidade da pele melhorou muito! 🌟",
-    date: "02/05/2025"
+    username: "@patriciaalves",
+    thumbnail: "https://images.unsplash.com/photo-1607606116242-357a0d503b6a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "Aos 42 anos, minha pele e cabelos nunca estiveram tão bonitos!",
+    views: "3.1M",
+    rating: 5
   },
   {
     id: 4,
     name: "Rodrigo Costa",
     username: "@rodrigocosta",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    platform: "tiktok" as const,
-    category: "imunidade" as const,
-    caption: "No inverno sempre ficava doente, mas desde que comecei com Juvelina, minha imunidade está no topo! Já faz 3 meses que não pego sequer um resfriado. O melhor é que não preciso tomar várias cápsulas - apenas 5ml uma vez ao dia e pronto! 👊",
-    date: "27/04/2025"
+    thumbnail: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+    caption: "Minha imunidade está no topo! 3 meses sem ficar doente.",
+    views: "985K",
+    rating: 5
   },
   {
     id: 5,
-    name: "Ana Paula Monteiro",
+    name: "Ana Paula",
     username: "@anapaulamont",
-    avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1498671546682-94a232c26d17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    platform: "instagram" as const,
-    category: "beleza" as const,
-    caption: "Confesso que estava cética no início, mas depois de 6 semanas usando Juvelina, não consigo mais ficar sem! Minhas unhas pararam de quebrar e meu cabelo está crescendo muito mais rápido e forte. Já comprei para toda minha família! 😍",
-    date: "05/05/2025"
+    thumbnail: "https://images.unsplash.com/photo-1498671546682-94a232c26d17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "Minhas unhas pararam de quebrar e meu cabelo está incrível!",
+    views: "1.5M",
+    rating: 5
   },
   {
     id: 6,
     name: "Fernando Gomes",
     username: "@fernandogfit",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    platform: "tiktok" as const,
-    category: "energia" as const,
-    caption: "Como personal trainer, recomendo Juvelina para todos meus alunos que precisam de mais energia. Eu mesmo uso diariamente antes dos treinos e sinto uma diferença absurda na performance. O sabor é bem neutro e fácil de tomar. Top demais! 💯",
-    date: "30/04/2025"
+    thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+    caption: "Energia durante todo o dia! Performance nos treinos melhorou muito.",
+    views: "2.7M",
+    rating: 5
   },
   {
     id: 7,
     name: "Camila Duarte",
-    username: "@camiladuarte.life",
-    avatar: "https://images.unsplash.com/photo-1479936343636-73cdc5aae0c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    platform: "instagram" as const,
-    category: "imunidade" as const,
-    caption: "Achei que não ia notar diferença, mas estou totalmente surpresa! Não pego gripe há meses e minha energia está constante durante todo o dia. O melhor é que não dá aquela queda depois, como acontece com café. Vou continuar usando com certeza! 🌿",
-    date: "22/04/2025"
-  },
-  {
-    id: 8,
-    name: "Lucas Marques",
-    username: "@lucasmarques",
-    avatar: "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1578496781379-7dcfb995293d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    platform: "tiktok" as const,
-    category: "imunidade" as const,
-    caption: "Sou médico e sempre fui cético com suplementos, mas os resultados dos estudos de biodisponibilidade da Juvelina me convenceram a testar. Após 2 meses, meus exames mostram níveis de vitamina D e zinco muito melhores. Recomendo a pacientes selecionados. 👨‍⚕️",
-    date: "18/04/2025"
-  },
-  {
-    id: 9,
-    name: "Dr. Marcelo",
-    username: "@drmarcelosilvamed",
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    platform: "instagram" as const,
-    category: "imunidade" as const,
-    caption: "Recomendo Juvelina aos meus pacientes pela alta absorção e qualidade. Os resultados clínicos têm sido impressionantes, especialmente para aqueles com deficiências nutricionais e baixa imunidade.",
-    date: "10/04/2025"
-  },
-  {
-    id: 10,
-    name: "Gabriela Lima",
-    username: "@gabilimafit",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
-    videoThumbnail: "https://images.unsplash.com/photo-1594381898411-846e7d193883?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGVuZXJneXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
-    platform: "tiktok" as const,
-    category: "energia" as const,
-    caption: "Galera, eu tô CHOCADA com a Juvelina! Sou nutricionista e sempre recomendo suplementos para meus pacientes, mas esse é diferente. A absorção é MUITO melhor, e a diferença na energia é surreal! 🤯 #JuvelinaAprovada",
-    date: "02/05/2025"
+    username: "@camiladuarte",
+    thumbnail: "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    caption: "Juvelina transformou minha rotina de bem-estar!",
+    views: "892K",
+    rating: 5
   }
 ];
 
-const VideoTestimonialsSection: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState('todos');
+interface VideoTestimonialsSectionProps {
+  onCtaClick?: (e?: React.MouseEvent) => void;
+}
+
+const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onCtaClick }) => {
+  const [selectedVideo, setSelectedVideo] = useState<typeof videoTestimonials[0] | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [viewersCount, setViewersCount] = useState(247);
+  const trackRef = useRef<HTMLDivElement>(null);
+  
+  // Duplicar vídeos para criar loop infinito
+  const duplicatedVideos = [...videoTestimonials, ...videoTestimonials, ...videoTestimonials];
+  
+  // Simular mudanças no número de espectadores
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setViewersCount(prev => {
+        const change = Math.floor(Math.random() * 11) - 5; // -5 a +5
+        const newCount = prev + change;
+        return Math.max(180, Math.min(320, newCount)); // Entre 180 e 320
+      });
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Auto-scroll contínuo
+  useEffect(() => {
+    if (isPaused || selectedVideo) return;
+    
+    const track = trackRef.current;
+    if (!track) return;
+    
+    let animationId: number;
+    let scrollPosition = 0;
+    
+    const animate = () => {
+      scrollPosition += 1; // Velocidade do scroll aumentada para fluidez
+      
+      // Reset quando chegar ao fim do primeiro conjunto
+      const itemWidth = 304; // largura do item (280px) + gap (24px)
+      const totalWidth = videoTestimonials.length * itemWidth;
+      
+      if (scrollPosition >= totalWidth) {
+        scrollPosition = 0;
+      }
+      
+      if (track) {
+        track.style.transform = `translateX(-${scrollPosition}px)`;
+        track.style.transition = 'none'; // Remove transição para movimento contínuo
+      }
+      
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [isPaused, selectedVideo]);
+  
+  const renderStars = (rating: number) => (
+    <div className="flex gap-0.5">
+      {[...Array(5)].map((_, i) => (
+        <Star key={i} size={12} className={i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+      ))}
+    </div>
+  );
 
   return (
-    <section id="video-depoimentos" className="py-20 bg-gradient-to-b from-juvelina-mint/20 to-white relative overflow-hidden">
-      {/* Padrão de fundo sutil */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 17.32v34.64L30 60 0 51.96V17.32L30 0zm0 10.39L8.66 22.17v26.66L30 60l21.34-11.17V22.17L30 10.39z' fill='%23A9683D' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-        backgroundSize: '60px 60px',
-      }}></div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <span className="inline-block bg-juvelina-gold/20 px-4 py-1 rounded-full text-juvelina-gold font-medium mb-4">
-            Histórias Reais
-          </span>
-          <motion.h2 
-            className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-black"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            Veja as Transformações em <span className="text-juvelina-gold">Vídeo</span>
-          </motion.h2>
-          <motion.p 
-            className="text-gray-600 text-lg max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            Assista aos depoimentos autênticos de pessoas que transformaram suas vidas com Juvelina Organics.
-          </motion.p>
+    <>
+      {/* Wave Transition mais suave - combinando com cores da Hero */}
+      <div className="relative w-full -mt-1">
+        <svg viewBox="0 0 1440 120" className="w-full h-auto" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="videoWaveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.9)" stopOpacity="1" />
+              <stop offset="30%" stopColor="rgba(194,247,188,0.2)" stopOpacity="1" />
+              <stop offset="60%" stopColor="rgba(194,247,188,0.1)" stopOpacity="1" />
+              <stop offset="100%" stopColor="#f9fdfb" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          <path 
+            d="M0,40 C320,20 640,60 960,40 C1280,20 1360,30 1440,40 L1440,120 L0,120 Z" 
+            fill="url(#videoWaveGradient)"
+          />
+        </svg>
+      </div>
+
+      <section 
+        id="video-depoimentos" 
+        className="py-20 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(180deg, #f9fdfb 0%, rgba(194,247,188,0.03) 30%, #ffffff 100%)"
+        }}
+      >
+        {/* Background decorativo fluido com animações mais visíveis */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Blob orgânico animado 1 - mais visível */}
+          <motion.div 
+            className="absolute top-10 left-1/3 w-[500px] h-[500px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(194,247,188,0.25) 0%, transparent 60%)",
+              filter: "blur(80px)"
+            }}
+            animate={{
+              x: [-50, 100, -50],
+              y: [-30, 50, -30],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+          
+          {/* Blob orgânico animado 2 - mais visível */}
+          <motion.div 
+            className="absolute bottom-20 right-1/3 w-[400px] h-[400px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(169,104,61,0.08) 0%, transparent 60%)",
+              filter: "blur(100px)"
+            }}
+            animate={{
+              x: [50, -80, 50],
+              y: [30, -60, 30],
+              scale: [1.1, 1.3, 1.1],
+            }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+          
+          {/* Partículas flutuantes maiores e mais visíveis */}
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                width: '6px',
+                height: '6px',
+                background: i % 2 === 0 ? 'rgba(169,104,61,0.2)' : 'rgba(194,247,188,0.3)',
+                left: `${15 + i * 20}%`,
+                top: `${20 + i * 15}%`
+              }}
+              animate={{
+                y: [-30, 40, -30],
+                x: [-10, 10, -10],
+                opacity: [0.3, 0.7, 0.3]
+              }}
+              transition={{
+                duration: 12 + i * 3,
+                repeat: Infinity,
+                delay: i * 0.7,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
         </div>
         
-        {/* Video Carousel Component */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <VideoCarousel 
-            testimonials={videoTestimonials} 
-            activeFilter={activeFilter} 
-            onFilterChange={setActiveFilter}
-          />
-        </motion.div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-juvelina-gold/20 px-4 py-1 rounded-full text-juvelina-gold font-medium mb-4">
+              Histórias Reais
+            </span>
+            <h2 className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-black">
+              Veja as Transformações em <span className="text-juvelina-gold">Vídeo</span>
+            </h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Assista aos depoimentos autênticos de pessoas que transformaram suas vidas com Juvelina Organics.
+            </p>
+          </div>
+        </div>
         
-        {/* CTA */}
-        <motion.div 
-          className="mt-16 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+        {/* Carrossel infinito */}
+        <div 
+          className="relative mt-12"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
         >
-          <a 
-            href="#oferta" 
-            className="inline-flex items-center gap-2 bg-juvelina-gold text-white px-6 py-3 rounded-full hover:bg-juvelina-gold/90 transition-colors shadow-md"
+          {/* Gradientes de dissolução nas bordas - mais sutis no mobile */}
+          <div className="absolute left-0 top-0 w-16 md:w-32 lg:w-48 h-full z-10 pointer-events-none"
+            style={{
+              background: window.innerWidth < 768 
+                ? "linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%)"
+                : "linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 30%, rgba(255,255,255,0) 100%)"
+            }}
+          />
+          <div className="absolute right-0 top-0 w-16 md:w-32 lg:w-48 h-full z-10 pointer-events-none"
+            style={{
+              background: window.innerWidth < 768
+                ? "linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%)"
+                : "linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 30%, rgba(255,255,255,0) 100%)"
+            }}
+          />
+          
+          {/* Track do carrossel */}
+          <div className="overflow-hidden px-4">
+            <div 
+              ref={trackRef}
+              className="flex gap-6"
+              style={{ 
+                width: 'max-content',
+                willChange: 'transform'
+              }}
+            >
+              {duplicatedVideos.map((video, index) => (
+                <motion.div
+                  key={`${video.id}-${index}`}
+                  className="relative w-[280px] h-[500px] flex-shrink-0 cursor-pointer group"
+                  onClick={() => setSelectedVideo(video)}
+                  whileHover={{ 
+                    scale: 1.03,
+                    y: -10
+                  }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300,
+                    damping: 20
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg">
+                    <img 
+                      src={video.thumbnail}
+                      alt={video.name}
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Overlay com gradiente melhorado */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/20" />
+                    
+                    {/* Play button */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <motion.div 
+                        className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+                        initial={{ scale: 0.8 }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <Play className="w-7 h-7 text-juvelina-gold ml-1" />
+                      </motion.div>
+                    </div>
+                    
+                    {/* Info overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold">
+                          {video.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">{video.name}</p>
+                          <p className="text-xs opacity-80">{video.username}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm line-clamp-2 mb-2">{video.caption}</p>
+                      <div className="flex items-center justify-between">
+                        {renderStars(video.rating)}
+                        <span className="text-xs">{video.views} views</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Indicador de pessoas assistindo */}
+        <div className="text-center mt-8">
+          <motion.div 
+            className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
           >
-            <span className="font-medium">Transforme sua vida como eles</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-            </svg>
-          </a>
-        </motion.div>
-      </div>
-    </section>
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            <span className="text-sm text-gray-700">
+              <motion.span 
+                className="font-medium"
+                key={viewersCount}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {viewersCount} pessoas
+              </motion.span> estão assistindo agora
+            </span>
+          </motion.div>
+        </div>
+      </section>
+      
+      {/* Modal de vídeo com produto */}
+      <AnimatePresence>
+        {selectedVideo && (
+          <motion.div
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedVideo(null)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl overflow-hidden max-w-5xl w-full max-h-[90vh] flex flex-col md:flex-row"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Lado esquerdo - Vídeo */}
+              <div className="flex-1 bg-black relative aspect-[9/16] md:aspect-video">
+                <button
+                  className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10"
+                  onClick={() => setSelectedVideo(null)}
+                >
+                  <X size={24} />
+                </button>
+                
+                {/* Placeholder do vídeo */}
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <Play size={60} className="mx-auto mb-4" />
+                    <p>Vídeo de {selectedVideo.name}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Lado direito - Informações do produto */}
+              <div className="w-full md:w-[400px] p-6 bg-gradient-to-b from-white to-juvelina-mint/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-juvelina-gold/20 flex items-center justify-center font-bold text-juvelina-gold">
+                    {selectedVideo.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-bold">{selectedVideo.name}</h3>
+                    <p className="text-sm text-gray-600">{selectedVideo.username}</p>
+                  </div>
+                </div>
+                
+                <p className="text-gray-700 mb-6 italic">"{selectedVideo.caption}"</p>
+                
+                {/* Produto */}
+                <div className="border-t pt-6">
+                  <h4 className="font-bold text-lg mb-4">Experimente Juvelina</h4>
+                  
+                  <div className="flex gap-4 mb-4">
+                    <img 
+                      src={juvelinaBottle}
+                      alt="Juvelina"
+                      className="w-24 h-24 object-contain"
+                    />
+                    <div className="flex-1">
+                      <h5 className="font-bold text-juvelina-gold">Juvelina Organics</h5>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Suplemento líquido com 25 nutrientes essenciais e absorção 5x superior.
+                      </p>
+                      {renderStars(5)}
+                    </div>
+                  </div>
+                  
+                  {/* Preço e CTA */}
+                  <div className="bg-juvelina-gold/10 rounded-lg p-4 mb-4">
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-gray-400 line-through text-sm">R$ 179,90</span>
+                      <span className="text-2xl font-bold text-juvelina-gold">R$ 129,90</span>
+                      <span className="text-green-600 text-sm font-medium">28% OFF</span>
+                    </div>
+                    <p className="text-xs text-gray-600">Oferta exclusiva + Frete Grátis</p>
+                  </div>
+                  
+                  <button 
+                    className="w-full bg-juvelina-gold text-white py-3 rounded-full font-medium flex items-center justify-center gap-2 hover:bg-opacity-90 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    onClick={(e) => {
+                      setSelectedVideo(null);
+                      onCtaClick?.(e);
+                    }}
+                  >
+                    <ShoppingCart size={20} />
+                    Aproveitar Oferta
+                  </button>
+                  
+                  <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                      Garantia de 30 dias
+                    </span>
+                    <span>•</span>
+                    <span>Frete Grátis</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

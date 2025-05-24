@@ -168,7 +168,7 @@ function App() {
         <HeroSection onCtaClick={handleCtaClick} />
         
         {/* Video Testimonials - Sempre carregado */}
-        <VideoTestimonialsSection />
+        <VideoTestimonialsSection onCtaClick={handleCtaClick} />
         
         <AnimatePresence>
           <motion.div
