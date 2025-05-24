@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Importações de componentes comuns
 import { 
