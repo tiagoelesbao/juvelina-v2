@@ -1,13 +1,12 @@
 // src/features/hero/index.tsx
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { motion } from 'framer-motion';
-import { PerformanceContext } from '../../App'; // ou do contexto separado
+import { PerformanceContext } from '../../App';
 import HeroHeading from './components/HeroHeading';
 import HeroButtons from './components/HeroButtons';
 import HeroStats from './components/HeroStats';
 import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
-import WaveTransition from '../../components/ui/WaveTransition';
 import { useCountUp, StatItem } from './hooks/useCountUp';
 
 interface HeroSectionProps {
@@ -17,9 +16,7 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   const [inView, setInView] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
-  
-  // ===== USAR O PERFORMANCE CONTEXT =====
-  const { isMobile, isTablet, reduceMotion } = useContext(PerformanceContext);
+  const { isMobile, isTablet, reduceMotion, isLowEnd } = useContext(PerformanceContext);
   
   const initialStats: StatItem[] = [
     { id: 1, value: 0, target: 12500, label: 'Clientes Satisfeitos', icon: '✨' },
@@ -29,7 +26,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
   
   const { stats } = useCountUp(initialStats, inView);
   
+  // Observer otimizado
   useEffect(() => {
+    if (isLowEnd) {
+      setInView(true); // Pular animação em dispositivos fracos
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -49,147 +52,135 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         observer.unobserve(sectionRef.current);
       }
     };
-  }, []);
+  }, [isLowEnd]);
 
-  // ===== VARIANTES DE ANIMAÇÃO BASEADAS NO DISPOSITIVO =====
-  const backgroundBlobVariants = !isMobile && !reduceMotion ? {
-    animate: {
-      scale: [1, 1.1, 1],
-      x: [0, 20, 0],
-      y: [0, -30, 0],
+  // Variantes de animação baseadas no dispositivo
+  const getBackgroundStyle = () => {
+    // IMPORTANTE: Garantir que sempre tenha um fundo sólido
+    const baseBackground = '#ffffff'; // Fundo branco sólido como base
+    
+    if (isMobile || isLowEnd) {
+      // Mobile: gradiente simples e sólido
+      return {
+        backgroundColor: baseBackground,
+        backgroundImage: `linear-gradient(180deg, 
+          #ffffff 0%, 
+          #fffdf4 40%, 
+          #f5fdf3 80%, 
+          #e8fbe5 100%)`
+      };
     }
-  } : {};
-
-  const fadeInVariants = reduceMotion ? {} : {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    transition: { duration: 0.7 }
+    
+    // Desktop: gradiente mais complexo mas ainda sólido
+    return {
+      backgroundColor: baseBackground,
+      backgroundImage: `linear-gradient(135deg, 
+        #fffdf4 0%, 
+        #ffffff 30%, 
+        #f8fef6 60%, 
+        #e8fbe5 100%)`
+    };
   };
 
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden pb-20 md:pb-0"
-      style={{
-        background: isMobile 
-          ? "linear-gradient(180deg, rgba(255,253,244,0.9) 0%, rgba(194,247,188,0.15) 100%)" // Gradiente simplificado para mobile
-          : "linear-gradient(135deg, rgba(255,253,244,0.8) 0%, rgba(255,255,255,0.9) 40%, rgba(194,247,188,0.15) 70%, rgba(194,247,188,0.2) 100%)",
-      }}
+      className="relative min-h-screen flex items-center overflow-hidden pb-20 md:pb-0 hero-section"
+      style={getBackgroundStyle()}
     >
-      {/* ===== ELEMENTOS DE FUNDO - APENAS DESKTOP ===== */}
-      {!isMobile && !isTablet && (
+      {/* Elementos de fundo - Apenas Desktop e não low-end */}
+      {!isMobile && !isTablet && !isLowEnd && !reduceMotion && (
         <>
-          {/* Blob 1 - Superior direito */}
-          <motion.div 
-            className="absolute rounded-full opacity-20"
-            style={{
-              width: '60vw',
-              height: '60vw',
-              background: "radial-gradient(circle, rgba(169,104,61,0.1) 0%, transparent 70%)",
-              top: '20%',
-              right: '-20vw',
-              filter: reduceMotion ? 'none' : 'blur(60px)' // Remove blur se motion reduzido
-            }}
-          />
-          
-          {/* Blob 2 - Inferior esquerdo com animação condicional */}
-          <motion.div 
-            className="absolute rounded-full opacity-20"
-            style={{
-              width: '40vw',
-              height: '40vw',
-              background: "radial-gradient(circle, rgba(194,247,188,0.15) 0%, transparent 70%)",
-              bottom: '10%',
-              left: '-10vw',
-              filter: reduceMotion ? 'none' : 'blur(50px)'
-            }}
-            {...backgroundBlobVariants}
-            transition={!reduceMotion ? {
-              duration: 20,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut"
-            } : {}}
-          />
-          
-          {/* Blob 3 - Central */}
+          {/* Blob 1 - Superior direito (sem animação se reduceMotion) */}
           <div 
-            className="absolute rounded-full opacity-30"
+            className="absolute rounded-full opacity-10"
             style={{
-              width: '30vw',
-              height: '30vw',
-              background: "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)",
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              filter: reduceMotion ? 'none' : 'blur(60px)'
+              width: '500px',
+              height: '500px',
+              background: "radial-gradient(circle, rgba(169,104,61,0.15) 0%, transparent 70%)",
+              top: '-100px',
+              right: '-150px',
+              filter: 'blur(40px)'
+            }}
+          />
+          
+          {/* Blob 2 - Inferior esquerdo */}
+          <div 
+            className="absolute rounded-full opacity-10"
+            style={{
+              width: '400px',
+              height: '400px',
+              background: "radial-gradient(circle, rgba(194,247,188,0.2) 0%, transparent 70%)",
+              bottom: '-100px',
+              left: '-100px',
+              filter: 'blur(40px)'
             }}
           />
         </>
       )}
       
-      {/* ===== VERSÃO MOBILE - BACKGROUND SIMPLIFICADO ===== */}
-      {isMobile && (
+      {/* Background simplificado para Mobile */}
+      {(isMobile || isLowEnd) && (
         <div 
           className="absolute inset-0"
           style={{
             background: `
               radial-gradient(
                 ellipse at top right,
-                rgba(169,104,61,0.08) 0%,
-                transparent 50%
+                rgba(169,104,61,0.05) 0%,
+                transparent 40%
               ),
               radial-gradient(
                 ellipse at bottom left,
-                rgba(194,247,188,0.12) 0%,
-                transparent 50%
+                rgba(194,247,188,0.08) 0%,
+                transparent 40%
               )
-            `
+            `,
+            pointerEvents: 'none'
           }}
         />
       )}
       
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* ===== CONTEÚDO COM ANIMAÇÕES CONDICIONAIS ===== */}
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          {/* Conteúdo com animações condicionais */}
           <motion.div 
             className="order-2 md:order-1"
-            {...fadeInVariants}
+            initial={reduceMotion ? {} : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={reduceMotion ? {} : { duration: 0.5 }}
           >
             <HeroHeading />
             <HeroButtons onCtaClick={onCtaClick} />
             
+            {/* Stats com animação reduzida em mobile */}
             <motion.div
               initial={reduceMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={reduceMotion ? {} : { delay: 0.8, duration: 0.7 }}
+              transition={reduceMotion ? {} : { delay: 0.6, duration: 0.5 }}
             >
               <HeroStats stats={stats} inView={inView} />
             </motion.div>
           </motion.div>
           
-          {/* ===== IMAGEM DO HERO ===== */}
+          {/* Imagem do Hero */}
           <motion.div 
-            className="md:col-span-1 order-1 md:order-2 relative"
-            {...fadeInVariants}
+            className="md:col-span-1 order-1 md:order-2 relative hero-image-container"
+            initial={reduceMotion ? {} : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={reduceMotion ? {} : { duration: 0.5 }}
           >
             <HeroImage />
           </motion.div>
         </div>
       </div>
       
-      {/* ===== INDICADOR DE SCROLL - OCULTAR EM MOBILE SE MOTION REDUZIDO ===== */}
+      {/* Indicador de scroll - ocultar em mobile se motion reduzido */}
       {(!isMobile || !reduceMotion) && (
         <div className="mb-16 md:mb-0">
           <ScrollIndicator />
         </div>
       )}
-      
-      {/* ===== TRANSIÇÃO ONDULADA ===== */}
-      <WaveTransition 
-        color="#C2F7BC" 
-        className="absolute bottom-0 left-0 w-full -mb-1"
-      />
     </section>
   );
 };

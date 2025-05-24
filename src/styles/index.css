@@ -1,72 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+/* src/styles/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Reset e prevenção de overflow horizontal */
-* {
+/* =================================
+   RESET E BASE
+   ================================= */
+*, *::before, *::after {
   box-sizing: border-box;
-  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-  overflow-x: hidden;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  color: #1f2937;
+  background-color: #ffffff;
   overflow-x: hidden;
-  margin: 0;
-  padding: 0;
   width: 100%;
   position: relative;
 }
 
 #root {
+  min-height: 100vh;
   overflow-x: hidden;
   width: 100%;
   position: relative;
 }
 
-/* Prevenir overflow em seções */
-section {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-  position: relative;
-}
-
-/* Container global */
-.container {
-  width: 100%;
-  max-width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin-left: auto;
-  margin-right: auto;
-  overflow-x: hidden;
-}
-
-/* Elementos posicionados absolutamente */
-.absolute {
-  max-width: 100vw;
-}
-
-/* Prevenir overflow em elementos com animação */
-[class*="animate-"] {
-  overflow: hidden;
-}
-
-/* Mobile specific */
-@media (max-width: 768px) {
-  .container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-}
-
-/* Fallback para as fontes */
+/* =================================
+   FONTES CUSTOMIZADAS
+   ================================= */
 @font-face {
   font-family: 'Ws Paradose';
-  src: url('https://fonts.cdnfonts.com/s/17860/WS-Paradose.woff') format('woff'),
-       local('Georgia'), serif;
+  src: local('Georgia'), local('Palatino'), serif;
   font-weight: normal;
   font-style: italic;
   font-display: swap;
@@ -74,77 +49,73 @@ section {
 
 @font-face {
   font-family: 'Zap';
-  src: url('https://fonts.cdnfonts.com/s/12118/zap-light.woff') format('woff'),
-       local('Poppins'), sans-serif;
+  src: local('Inter'), local('Helvetica'), sans-serif;
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-/* Tailwind directives */
+/* =================================
+   TAILWIND BASE
+   ================================= */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* src/index.css */
-
-/* Importação de fontes - Use caminhos relativos ao projeto ou CDNs mais confiáveis */
-@font-face {
-  font-family: 'Ws Paradose';
-  src: url('/fonts/WS-Paradose.woff') format('woff');
-  font-weight: normal;
-  font-style: italic;
-  font-display: swap; /* Melhora o carregamento */
+/* =================================
+   CORREÇÃO DE TRANSPARÊNCIA
+   ================================= */
+section {
+  background-color: #ffffff;
+  position: relative;
+  isolation: isolate;
 }
 
-@font-face {
-  font-family: 'Zap';
-  src: url('/fonts/zap-light.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+.hero-section {
+  background-color: #ffffff !important;
+  min-height: 100vh;
 }
 
-@font-face {
-  font-family: 'Zap';
-  src: url('/fonts/zap-regular.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Zap';
-  src: url('/fonts/zap-light-italic.woff') format('woff');
-  font-weight: normal;
-  font-style: italic;
-  font-display: swap;
-}
-
-/* Estilos base */
-@layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Zap', sans-serif;
-  }
-}
-
-/* Componentes personalizados */
+/* =================================
+   COMPONENTES GLOBAIS
+   ================================= */
 @layer components {
-  /* Customização da barra de rolagem */
+  /* Container responsivo */
+  .container {
+    width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* Scrollbar customizada */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f3f4f6;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #A9683D;
+    background: #a9683d;
     border-radius: 4px;
   }
 
@@ -152,47 +123,62 @@ section {
     background: #8a5430;
   }
 
-  /* Efeito de transição aos botões */
-  button, a {
-    transition: all 0.3s ease;
+  /* Scroll suave em iOS */
+  .hide-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Utilitários personalizados */
+/* =================================
+   UTILITÁRIOS CUSTOMIZADOS
+   ================================= */
 @layer utilities {
-  /* Animações */
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
+  /* GPU Acceleration */
+  .gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
   }
 
-  @keyframes expandWidth {
-    from { width: 0; }
-    to { width: 100%; }
+  /* Contain para performance */
+  .contain-layout {
+    contain: layout;
   }
 
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  /* Text rendering otimizado */
+  .text-optimize {
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Animações simples */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
 
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-expandWidth {
-    animation: expandWidth 0.5s ease-out forwards;
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .animate-fadeIn {
@@ -200,331 +186,216 @@ section {
   }
 
   .animate-fadeInUp {
-    animation: fadeInUp 0.7s ease-out forwards;
+    animation: fadeInUp 0.7s ease-out;
+  }
+}
+
+/* =================================
+   MOBILE FIRST OPTIMIZATIONS
+   ================================= */
+@media (max-width: 768px) {
+  /* Desabilitar filtros pesados */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
-  .animate-scaleIn {
-    animation: scaleIn 0.3s ease-out;
+  /* Simplificar sombras */
+  [class*="shadow"] {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
 
-  .delay-100 {
-    animation-delay: 0.1s;
+  /* Desabilitar animações de hover */
+  [class*="hover:"]:hover {
+    transform: none !important;
   }
 
-  .delay-200 {
-    animation-delay: 0.2s;
+  /* Otimizar transições */
+  * {
+    transition-duration: 0.2s !important;
   }
 
-  .delay-300 {
-    animation-delay: 0.3s;
+  /* Hero mobile */
+  .hero-section {
+    padding-top: 4rem;
+    padding-bottom: 2rem;
   }
 
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
+  .hero-image-container {
+    max-width: 320px;
+    margin: 0 auto;
   }
 
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Tamanhos de texto responsivos */
+  .text-4xl {
+    font-size: 1.875rem;
   }
 
-/* Adicione ao seu index.css */
+  .text-5xl,
+  .text-6xl {
+    font-size: 2.25rem;
+  }
+
+  /* Otimizar grids */
+  .grid {
+    gap: 1rem;
+  }
+
+  /* Remover animações pesadas */
+  .animate-float,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* =================================
+   PREFERÊNCIAS DE ACESSIBILIDADE
+   ================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Classe para forçar reduced motion */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* =================================
+   FIXES DE OVERFLOW
+   ================================= */
 html, body {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-/* Verificar se algum elemento tem largura que excede o viewport */
-* {
+section {
   max-width: 100vw;
-  box-sizing: border-box;
-}
-
-/* Fix horizontal scrolling */
-html, body {
-  max-width: 100%;
   overflow-x: hidden;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-.overflow-x-auto {
+.absolute,
+.fixed {
   max-width: 100vw;
 }
 
-/* Ensure responsive tables don't cause overflow */
-table {
-  table-layout: fixed;
-  width: 100%;
+/* =================================
+   PERFORMANCE CRÍTICA
+   ================================= */
+/* Evitar layout shifts */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-.container {
-  width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-/* Adicione essas classes ao seu arquivo index.css para garantir suporte aos novos backgrounds */
-
-/* Gradientes modernos */
-.bg-gradient-radial {
-  background-image: radial-gradient(var(--tw-gradient-stops));
-}
-
-.bg-gradient-conic {
-  background-image: conic-gradient(var(--tw-gradient-stops));
-}
-
-/* Efeitos de fundo para Juvelina */
-.bg-juvelina-ethereal {
-  background: linear-gradient(120deg, rgba(255, 253, 244, 0.8) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(194, 247, 188, 0.1) 100%);
-}
-
-.juvelina-glow {
-  position: relative;
-}
-
-.juvelina-glow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(169, 104, 61, 0.1), transparent 70%);
-  z-index: -1;
-}
-
-.juvelina-glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* Efeitos de texto */
-.text-shadow-gold {
-  text-shadow: 0 0 10px rgba(169, 104, 61, 0.3);
-}
-
-/* Animações específicas */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0),
-    rgba(169, 104, 61, 0.2),
-    rgba(255, 255, 255, 0)
-  );
-  background-size: 200% 100%;
-  animation: shimmer 3s infinite;
-}
-
-/* Efeito de blobs suaves para fundos orgânicos */
-.blob-animation {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.4;
-  mix-blend-mode: overlay;
-  animation: blob-pulse 10s ease-in-out infinite alternate;
-}
-
-@keyframes blob-pulse {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  33% {
-    transform: scale(1.1) translate(5%, 5%);
-  }
-  66% {
-    transform: scale(0.9) translate(-5%, 5%);
-  }
-  100% {
-    transform: scale(1) translate(0, 0);
-  }
-}
-
-/* Cor de background com textura sutil */
-.bg-texture {
-  background-color: #fdfdfc;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%23a9683d' fill-opacity='0.03'%3E%3Cpath d='M20 0c-11.046 0-20 8.954-20 20s8.954 20 20 20 20-8.954 20-20-8.954-20-20-20zm0 36c-8.836 0-16-7.164-16-16s7.164-16 16-16 16 7.164 16 16-7.164 16-16 16z'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-/* Efeito de luz dourada */
-.gold-light {
+/* Lazy loading placeholders */
+.lazy-placeholder {
+  background: #f3f4f6;
   position: relative;
   overflow: hidden;
 }
 
-.gold-light::after {
-  content: "";
+.lazy-placeholder::before {
+  content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle at center,
-    rgba(169, 104, 61, 0.15) 0%,
-    rgba(194, 247, 188, 0.05) 30%,
-    transparent 70%
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
   );
-  opacity: 0.7;
-  transform: rotate(30deg);
+  animation: shimmer 1.5s infinite;
 }
 
-/* Adicionar ao src/styles/index.css */
+@keyframes shimmer {
+  to {
+    left: 100%;
+  }
+}
 
-/* Sticky header positioning */
+/* =================================
+   STICKY HEADER FIX
+   ================================= */
 .announcement-bar {
   position: sticky;
   top: 0;
   z-index: 50;
+  background-color: #a9683d;
 }
 
 .main-header {
   position: sticky;
-  top: 40px; /* Height of announcement bar */
+  top: 40px;
   z-index: 40;
+  background-color: #ffffff;
 }
 
-/* Adjust sections to account for sticky headers */
 section[id] {
-  scroll-margin-top: 120px; /* Combined height of both headers */
+  scroll-margin-top: 120px;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .announcement-bar {
-    font-size: 0.875rem;
-  }
-  
-  section[id] {
-    scroll-margin-top: 100px;
-  }
+/* =================================
+   MODAL OPTIMIZATIONS
+   ================================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
 }
 
-/* Smooth transitions for header shadows */
-.header-scrolled {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Ensure proper stacking context */
-#root {
-  position: relative;
-  z-index: 1;
+/* =================================
+   CRITICAL CSS - INLINE NO HTML
+   ================================= */
+/* Cores principais do tema */
+:root {
+  --juvelina-gold: #a9683d;
+  --juvelina-mint: #c2f7bc;
+  --juvelina-emerald: #357266;
+  --juvelina-aqua: #9bd0d2;
+  --white: #ffffff;
+  --black: #000000;
 }
 
-/* Adicione este CSS ao seu arquivo index.css */
-
-/* Gradientes de texto otimizados */
-.text-gradient-gold {
-  background: linear-gradient(90deg, #A9683D, #D4B26A);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-fill-color: transparent;
+/* Loading state */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
-.text-gradient-gold-emerald {
-  background: linear-gradient(135deg, #A9683D 0%, #357266 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-fill-color: transparent;
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
 }
 
-/* Suporte para prefixos de navegadores */
-@supports (-webkit-background-clip: text) {
-  .text-gradient-gold,
-  .text-gradient-gold-emerald {
-    color: transparent;
-  }
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* Fallback para navegadores sem suporte */
-@supports not (-webkit-background-clip: text) {
-  .text-gradient-gold {
-    color: #A9683D;
-  }
-  
-  .text-gradient-gold-emerald {
-    color: #357266;
-  }
-}
-
-/* Animação de shimmer removida para melhor performance */
-.animate-shimmer {
-  animation: none;
-}
-
-/* Adicione este CSS ao seu arquivo index.css para garantir que os selos não sejam cortados */
-
-/* Fix para o Hero Section */
-.hero-section {
-  overflow: visible !important;
-}
-
-/* Container da imagem do produto */
-.hero-image-container {
-  position: relative;
-  overflow: visible;
-  /* Adiciona padding para acomodar os selos */
-  padding: 2rem;
-}
-
-/* Mobile: padding reduzido */
-@media (max-width: 768px) {
-  .hero-image-container {
-    padding: 1rem;
-  }
-  
-  /* Garante que o hero tenha espaço suficiente */
-  .hero-section {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-}
-
-/* Desktop: espaço extra para os selos laterais */
-@media (min-width: 768px) {
-  .hero-image-container {
-    /* Margem extra para acomodar selos */
-    margin-left: 120px;
-    margin-right: 120px;
-  }
-  
-  /* Container principal com overflow visível */
-  .hero-grid {
-    overflow: visible;
-  }
-}
-
-/* Previne corte de elementos posicionados absolutamente */
-.relative {
-  overflow: visible !important;
-}
-
-/* Z-index para garantir ordem correta */
-.hero-badge {
-  z-index: 10;
-}
-
-.hero-image {
-  z-index: 5;
-}
-
-.hero-background {
-  z-index: 1;
-}
-
-}
+/* Import das otimizações mobile */
+@import './mobile-optimizations.css';

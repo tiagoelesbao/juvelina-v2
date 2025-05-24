@@ -1,0 +1,231 @@
+/* src/styles/mobile-optimizations.css */
+
+/* =================================
+   CORREÇÃO DE TRANSPARÊNCIA
+   ================================= */
+.hero-section {
+  background-color: #ffffff !important;
+  min-height: 100vh;
+}
+
+/* Garantir fundo sólido em todas as seções */
+section {
+  background-color: #ffffff;
+  position: relative;
+  isolation: isolate;
+}
+
+/* =================================
+   OTIMIZAÇÕES MOBILE
+   ================================= */
+@media (max-width: 768px) {
+  /* Desabilitar todos os filtros pesados */
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Desabilitar blur que causa muito lag */
+  .blur-sm,
+  .blur,
+  .blur-md,
+  .blur-lg,
+  .blur-xl,
+  .blur-2xl,
+  .blur-3xl,
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+  
+  /* Simplificar todas as sombras */
+  [class*="shadow"] {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Desabilitar todas as animações de hover */
+  [class*="hover:"]:hover {
+    transform: none !important;
+    scale: none !important;
+  }
+  
+  /* Forçar aceleração de hardware em elementos críticos */
+  .hero-section,
+  .hero-image-container,
+  img,
+  video {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-perspective: 1000;
+  }
+  
+  /* Otimizar imagens */
+  img {
+    will-change: auto !important;
+    contain: layout style paint;
+  }
+  
+  /* Desabilitar animações complexas */
+  .animate-float,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+  }
+  
+  /* Simplificar transições */
+  * {
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Otimizar scroll */
+  html,
+  body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevenir repaint desnecessário */
+  .fixed,
+  .sticky {
+    will-change: auto;
+    transform: translateZ(0);
+  }
+  
+  /* Hero section mobile específico */
+  .hero-section {
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+  
+  .hero-image-container {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  
+  /* Container responsivo */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Otimizar fontes */
+  h1, h2, h3, h4, h5, h6 {
+    text-rendering: optimizeSpeed;
+  }
+  
+  /* Reduzir tamanho de elementos grandes */
+  .text-4xl {
+    font-size: 1.875rem;
+  }
+  
+  .text-6xl {
+    font-size: 2.25rem;
+  }
+  
+  /* Otimizar grids e flex */
+  .grid,
+  .flex {
+    contain: layout;
+  }
+}
+
+/* =================================
+   DISPOSITIVOS LOW-END
+   ================================= */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+}
+
+/* Simplificar gradientes em low-end */
+@media (max-width: 768px) {
+  .bg-gradient-to-r,
+  .bg-gradient-to-b,
+  .bg-gradient-to-br {
+    background-image: none !important;
+    background-color: var(--gradient-start, #ffffff) !important;
+  }
+}
+
+/* =================================
+   PERFORMANCE CRÍTICA
+   ================================= */
+/* Contain para evitar reflow */
+.card,
+.card-testimonial,
+.modal,
+[class*="rounded"] {
+  contain: layout style;
+}
+
+/* GPU acceleration seletiva */
+.gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Otimizar vídeos e carousels */
+.video-carousel,
+.testimonial-carousel {
+  contain: strict;
+  touch-action: pan-x;
+}
+
+/* Lazy loading placeholder */
+.lazy-placeholder {
+  background: #f3f4f6;
+  animation: none;
+}
+
+/* =================================
+   FIXES ESPECÍFICOS
+   ================================= */
+/* Fix para overflow horizontal */
+html,
+body,
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Fix para elementos absolutamente posicionados */
+.absolute {
+  max-width: 100vw;
+}
+
+/* Fix para modais */
+.fixed {
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* =================================
+   PREFERÊNCIA DE MOVIMENTO REDUZIDO
+   ================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .motion-safe\:animate-spin {
+    animation: none;
+  }
+}
