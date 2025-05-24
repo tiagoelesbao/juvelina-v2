@@ -111,6 +111,26 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return `${(height / width) * 100}%`;
   };
 
+  // Criar props da imagem com type safety
+  const imgProps: React.ImgHTMLAttributes<HTMLImageElement> = {
+    src: getOptimizedSrc(),
+    alt: alt,
+    width: width,
+    height: height,
+    loading: priority ? "eager" : "lazy",
+    decoding: priority ? "sync" : "async",
+    onLoad: () => setLoaded(true),
+    onError: () => setError(true),
+    className: `absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+      loaded ? 'opacity-100' : 'opacity-0'
+    }`
+  };
+
+  // Adicionar fetchPriority apenas se for prioridade
+  if (priority) {
+    (imgProps as any).fetchPriority = 'high';
+  }
+
   return (
     <div 
       ref={imgRef} 
@@ -138,21 +158,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       
       {/* Imagem real só carrega quando visível */}
       {isInView && !error && (
-        <img
-          src={getOptimizedSrc()}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={priority ? "eager" : "lazy"}
-          decoding={priority ? "sync" : "async"}
-          onLoad={() => setLoaded(true)}
-          onError={() => setError(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-            loaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          // Adicionar fetchpriority ao invés de importance
-          {...(priority ? { fetchPriority: "high" } : {})}
-        />
+        <img {...imgProps} />
       )}
       
       {/* Fallback em caso de erro */}

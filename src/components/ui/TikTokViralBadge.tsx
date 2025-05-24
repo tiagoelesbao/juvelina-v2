@@ -1,6 +1,7 @@
 // src/components/ui/TikTokViralBadge.tsx
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { PerformanceContext } from '../../App';
 
 interface TikTokViralBadgeProps {
   views?: string;
@@ -15,6 +16,8 @@ const TikTokViralBadge: React.FC<TikTokViralBadgeProps> = ({
   positionClass = '',
   className = ''
 }) => {
+  const { isMobile, isLowEnd, reduceMotion } = useContext(PerformanceContext);
+  
   // Determinar a classe de posição
   const getPositionClass = () => {
     if (positionClass) return positionClass;
@@ -29,57 +32,72 @@ const TikTokViralBadge: React.FC<TikTokViralBadgeProps> = ({
     }
   };
 
-  // Variantes para as animações de pulsar
-  const pulseVariants = {
-    pulse: {
-      scale: [1, 1.05, 1],
-      opacity: [1, 0.8, 1],
-      boxShadow: [
-        "0px 4px 10px rgba(0, 0, 0, 0.1)",
-        "0px 6px 15px rgba(0, 0, 0, 0.2)",
-        "0px 4px 10px rgba(0, 0, 0, 0.1)"
-      ],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "reverse" as const
-      }
+  // Animações simplificadas para low-end devices
+  const getAnimationVariants = () => {
+    if (isLowEnd || reduceMotion) {
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.3 }
+      };
     }
+
+    // Variantes para as animações de pulsar
+    const pulseVariants = {
+      pulse: {
+        scale: [1, 1.05, 1],
+        opacity: [1, 0.8, 1],
+        boxShadow: [
+          "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          "0px 6px 15px rgba(0, 0, 0, 0.2)",
+          "0px 4px 10px rgba(0, 0, 0, 0.1)"
+        ],
+        transition: {
+          duration: 2,
+          repeat: Infinity,
+          repeatType: "reverse" as const
+        }
+      }
+    };
+
+    // Variantes para o efeito de brilho
+    const glowVariants = {
+      glow: {
+        opacity: [0.7, 1, 0.7],
+        filter: [
+          "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.2))",
+          "drop-shadow(0px 0px 5px rgba(238, 29, 82, 0.5))",
+          "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.2))"
+        ],
+        transition: {
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "reverse" as const
+        }
+      }
+    };
+
+    // Efeito de piscar para "Viral"
+    const blinkTextVariants = {
+      blink: {
+        color: ["#000000", "#EE1D52", "#000000"],
+        textShadow: [
+          "0px 0px 0px rgba(238, 29, 82, 0)",
+          "0px 0px 5px rgba(238, 29, 82, 0.7)",
+          "0px 0px 0px rgba(238, 29, 82, 0)"
+        ],
+        transition: {
+          duration: 3,
+          repeat: Infinity,
+          repeatType: "reverse" as const
+        }
+      }
+    };
+
+    return { pulseVariants, glowVariants, blinkTextVariants };
   };
 
-  // Variantes para o efeito de brilho
-  const glowVariants = {
-    glow: {
-      opacity: [0.7, 1, 0.7],
-      filter: [
-        "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.2))",
-        "drop-shadow(0px 0px 5px rgba(238, 29, 82, 0.5))",
-        "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.2))"
-      ],
-      transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        repeatType: "reverse" as const
-      }
-    }
-  };
-
-  // Efeito de piscar para "Viral"
-  const blinkTextVariants = {
-    blink: {
-      color: ["#000000", "#EE1D52", "#000000"],
-      textShadow: [
-        "0px 0px 0px rgba(238, 29, 82, 0)",
-        "0px 0px 5px rgba(238, 29, 82, 0.7)",
-        "0px 0px 0px rgba(238, 29, 82, 0)"
-      ],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        repeatType: "reverse" as const
-      }
-    }
-  };
+  const animations = getAnimationVariants();
 
   return (
     <motion.div
@@ -87,22 +105,23 @@ const TikTokViralBadge: React.FC<TikTokViralBadgeProps> = ({
       initial={{ opacity: 0, y: -30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
-        type: "spring",
+        type: reduceMotion ? "tween" : "spring",
         stiffness: 300,
         damping: 20,
-        delay: 0.5
+        delay: 0.5,
+        duration: reduceMotion ? 0.3 : undefined
       }}
     >
       <motion.div
         className="bg-white rounded-full shadow-xl flex items-center p-3 gap-2"
-        variants={pulseVariants}
-        animate="pulse"
-        whileHover={{ scale: 1.1, transition: { duration: 0.3 } }}
+        variants={!isLowEnd && !reduceMotion && 'pulseVariants' in animations ? animations.pulseVariants : undefined}
+        animate={!isLowEnd && !reduceMotion ? "pulse" : undefined}
+        whileHover={!reduceMotion ? { scale: 1.1, transition: { duration: 0.3 } } : undefined}
       >
         <motion.div 
           className="w-10 h-10 bg-black rounded-full flex items-center justify-center"
-          variants={glowVariants}
-          animate="glow"
+          variants={!isLowEnd && !reduceMotion && 'glowVariants' in animations ? animations.glowVariants : undefined}
+          animate={!isLowEnd && !reduceMotion ? "glow" : undefined}
         >
           {/* TikTok Icon */}
           <svg 
@@ -120,8 +139,8 @@ const TikTokViralBadge: React.FC<TikTokViralBadgeProps> = ({
         <div className="flex flex-col">
           <motion.span 
             className="font-bold text-sm"
-            variants={blinkTextVariants}
-            animate="blink"
+            variants={!isLowEnd && !reduceMotion && 'blinkTextVariants' in animations ? animations.blinkTextVariants : undefined}
+            animate={!isLowEnd && !reduceMotion ? "blink" : undefined}
           >
             Viral no TikTok
           </motion.span>

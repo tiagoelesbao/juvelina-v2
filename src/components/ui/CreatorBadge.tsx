@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+// src/components/ui/CreatorBadge.tsx
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, CheckCircle } from 'lucide-react';
+import { PerformanceContext } from '../../App';
 
 interface Creator {
   id: number;
@@ -18,6 +20,7 @@ const CreatorBadge: React.FC = () => {
   const [showBadge, setShowBadge] = useState(false);
   const [activeCreator, setActiveCreator] = useState<number>(0);
   const [badgeClosed, setBadgeClosed] = useState<boolean>(false);
+  const { isMobile, isLowEnd, reduceMotion } = useContext(PerformanceContext);
   
   // Lista de creators que endossam a marca
   const creators: Creator[] = [
@@ -58,8 +61,8 @@ const CreatorBadge: React.FC = () => {
   
   // Mostra o badge após um delay maior e alterna entre creators
   useEffect(() => {
-    // Não mostrar notificações se o usuário fechou manualmente
-    if (badgeClosed) return;
+    // Não mostrar notificações se o usuário fechou manualmente ou está em dispositivo low-end
+    if (badgeClosed || isLowEnd || isMobile) return;
     
     // Mostrar o badge após 25 segundos
     const timer = setTimeout(() => {
@@ -77,7 +80,7 @@ const CreatorBadge: React.FC = () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [showBadge, creators.length, badgeClosed]);
+  }, [showBadge, creators.length, badgeClosed, isLowEnd, isMobile]);
   
   const renderStars = (rating: number) => (
     <div className="flex">
@@ -97,6 +100,9 @@ const CreatorBadge: React.FC = () => {
     </div>
   );
   
+  // Não renderizar em mobile ou low-end devices
+  if (isMobile || isLowEnd) return null;
+  
   return (
     <AnimatePresence>
       {showBadge && !badgeClosed && (
@@ -104,7 +110,12 @@ const CreatorBadge: React.FC = () => {
           initial={{ opacity: 0, x: -100, y: 0 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           exit={{ opacity: 0, x: -100 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ 
+            type: reduceMotion ? 'tween' : 'spring', 
+            stiffness: 300, 
+            damping: 30,
+            duration: reduceMotion ? 0.2 : undefined
+          }}
           className="fixed left-5 top-24 z-40 max-w-xs"
         >
           <div className="bg-white rounded-lg shadow-xl p-3 border border-juvelina-mint">

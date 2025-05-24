@@ -1,7 +1,9 @@
 // src/components/ui/TestimonialCard.tsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { Star, Instagram } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
+import { motion } from 'framer-motion';
+import { PerformanceContext } from '../../App';
 
 export interface Testimonial {
   id: number;
@@ -24,6 +26,8 @@ interface TestimonialCardProps {
 
 // Usando React.memo para evitar re-renders desnecessários
 const TestimonialCard = React.memo(({ testimonial, onClick }: TestimonialCardProps) => {
+  const { reduceMotion } = useContext(PerformanceContext);
+  
   // Função para renderizar as estrelas de avaliação
   const renderStars = (rating: number) => (
     <div className="flex">
@@ -51,9 +55,9 @@ const TestimonialCard = React.memo(({ testimonial, onClick }: TestimonialCardPro
     beleza: 'Beleza'
   };
 
-  return (
+  const cardElement = (
     <div 
-      className="card-testimonial cursor-pointer"
+      className="card-testimonial cursor-pointer relative"
       onClick={() => onClick(testimonial.id)}
     >
       <div className="flex items-center gap-3 mb-3">
@@ -61,6 +65,7 @@ const TestimonialCard = React.memo(({ testimonial, onClick }: TestimonialCardPro
           src={testimonial.avatar} 
           alt={testimonial.name}
           className="w-12 h-12 rounded-full object-cover"
+          loading="lazy"
         />
         <div>
           <div className="flex items-center gap-1">
@@ -106,6 +111,24 @@ const TestimonialCard = React.memo(({ testimonial, onClick }: TestimonialCardPro
       )}
     </div>
   );
+
+  // Se reduceMotion estiver ativo, retornar sem animações
+  if (reduceMotion) {
+    return cardElement;
+  }
+
+  // Caso contrário, retornar com animações
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    >
+      {cardElement}
+    </motion.div>
+  );
 });
+
+TestimonialCard.displayName = 'TestimonialCard';
 
 export default TestimonialCard;

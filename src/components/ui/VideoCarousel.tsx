@@ -1,8 +1,9 @@
 // src/components/ui/VideoCarousel.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, Instagram } from 'lucide-react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Play, Instagram, X } from 'lucide-react';
 import TikTokIcon from './TikTokIcon';
+import { PerformanceContext } from '../../App';
 
 interface VideoTestimonial {
   id: number;
@@ -34,6 +35,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
   const [loadedVideos, setLoadedVideos] = useState<number[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { isMobile, isLowEnd, reduceMotion } = useContext(PerformanceContext);
 
   // Filtrar depoimentos
   const filteredTestimonials = activeFilter === 'todos'
@@ -50,16 +52,18 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
     }
   }, [activeFilter]);
 
-  // Configurar scroll automático
+  // Configurar scroll automático (apenas desktop e se não for low-end)
   useEffect(() => {
-    startAutoScroll();
+    if (!isMobile && !isLowEnd && !reduceMotion) {
+      startAutoScroll();
+    }
 
     return () => {
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
       }
     };
-  }, [filteredTestimonials, currentIndex]);
+  }, [filteredTestimonials, currentIndex, isMobile, isLowEnd, reduceMotion]);
   
   // Pausar auto-scroll quando o usuário interage
   useEffect(() => {
@@ -71,12 +75,14 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       // Reiniciar após um período de inatividade
       const timeout = setTimeout(() => {
         setIsScrolling(false);
-        startAutoScroll();
+        if (!isMobile && !isLowEnd && !reduceMotion) {
+          startAutoScroll();
+        }
       }, 5000);
       
       return () => clearTimeout(timeout);
     }
-  }, [isScrolling]);
+  }, [isScrolling, isMobile, isLowEnd, reduceMotion]);
 
   // Iniciar scroll automático
   const startAutoScroll = () => {
@@ -105,7 +111,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       // Animação de scroll suave
       container.scrollTo({
         left: targetPosition,
-        behavior: 'smooth'
+        behavior: reduceMotion ? 'auto' : 'smooth'
       });
     }
   };
@@ -150,8 +156,10 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
     setShowModal(false);
     setSelectedVideo(null);
     
-    // Reiniciar auto-scroll
-    startAutoScroll();
+    // Reiniciar auto-scroll se aplicável
+    if (!isMobile && !isLowEnd && !reduceMotion) {
+      startAutoScroll();
+    }
   };
 
   // Componente de filtro
@@ -185,8 +193,6 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
 
   // Componente de thumbnail de vídeo com lazy loading
   const VideoThumbnail = ({ testimonial }: { testimonial: VideoTestimonial }) => {
-    const isVideoLoaded = loadedVideos.includes(testimonial.id);
-    
     return (
       <div className="relative pb-[177.77%] h-0 bg-gray-100">
         <img 
@@ -236,8 +242,8 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       
       {/* Carousel container */}
       <div className="relative overflow-hidden">
-        {/* Controles de navegação */}
-        {filteredTestimonials.length > 0 && (
+        {/* Controles de navegação - apenas desktop */}
+        {!isMobile && filteredTestimonials.length > 0 && (
           <>
             <button 
               className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 p-2 rounded-full shadow-md text-juvelina-gold hover:bg-white transition-colors focus:outline-none"
@@ -260,16 +266,17 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
         {/* Vídeos */}
         <div 
           ref={scrollContainerRef}
-          className="flex overflow-x-hidden gap-4 pb-4 hide-scrollbar"
+          className="flex overflow-x-auto md:overflow-x-hidden gap-4 pb-4 hide-scrollbar"
           onMouseDown={() => setIsScrolling(true)}
           onTouchStart={() => setIsScrolling(true)}
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {filteredTestimonials.length > 0 ? (
             filteredTestimonials.map((testimonial) => (
               <motion.div
                 key={testimonial.id}
                 className="min-w-[320px] max-w-[320px] bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0"
-                whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                whileHover={!reduceMotion ? { y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' } : {}}
                 animate={{ 
                   opacity: 1,
                   x: 0,
@@ -331,63 +338,70 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       </div>
       
       {/* Modal de Vídeo */}
-      {showModal && selectedVideo && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={closeVideoModal}
-        >
-          <div 
-            className="bg-white rounded-lg overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col"
-            onClick={e => e.stopPropagation()}
+      <AnimatePresence>
+        {showModal && selectedVideo && (
+          <motion.div 
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            onClick={closeVideoModal}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <img 
-                  src={selectedVideo.avatar} 
-                  alt={selectedVideo.name} 
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="font-bold">{selectedVideo.name}</h3>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    {selectedVideo.platform === 'instagram' ? (
-                      <Instagram size={12} />
-                    ) : (
-                      <TikTokIcon size={12} />
-                    )}
-                    {selectedVideo.username}
-                  </p>
+            <motion.div 
+              className="bg-white rounded-lg overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col"
+              onClick={e => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+            >
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={selectedVideo.avatar} 
+                    alt={selectedVideo.name} 
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="font-bold">{selectedVideo.name}</h3>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      {selectedVideo.platform === 'instagram' ? (
+                        <Instagram size={12} />
+                      ) : (
+                        <TikTokIcon size={12} />
+                      )}
+                      {selectedVideo.username}
+                    </p>
+                  </div>
                 </div>
+                <button 
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={closeVideoModal}
+                  aria-label="Fechar"
+                >
+                  <X size={24} />
+                </button>
               </div>
-              <button 
-                className="text-gray-500 hover:text-gray-700"
-                onClick={closeVideoModal}
-                aria-label="Fechar"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Conteúdo do vídeo */}
-            <div className="aspect-[9/16] relative flex-1 bg-black">
-              <iframe
-                src={`https://www.tiktok.com/embed/video/dummy-id-${selectedVideo.id}`}
-                className="w-full h-full"
-                allowFullScreen
-                title={`Depoimento de ${selectedVideo.name}`}
-              />
-            </div>
-            
-            {/* Informações adicionais */}
-            <div className="p-4 border-t border-gray-100">
-              <p className="text-gray-700 mb-2">{selectedVideo.caption}</p>
-              <p className="text-xs text-gray-500">{selectedVideo.date}</p>
-            </div>
-          </div>
-        </div>
-      )}
+              
+              {/* Conteúdo do vídeo */}
+              <div className="aspect-[9/16] relative flex-1 bg-black">
+                <iframe
+                  src={`https://www.tiktok.com/embed/video/dummy-id-${selectedVideo.id}`}
+                  className="w-full h-full"
+                  allowFullScreen
+                  title={`Depoimento de ${selectedVideo.name}`}
+                />
+              </div>
+              
+              {/* Informações adicionais */}
+              <div className="p-4 border-t border-gray-100">
+                <p className="text-gray-700 mb-2">{selectedVideo.caption}</p>
+                <p className="text-xs text-gray-500">{selectedVideo.date}</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
