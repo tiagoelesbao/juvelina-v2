@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -32,6 +32,33 @@ import Footer from './components/product/Footer';
 // Componente de Scroll to Top
 import { ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+// ===== PERFORMANCE CONTEXT =====
+interface PerformanceContextType {
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  reduceMotion: boolean;
+  deviceType: 'mobile' | 'tablet' | 'desktop';
+}
+
+export const PerformanceContext = createContext<PerformanceContextType>({
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+  reduceMotion: false,
+  deviceType: 'desktop'
+});
+
+// Hook para usar o contexto
+export const usePerformance = () => {
+  const context = React.useContext(PerformanceContext);
+  if (!context) {
+    throw new Error('usePerformance must be used within PerformanceProvider');
+  }
+  return context;
+};
+// ===== FIM DO PERFORMANCE CONTEXT =====
 
 const ScrollToTop: React.FC = () => {
   const scrollToTop = () => {
@@ -137,6 +164,96 @@ function App() {
   const { showModal, modalVariant, openModal, closeModal } = useModalState();
   const { showScrollTop } = useScrollPosition();
   const [exitIntentTriggered, setExitIntentTriggered] = useState(false);
+  
+  // ===== ESTADOS DO PERFORMANCE CONTEXT =====
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+
+  // Detectar tipo de dispositivo e preferências
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      
+      // Definir breakpoints
+      const mobile = width < 768;
+      const tablet = width >= 768 && width < 1024;
+      const desktop = width >= 1024;
+      
+      setIsMobile(mobile);
+      setIsTablet(tablet);
+      setIsDesktop(desktop);
+      
+      // Determinar tipo de dispositivo
+      if (mobile) {
+        setDeviceType('mobile');
+      } else if (tablet) {
+        setDeviceType('tablet');
+      } else {
+        setDeviceType('desktop');
+      }
+      
+      // Reduzir animações automaticamente em mobile
+      if (mobile) {
+        setReduceMotion(true);
+      }
+      
+      // Verificar preferência do usuário para movimento reduzido
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        setReduceMotion(true);
+      }
+      
+      // Verificar se é dispositivo touch
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (hasTouch && (mobile || tablet)) {
+        // Adicionar classe para otimizações específicas de touch
+        document.documentElement.classList.add('touch-device');
+      } else {
+        document.documentElement.classList.remove('touch-device');
+      }
+    };
+    
+    // Verificar inicialmente
+    checkDevice();
+    
+    // Adicionar listener para mudanças de tamanho
+    window.addEventListener('resize', checkDevice);
+    
+    // Listener para mudanças na preferência de movimento
+    const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      setReduceMotion(e.matches);
+    };
+    
+    motionMediaQuery.addEventListener('change', handleMotionChange);
+    
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+      motionMediaQuery.removeEventListener('change', handleMotionChange);
+    };
+  }, []);
+
+  // Adicionar classes ao body baseado no dispositivo
+  useEffect(() => {
+    const bodyClasses = document.body.classList;
+    
+    // Remover todas as classes de dispositivo
+    bodyClasses.remove('device-mobile', 'device-tablet', 'device-desktop');
+    
+    // Adicionar classe atual
+    bodyClasses.add(`device-${deviceType}`);
+    
+    // Adicionar classe de movimento reduzido se necessário
+    if (reduceMotion) {
+      bodyClasses.add('reduce-motion');
+    } else {
+      bodyClasses.remove('reduce-motion');
+    }
+  }, [deviceType, reduceMotion]);
+  // ===== FIM DOS ESTADOS DO PERFORMANCE CONTEXT =====
 
   // Handler para CTA clicks
   const handleCtaClick = (e?: React.MouseEvent) => {
@@ -144,8 +261,11 @@ function App() {
     openModal('default');
   };
 
-  // Exit Intent Detection
+  // Exit Intent Detection - Desabilitado em mobile
   useEffect(() => {
+    // Não executar exit intent em mobile
+    if (isMobile) return;
+    
     let timeoutId: ReturnType<typeof setTimeout>;
     
     const handleMouseLeave = (e: MouseEvent) => {
@@ -178,97 +298,110 @@ function App() {
       document.removeEventListener('mousemove', handleMouseMove);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [exitIntentTriggered, showModal, openModal]);
+  }, [exitIntentTriggered, showModal, openModal, isMobile]);
 
-  // Time-based modal trigger - após 90 segundos
+  // Time-based modal trigger - Aumentar tempo em mobile
   useEffect(() => {
+    const delay = isMobile ? 180000 : 90000; // 3 min mobile, 1.5 min desktop
+    
     const timer = setTimeout(() => {
       if (!showModal && !exitIntentTriggered) {
         openModal('time-based');
       }
-    }, 90000); // 90 segundos
+    }, delay);
     
     return () => clearTimeout(timer);
-  }, [showModal, exitIntentTriggered, openModal]);
+  }, [showModal, exitIntentTriggered, openModal, isMobile]);
+
+  // Valor do contexto de performance
+  const performanceValue = {
+    isMobile,
+    isTablet,
+    isDesktop,
+    reduceMotion,
+    deviceType
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Barra de Progresso do Scroll */}
-      <ScrollProgressBar 
-        color="#A9683D" 
-        height={3} 
-        showPercentage={false}
-        position="top"
-      />
-      
-      {/* Barra de Anúncio */}
-      <AnnouncementBar 
-        initialUnits={54} 
-        discountPercentage={30}
-      />
-      
-      {/* Header Principal */}
-      <Header onCtaClick={handleCtaClick} />
-      
-      {/* Hero Section */}
-      <HeroSection onCtaClick={handleCtaClick} />
-      
-      {/* Seção de Depoimentos em Vídeo */}
-      <VideoTestimonialsSection onCtaClick={handleCtaClick} />
-      
-      {/* Seção de Benefícios */}
-      <BenefitsSection />
-      
-      {/* Seção de Ingredientes */}
-      <IngredientsSection />
-      
-      {/* Seção de Absorção */}
-      <AbsorptionSection />
-      
-      {/* Galeria de UGC */}
-      <UGCGallerySection />
-      
-      {/* Seção de Garantia */}
-      <GuaranteeSection />
-      
-      {/* Seção de Preços */}
-      <PricingSection onCtaClick={handleCtaClick} />
-      
-      {/* Seção de Oferta Viral */}
-      <ViralOfferSection onCtaClick={handleCtaClick} />
-      
-      {/* FAQ */}
-      <FaqSection />
-      
-      {/* Footer */}
-      <Footer />
-      
-      {/* Modal de Compra */}
-      <AnimatePresence>
-        {showModal && (
-          <PurchaseModal 
-            isOpen={showModal} 
-            onClose={closeModal}
-            variant={modalVariant}
-            personalizedTitle={
-              modalVariant === 'exit-intent' 
-                ? "Espere! Temos uma Oferta Especial"
-                : modalVariant === 'time-based'
-                ? "Oferta por Tempo Limitado!"
-                : undefined
-            }
-          />
-        )}
-      </AnimatePresence>
-      
-      {/* Botão Scroll to Top */}
-      <AnimatePresence>
-        {showScrollTop && <ScrollToTop />}
-      </AnimatePresence>
+    <PerformanceContext.Provider value={performanceValue}>
+      <div className="min-h-screen bg-white">
+        {/* Barra de Progresso do Scroll */}
+        <ScrollProgressBar 
+          color="#A9683D" 
+          height={3} 
+          showPercentage={false}
+          position="top"
+        />
+        
+        {/* Barra de Anúncio */}
+        <AnnouncementBar 
+          initialUnits={54} 
+          discountPercentage={30}
+        />
+        
+        {/* Header Principal */}
+        <Header onCtaClick={handleCtaClick} />
+        
+        {/* Hero Section */}
+        <HeroSection onCtaClick={handleCtaClick} />
+        
+        {/* Seção de Depoimentos em Vídeo */}
+        <VideoTestimonialsSection onCtaClick={handleCtaClick} />
+        
+        {/* Seção de Benefícios */}
+        <BenefitsSection />
+        
+        {/* Seção de Ingredientes */}
+        <IngredientsSection />
+        
+        {/* Seção de Absorção */}
+        <AbsorptionSection />
+        
+        {/* Galeria de UGC */}
+        <UGCGallerySection />
+        
+        {/* Seção de Garantia */}
+        <GuaranteeSection />
+        
+        {/* Seção de Preços */}
+        <PricingSection onCtaClick={handleCtaClick} />
+        
+        {/* Seção de Oferta Viral */}
+        <ViralOfferSection onCtaClick={handleCtaClick} />
+        
+        {/* FAQ */}
+        <FaqSection />
+        
+        {/* Footer */}
+        <Footer />
+        
+        {/* Modal de Compra */}
+        <AnimatePresence>
+          {showModal && (
+            <PurchaseModal 
+              isOpen={showModal} 
+              onClose={closeModal}
+              variant={modalVariant}
+              personalizedTitle={
+                modalVariant === 'exit-intent' 
+                  ? "Espere! Temos uma Oferta Especial"
+                  : modalVariant === 'time-based'
+                  ? "Oferta por Tempo Limitado!"
+                  : undefined
+              }
+            />
+          )}
+        </AnimatePresence>
+        
+        {/* Botão Scroll to Top - Ocultar em mobile se motion reduzido */}
+        <AnimatePresence>
+          {showScrollTop && (!isMobile || !reduceMotion) && <ScrollToTop />}
+        </AnimatePresence>
 
-      {/* Vercel Speed Insights */}
-      <SpeedInsights />
-    </div>
+        {/* Vercel Speed Insights */}
+        <SpeedInsights />
+      </div>
+    </PerformanceContext.Provider>
   );
 }
 
