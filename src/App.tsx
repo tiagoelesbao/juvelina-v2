@@ -1,7 +1,7 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Importações de componentes comuns
 import { 
@@ -265,6 +265,9 @@ function App() {
       <AnimatePresence>
         {showScrollTop && <ScrollToTop />}
       </AnimatePresence>
+
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
     </div>
   );
 }
