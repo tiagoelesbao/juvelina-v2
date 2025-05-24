@@ -11,11 +11,9 @@ export default defineConfig({
     // React com Fast Refresh
     react({
       babel: {
-        plugins: [
-          // Remove prop-types em produção (opcional)
-          process.env.NODE_ENV === 'production' && 
-          ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }]
-        ].filter(Boolean)
+        plugins: process.env.NODE_ENV === 'production' 
+          ? [['babel-plugin-transform-react-remove-prop-types', { removeImport: true }]]
+          : []
       }
     }),
     
@@ -153,14 +151,14 @@ export default defineConfig({
     }),
     
     // Visualizador de bundle (apenas quando ANALYZE=true)
-    process.env.ANALYZE && visualizer({
+    ...(process.env.ANALYZE === 'true' ? [visualizer({
       open: true,
       filename: 'dist/stats.html',
       gzipSize: true,
       brotliSize: true,
       template: 'treemap' // ou 'sunburst', 'network'
-    })
-  ].filter(Boolean),
+    })] : [])
+  ],
   
   resolve: {
     alias: {
@@ -250,8 +248,7 @@ export default defineConfig({
         
         // Nomes de arquivos otimizados
         entryFileNames: 'assets/js/[name].[hash].js',
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+        chunkFileNames: () => {
           return `assets/js/[name].[hash].js`;
         },
         assetFileNames: (assetInfo) => {

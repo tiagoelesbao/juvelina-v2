@@ -150,8 +150,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
             loaded ? 'opacity-100' : 'opacity-0'
           }`}
-          // Importante para performance em mobile
-          importance={priority ? "high" : "low"}
+          // Adicionar fetchpriority ao invés de importance
+          {...(priority ? { fetchPriority: "high" } : {})}
         />
       )}
       
