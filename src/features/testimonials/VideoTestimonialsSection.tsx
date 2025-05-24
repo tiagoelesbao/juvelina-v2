@@ -1,7 +1,8 @@
 // src/features/testimonials/VideoTestimonialsSection.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Play, ShoppingCart, X, Star } from 'lucide-react';
+import DynamicWaveTransition from '../../components/ui/DynamicWaveTransition';
 
 // Imagem do produto
 const juvelinaBottle = "https://images.unsplash.com/photo-1607006333439-505849ef4f76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80";
@@ -82,6 +83,19 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
   const [isPaused, setIsPaused] = useState(false);
   const [viewersCount, setViewersCount] = useState(247);
   const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  
+  // Hook para animação baseada em scroll
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  
+  // Transformações baseadas no scroll
+  const waveY = useTransform(scrollYProgress, [0, 1], ['0%', '-50%']);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+  const blob1Scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.5, 1.2]);
+  const blob2X = useTransform(scrollYProgress, [0, 1], ['0%', '-30%']);
   
   // Duplicar vídeos para criar loop infinito
   const duplicatedVideos = [...videoTestimonials, ...videoTestimonials, ...videoTestimonials];
@@ -144,45 +158,64 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
   );
 
   return (
-    <>
-      {/* Wave Transition mais suave - combinando com cores da Hero */}
-      <div className="relative w-full -mt-1">
-        <svg viewBox="0 0 1440 120" className="w-full h-auto" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="videoWaveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.9)" stopOpacity="1" />
-              <stop offset="30%" stopColor="rgba(194,247,188,0.2)" stopOpacity="1" />
-              <stop offset="60%" stopColor="rgba(194,247,188,0.1)" stopOpacity="1" />
-              <stop offset="100%" stopColor="#f9fdfb" stopOpacity="1" />
-            </linearGradient>
-          </defs>
-          <path 
-            d="M0,40 C320,20 640,60 960,40 C1280,20 1360,30 1440,40 L1440,120 L0,120 Z" 
-            fill="url(#videoWaveGradient)"
-          />
-        </svg>
-      </div>
+    <div className="relative" style={{ marginTop: '-4px' }}>
+      {/* Dynamic Wave Transition com animação baseada em scroll */}
+      <DynamicWaveTransition 
+        fromColor="rgba(194,247,188,0.2)"
+        toColor="#C2F7BC"
+        className="relative z-10"
+        height={180}
+      />
 
       <section 
+        ref={sectionRef}
         id="video-depoimentos" 
-        className="py-20 relative overflow-hidden"
+        className="relative overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, #f9fdfb 0%, rgba(194,247,188,0.03) 30%, #ffffff 100%)"
+          background: "linear-gradient(180deg, #C2F7BC 0%, rgba(194,247,188,0.7) 15%, rgba(194,247,188,0.5) 35%, rgba(194,247,188,0.2) 60%, rgba(255,255,255,0.98) 100%)",
+          marginTop: '-177px',
+          paddingTop: '140px',
+          paddingBottom: '80px'
         }}
       >
-        {/* Background decorativo fluido com animações mais visíveis */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Blob orgânico animado 1 - mais visível */}
+        {/* Background decorativo fluido com animações mais visíveis e responsivas ao scroll */}
+        <motion.div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ y: backgroundY }}
+        >
+          {/* Blob orgânico animado 1 - COM SCROLL TRANSFORM */}
           <motion.div 
-            className="absolute top-10 left-1/3 w-[500px] h-[500px] rounded-full"
+            className="absolute top-20 -left-20 w-[600px] h-[600px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(194,247,188,0.25) 0%, transparent 60%)",
-              filter: "blur(80px)"
+              background: "radial-gradient(circle, rgba(194,247,188,0.6) 0%, rgba(194,247,188,0.3) 40%, transparent 70%)",
+              filter: "blur(40px)",
+              scale: blob1Scale
             }}
             animate={{
-              x: [-50, 100, -50],
-              y: [-30, 50, -30],
-              scale: [1, 1.2, 1],
+              x: [-100, 200, -100],
+              y: [-50, 100, -50],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+          
+          {/* Blob orgânico animado 2 - COM SCROLL TRANSFORM */}
+          <motion.div 
+            className="absolute bottom-40 right-10 w-[500px] h-[500px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(169,104,61,0.15) 0%, rgba(169,104,61,0.08) 40%, transparent 70%)",
+              filter: "blur(60px)",
+              x: blob2X
+            }}
+            animate={{
+              y: [50, -80, 50],
+              scale: [1.2, 1.5, 1.2],
+              rotate: [360, 180, 0],
             }}
             transition={{
               duration: 25,
@@ -192,52 +225,77 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
             }}
           />
           
-          {/* Blob orgânico animado 2 - mais visível */}
+          {/* Novo blob central para mais movimento */}
           <motion.div 
-            className="absolute bottom-20 right-1/3 w-[400px] h-[400px] rounded-full"
+            className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full -translate-x-1/2 -translate-y-1/2"
             style={{
-              background: "radial-gradient(circle, rgba(169,104,61,0.08) 0%, transparent 60%)",
-              filter: "blur(100px)"
+              background: "radial-gradient(circle, rgba(194,247,188,0.4) 0%, transparent 60%)",
+              filter: "blur(80px)"
             }}
             animate={{
-              x: [50, -80, 50],
-              y: [30, -60, 30],
-              scale: [1.1, 1.3, 1.1],
+              scale: [0.8, 1.4, 0.8],
+              opacity: [0.3, 0.6, 0.3],
             }}
             transition={{
-              duration: 30,
+              duration: 15,
               repeat: Infinity,
               repeatType: "reverse",
               ease: "easeInOut"
             }}
           />
           
-          {/* Partículas flutuantes maiores e mais visíveis */}
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: '6px',
-                height: '6px',
-                background: i % 2 === 0 ? 'rgba(169,104,61,0.2)' : 'rgba(194,247,188,0.3)',
-                left: `${15 + i * 20}%`,
-                top: `${20 + i * 15}%`
-              }}
-              animate={{
-                y: [-30, 40, -30],
-                x: [-10, 10, -10],
-                opacity: [0.3, 0.7, 0.3]
-              }}
-              transition={{
-                duration: 12 + i * 3,
-                repeat: Infinity,
-                delay: i * 0.7,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
-        </div>
+          {/* Partículas flutuantes MAIORES e mais visíveis */}
+          {[...Array(8)].map((_, i) => {
+            const particleY = useTransform(scrollYProgress, [0, 1], [0, -(50 + i * 10)]);
+            
+            return (
+              <motion.div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  width: i % 2 === 0 ? '12px' : '8px',
+                  height: i % 2 === 0 ? '12px' : '8px',
+                  background: i % 3 === 0 
+                    ? 'rgba(169,104,61,0.4)' 
+                    : i % 3 === 1 
+                      ? 'rgba(194,247,188,0.6)' 
+                      : 'rgba(155,208,210,0.5)',
+                  left: `${10 + i * 12}%`,
+                  top: `${15 + (i % 4) * 20}%`,
+                  boxShadow: '0 0 20px rgba(194,247,188,0.5)',
+                  y: particleY
+                }}
+                animate={{
+                  x: [-20, 20, -20],
+                  opacity: [0.4, 1, 0.4],
+                  scale: [1, 1.5, 1]
+                }}
+                transition={{
+                  duration: 8 + i * 2,
+                  repeat: Infinity,
+                  delay: i * 0.5,
+                  ease: "easeInOut"
+                }}
+              />
+            );
+          })}
+          
+          {/* Ondas de movimento no fundo */}
+          <motion.div 
+            className="absolute bottom-0 left-0 w-full h-1/3"
+            style={{
+              background: "linear-gradient(to top, rgba(194,247,188,0.2) 0%, transparent 100%)",
+            }}
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+        </motion.div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
@@ -475,7 +533,7 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 
