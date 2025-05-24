@@ -1,0 +1,115 @@
+// src/features/testimonials/VideoTestimonialsSection/data.ts
+import { VideoTestimonial } from './types';
+
+export const videoTestimonials: VideoTestimonial[] = [
+  {
+    id: 1,
+    name: "Amanda Silva",
+    username: "@amandasilva_fit",
+    thumbnail: "https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "3 semanas com Juvelina e minha energia mudou completamente! Treinos melhores, disposição o dia todo.",
+    views: "2.3M",
+    rating: 5,
+    likes: "125K",
+    comments: "3.2K",
+    category: "energia",
+    platform: "instagram",
+    verified: true
+  },
+  {
+    id: 2,
+    name: "Carlos Mendes",
+    username: "@carlosmendes",
+    thumbnail: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1450&q=80",
+    caption: "Como treinador, recomendo Juvelina para todos meus alunos! A diferença na performance é visível.",
+    views: "1.8M",
+    rating: 5,
+    likes: "98K",
+    comments: "2.1K",
+    category: "energia",
+    platform: "tiktok",
+    verified: true
+  },
+  {
+    id: 3,
+    name: "Patrícia Alves",
+    username: "@patriciaalves",
+    thumbnail: "https://images.unsplash.com/photo-1607606116242-357a0d503b6a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "Aos 42 anos, minha pele e cabelos nunca estiveram tão bonitos! Juvelina fez toda diferença.",
+    views: "3.1M",
+    rating: 5,
+    likes: "234K",
+    comments: "5.6K",
+    category: "beleza",
+    platform: "instagram",
+    verified: true
+  },
+  {
+    id: 4,
+    name: "Rodrigo Costa",
+    username: "@rodrigocosta",
+    thumbnail: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+    caption: "Minha imunidade está no topo! 3 meses sem ficar doente. Juvelina mudou minha vida.",
+    views: "985K",
+    rating: 5,
+    likes: "67K",
+    comments: "1.3K",
+    category: "imunidade",
+    platform: "tiktok"
+  },
+  {
+    id: 5,
+    name: "Ana Paula",
+    username: "@anapaulamont",
+    thumbnail: "https://images.unsplash.com/photo-1498671546682-94a232c26d17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
+    caption: "Minhas unhas pararam de quebrar e meu cabelo está incrível! Super recomendo Juvelina.",
+    views: "1.5M",
+    rating: 5,
+    likes: "89K",
+    comments: "2.4K",
+    category: "beleza",
+    platform: "instagram",
+    verified: true
+  },
+  {
+    id: 6,
+    name: "Fernando Gomes",
+    username: "@fernandogfit",
+    thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+    caption: "Energia durante todo o dia! Performance nos treinos melhorou muito com Juvelina.",
+    views: "2.7M",
+    rating: 5,
+    likes: "156K",
+    comments: "3.8K",
+    category: "energia",
+    platform: "tiktok",
+    verified: true
+  },
+  {
+    id: 7,
+    name: "Camila Duarte",
+    username: "@camiladuarte",
+    thumbnail: "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    caption: "Juvelina transformou minha rotina de bem-estar! Me sinto muito mais disposta e saudável.",
+    views: "892K",
+    rating: 5,
+    likes: "54K",
+    comments: "987",
+    category: "energia",
+    platform: "instagram"
+  },
+  {
+    id: 8,
+    name: "Dr. Marcus Silva",
+    username: "@drmarcussilva",
+    thumbnail: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    caption: "Como médico, aprovo a fórmula da Juvelina. Absorção líquida faz toda diferença nos resultados.",
+    views: "4.2M",
+    rating: 5,
+    likes: "312K",
+    comments: "8.9K",
+    category: "imunidade",
+    platform: "tiktok",
+    verified: true
+  }
+];
