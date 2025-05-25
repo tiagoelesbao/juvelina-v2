@@ -24,37 +24,9 @@ const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSectio
 const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
 const Footer = lazy(() => import('./components/product/Footer'));
 
-// Lazy loading inteligente para VideoTestimonialsSection
+// Lazy loading com fallback para VideoTestimonialsSection
 const VideoTestimonialsSection = lazy(() => {
-  return new Promise(resolve => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          import('./features/testimonials/VideoTestimonialsSection').then(resolve);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    
-    // Observar elemento anterior à seção
-    const checkForElement = () => {
-      const target = document.querySelector('#hero-section');
-      if (target) {
-        observer.observe(target);
-      } else {
-        // Tentar novamente após um breve delay
-        setTimeout(checkForElement, 100);
-      }
-    };
-    
-    checkForElement();
-    
-    // Fallback após 2 segundos se não encontrar o elemento
-    setTimeout(() => {
-      import('./features/testimonials/VideoTestimonialsSection').then(resolve);
-    }, 2000);
-  });
+  return import('./features/testimonials/VideoTestimonialsSection');
 });
 
 // Tipo estendido para Navigator com deviceMemory
