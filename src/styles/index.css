@@ -41,9 +41,9 @@ h1, h2, h3, h4, h5, h6,
    ================================= */
 @font-face {
   font-family: 'Zap';
-  src: url('/public/assets/fonts/zap.woff2') format('woff2'),
-       url('/public/assets/fonts/zap.woff') format('woff'),
-       url('/public/assets/fonts/zap.ttf') format('truetype');
+  src: url('/fonts/zap.woff2') format('woff2'),
+       url('/fonts/zap.woff') format('woff'),
+       url('/fonts/zap.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -51,9 +51,9 @@ h1, h2, h3, h4, h5, h6,
 
 @font-face {
   font-family: 'Ws Paradose';
-  src: url('/public/assets/fonts/ws-paradose.woff2') format('woff2'),
-       url('/public/assets/fonts/ws-paradose.woff') format('woff'),
-       url('/public/assets/fonts/ws-paradose.ttf') format('truetype');
+  src: url('/fonts/ws-paradose.woff2') format('woff2'),
+       url('/fonts/ws-paradose.woff') format('woff'),
+       url('/fonts/ws-paradose.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
