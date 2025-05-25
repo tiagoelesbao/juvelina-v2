@@ -572,4 +572,90 @@ section {
     mask-image: linear-gradient(to right, black 0%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 0%, transparent 100%);
   }
+
+/* Hero Section Específica */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Garantir altura total da viewport no desktop */
+@media (min-width: 768px) {
+  .hero-section > div:first-child {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Mobile: ajustar altura */
+@media (max-width: 767px) {
+  .hero-section > div:first-child {
+    min-height: auto;
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Remover padding extra do hero */
+.hero-section {
+  padding-top: 0 !important;
+}
+
+/* Espaçamento entre hero e próxima seção */
+.hero-section + section {
+  margin-top: -1px; /* Evitar gap entre wave e próxima seção */
+}
+
+/* =================================
+   HERO SECTION - SOLUÇÃO DEFINITIVA
+   ================================= */
+.hero-section {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* Container do conteúdo hero */
+.hero-content {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 120px); /* Descontar altura do header */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile: ajuste de altura */
+@media (max-width: 767px) {
+  .hero-content {
+    min-height: calc(100vh - 100px); /* Altura menor do header no mobile */
+    padding-top: 4rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-section {
+    padding-top: 4rem; /* Adiciona espaço extra no topo */
+  }
+}
+
+/* Remover qualquer padding do main */
+main {
+  padding-top: 0 !important;
+}
+
+/* Garantir que não há margens extras */
+.hero-section {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ajuste para wave transition */
+.hero-section .wave-transition {
+  position: relative;
+  margin-top: -2px;
+}
+
 }
