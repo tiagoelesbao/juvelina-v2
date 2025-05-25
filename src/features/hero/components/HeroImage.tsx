@@ -3,8 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const HeroImage: React.FC = () => {
-  // Usar caminho absoluto da pasta public
-  const juvelinaBottle = '/images/juvelina-bottle.png';
+  // Remover a declaração de variável e usar diretamente o caminho
   
   return (
     <div className="md:col-span-1 relative">
@@ -95,7 +94,7 @@ const HeroImage: React.FC = () => {
           }}
         />
         
-        {/* Imagem do produto */}
+        {/* Imagem do produto - USAR CAMINHO DIRETO */}
         <motion.div
           className="relative z-10"
           animate={{ 
@@ -109,11 +108,16 @@ const HeroImage: React.FC = () => {
           }}
         >
           <img 
-            src={juvelinaBottle}
+            src="/images/juvelina-bottle.png"
             alt="Suplemento Líquido Juvelina" 
             className="max-w-full h-auto transform scale-110 md:scale-150"
             style={{ 
               filter: "drop-shadow(0px 30px 60px rgba(169,104,61,0.3))"
+            }}
+            onError={(e) => {
+              console.error('Erro ao carregar imagem Juvelina:', e);
+              // Fallback para uma imagem temporária se houver erro
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1607006348458-ff29e31ebb09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
             }}
           />
         </motion.div>
