@@ -174,7 +174,7 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
         transition={{ delay: 1, duration: 0.5 }}
       >
         {/* Formas de pagamento - MOBILE: width fixo para mesmo tamanho */}
-        <div className="bg-white rounded-xl px-40 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
+        <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
           <div className="flex items-center justify-center sm:justify-start gap-3">
             <span className="text-xs text-gray-500 font-medium">Pagamento seguro:</span>
             <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
         </div>
         
         {/* Avaliações - MOBILE: width fixo para mesmo tamanho */}
-        <div className="bg-white rounded-xl px-40 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
+        <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
