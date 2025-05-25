@@ -31,7 +31,7 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
         {...fadeInUp}
         transition={{ delay: 0.7, duration: 0.7 }}
       >
-        {/* Botão Principal com desconto - CORRIGIDO PARA DESKTOP */}
+        {/* Botão Principal com desconto */}
         <div className="relative w-full sm:w-auto">
           {/* Badge de desconto flutuante */}
           <motion.div 
@@ -74,9 +74,9 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
           </motion.button>
         </div>
         
-        {/* Botão Secundário - Mesmo tamanho */}
+        {/* Botão Secundário - Visível apenas no mobile */}
         <motion.button
-          className="group w-full sm:w-auto flex items-center justify-center px-6 md:px-8 py-4 rounded-full font-medium border-2 border-juvelina-gold text-juvelina-gold bg-white/80 backdrop-blur-sm relative overflow-hidden whitespace-nowrap"
+          className="group w-full sm:w-auto flex sm:hidden items-center justify-center px-6 md:px-8 py-4 rounded-full font-medium border-2 border-juvelina-gold text-juvelina-gold bg-white/80 backdrop-blur-sm relative overflow-hidden whitespace-nowrap"
           whileHover={{ 
             backgroundColor: "rgba(169,104,61,0.05)",
             scale: 1.02
@@ -127,68 +127,48 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
         </div>
       </motion.div>
 
-      {/* DESKTOP: Container para Garantias - Alinhado à esquerda */}
+      {/* Container para Avaliações e Pagamento */}
       <motion.div 
-        className="hidden sm:block bg-gray-50 rounded-2xl p-4 mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9, duration: 0.5 }}
-      >
-        {/* Garantias em grid */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium text-gray-700">Garantia de 30 dias</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium text-gray-700">Frete Grátis Brasil</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium text-gray-700">Compra 100% Segura</span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Container para Pagamento e Avaliações - Alinhado à esquerda no desktop */}
-      <motion.div 
-        className="flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-4 mb-6"
+        className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-start gap-3 mb-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.5 }}
       >
-        {/* Formas de pagamento - MOBILE: width fixo para mesmo tamanho */}
-        <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
-          <div className="flex items-center justify-center sm:justify-start gap-3">
-            <span className="text-xs text-gray-500 font-medium">Pagamento seguro:</span>
-            <div className="flex items-center gap-2">
-              <img src="https://cdn-icons-png.flaticon.com/24/349/349221.png" alt="Visa" className="h-5" />
-              <img src="https://cdn-icons-png.flaticon.com/24/349/349228.png" alt="Mastercard" className="h-5" />
-              <img src="https://cdn-icons-png.flaticon.com/24/5968/5968296.png" alt="Pix" className="h-5" />
-              <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">+3</span>
+        {/* Formas de pagamento - Apenas mobile */}
+        <div className="bg-white rounded-xl px-4 py-2.5 shadow-sm border border-gray-100 w-auto sm:hidden">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">Pagamento seguro:</span>
+            <div className="flex items-center gap-1.5">
+              {/* Visa */}
+              <div className="w-8 h-5 flex items-center justify-center">
+                <svg viewBox="0 0 48 32" className="h-4">
+                  <rect fill="#0E4595" width="48" height="32" rx="4"/>
+                  <path fill="white" d="M19.2 11.2L16.9 20.8h-2.7l2.3-9.6h2.7zm11.1 6.2l1.5-4 .8 4h-2.3zm3.1 3.4h2.5l-2.2-9.6h-2.3c-.5 0-.9.3-1.1.7l-3.9 8.9h2.7l.5-1.5h3.3l.3 1.5h.2zm-7.9-3.1c0-2.6-3.7-2.8-3.6-4 0-.4.3-.7 1.1-.8.4 0 1.4-.1 2.6.4l.5-2.2c-.6-.2-1.5-.5-2.5-.5-2.7 0-4.5 1.4-4.5 3.4 0 1.5 1.3 2.3 2.3 2.8 1 .5 1.4.8 1.4 1.3 0 .7-.8 1-1.6 1-.7 0-1.6-.2-2.3-.5l-.5 2.2c.5.2 1.5.4 2.5.4 2.7.1 4.6-1.3 4.6-3.5zm-13.7-6.5l-4.2 9.6H9.8L7.6 13c-.1-.5-.3-.6-.6-.8-.5-.3-1.4-.6-2.1-.8l.1-.3h3.7c.5 0 .9.3 1 .8l.9 4.9 2.3-5.7h2.8z"/>
+                </svg>
+              </div>
+              {/* Mastercard */}
+              <div className="w-8 h-5 flex items-center justify-center">
+                <svg viewBox="0 0 48 32" className="h-4">
+                  <rect fill="#1A1F71" width="48" height="32" rx="4"/>
+                  <circle cx="19" cy="16" r="7" fill="#EB001B"/>
+                  <circle cx="29" cy="16" r="7" fill="#F79E1B"/>
+                  <path fill="#FF5F00" d="M24 11.5c1.4 1.2 2.2 3 2.2 4.5s-.9 3.3-2.2 4.5c-1.4-1.2-2.2-3-2.2-4.5s.9-3.3 2.2-4.5z"/>
+                </svg>
+              </div>
+              {/* Pix */}
+              <div className="w-8 h-5 flex items-center justify-center bg-[#00BFA5] rounded">
+                <svg viewBox="0 0 24 24" className="h-3.5 text-white" fill="currentColor">
+                  <path d="M14.4 8.8c-.7-.7-1.6-1.1-2.6-1.1H9.2l-2.9 2.9c-1.2 1.2-1.2 3.1 0 4.2L9.2 18h2.6c1 0 1.9-.4 2.6-1.1l1.7-1.7c.7-.7 1.1-1.6 1.1-2.6 0-1-.4-1.9-1.1-2.6l-1.7-1.7zm-1.1 5.5l-1.7 1.7c-.4.4-.9.6-1.4.6h-1l1.7-1.7c.7-.7.7-1.8 0-2.5L9.2 10.8h1c.5 0 1 .2 1.4.6l1.7 1.7c.4.4.6.9.6 1.4 0 .5-.2 1-.6 1.4z"/>
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">+3</span>
             </div>
           </div>
         </div>
         
-        {/* Avaliações - MOBILE: width fixo para mesmo tamanho */}
-        <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 w-64 sm:w-auto">
-          <div className="flex items-center justify-center sm:justify-start gap-2">
+        {/* Avaliações - Visível em todos os dispositivos */}
+        <div className="bg-white rounded-xl px-4 py-2.5 shadow-sm border border-gray-100 w-auto">
+          <div className="flex items-center gap-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
@@ -200,17 +180,7 @@ const HeroButtons: React.FC<HeroButtonsProps> = ({ onCtaClick }) => {
             <span className="text-xs text-gray-500">(2.847 avaliações)</span>
           </div>
         </div>
-      </motion.div>
-      
-      {/* Micro copy de escassez - Centralizado no mobile, à esquerda no desktop */}
-      <motion.p 
-        className="text-center sm:text-left text-sm text-gray-600 font-medium"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.1, duration: 0.5 }}
-      >
-        🔥 237 pessoas compraram nas últimas 24 horas
-      </motion.p>
+      </motion.div> 
     </>
   );
 };

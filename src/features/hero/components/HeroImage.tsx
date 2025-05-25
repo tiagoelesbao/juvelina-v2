@@ -13,7 +13,7 @@ const HeroImage: React.FC = () => {
     <div className="md:col-span-1 relative">
       {/* TikTok Badge - posicionado no topo da coluna */}
       <motion.div
-        className="absolute -top-10 right-0 z-20"
+        className="absolute -top-1/4 right-0 z-20"
         initial={{ opacity: 0, scale: 0.8, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}

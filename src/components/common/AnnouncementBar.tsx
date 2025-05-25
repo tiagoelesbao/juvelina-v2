@@ -60,11 +60,10 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({
         <div className="flex items-center justify-center md:justify-between">
             {/* Main announcement text */}
             <p className="text-center text-sm md:text-base flex items-center justify-center gap-2 flex-grow">
-            <span className="inline-block w-4 h-2 md:w-2 md:h-2 bg-white rounded-full animate-pulse" />
-            🌿 OFERTA ESPECIAL: {discountPercentage}% OFF + Frete Grátis | 
-            Restam {formatTime(timeLeft.hours)}h:{formatTime(timeLeft.minutes)}m:{formatTime(timeLeft.seconds)}s | 
-            Apenas {unitsLeft} unidades! 🌿
-            <span className="inline-block w-4 h-2 md:w-2 md:h-2 bg-white rounded-full animate-pulse" />
+            <span className="inline-block w-2 h-2 md:w-2 md:h-2 bg-white rounded-full animate-pulse" />
+            🌿 OFERTA ESPECIAL: {discountPercentage}% OFF + Frete Grátis 🌿 
+        
+            <span className="inline-block w-2 h-2 md:w-2 md:h-2 bg-white rounded-full animate-pulse" />
             </p>
 
           {/* Language selector (desktop only) */}
