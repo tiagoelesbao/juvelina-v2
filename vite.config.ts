@@ -47,20 +47,6 @@ export default defineConfig({
         sourcemap: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'unsplash-images-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 dias
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -68,6 +54,20 @@ export default defineConfig({
               expiration: {
                 maxEntries: 20,
                 maxAgeSeconds: 365 * 24 * 60 * 60 // 1 ano
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'unsplash-images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 dias
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -160,7 +160,6 @@ export default defineConfig({
     })] : [])
   ],
 
-  // >>> AQUI! <<<
   assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.otf'],
 
   resolve: {
@@ -212,52 +211,12 @@ export default defineConfig({
     // Rollup Options otimizadas
     rollupOptions: {
       output: {
-        // Chunks manuais otimizados
-        manualChunks: (id) => {
-          // Corrigir os caminhos para match correto
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('framer-motion')) {
-              return 'framer-motion';
-            }
-            if (id.includes('lucide-react') || id.includes('react-intersection-observer')) {
-              return 'ui-vendor';
-            }
-          }
-          
-          // Framer Motion (pesado, separar)
-          if (id.includes('node_modules/framer-motion/')) {
-            return 'framer-motion';
-          }
-          
-          // UI Libraries
-          if (id.includes('node_modules/lucide-react/') ||
-              id.includes('node_modules/react-intersection-observer/')) {
-            return 'ui-vendor';
-          }
-          
-          // Para features, usar caminhos relativos corretos
-          if (id.includes('/features/testimonials/')) {
-            return 'testimonials';
-          }
-          if (id.includes('/features/benefits/')) {
-            return 'benefits';
-          }
-          if (id.includes('/features/product/')) {
-            return 'product';
-          }
-          if (id.includes('/features/ingredients/')) {
-            return 'ingredients';
-          }
-        },
+        // CORREÇÃO: Comentar manualChunks temporariamente
+        // manualChunks será reconfigurado depois que todos os componentes estiverem funcionando
         
         // Nomes de arquivos otimizados
         entryFileNames: 'assets/js/[name].[hash].js',
-        chunkFileNames: () => {
-          return `assets/js/[name].[hash].js`;
-        },
+        chunkFileNames: 'assets/js/[name].[hash].js',
         assetFileNames: (assetInfo) => {
           const name = assetInfo.name || 'asset';
           const info = name.split('.');
