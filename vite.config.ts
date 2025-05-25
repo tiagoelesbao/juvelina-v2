@@ -1,48 +1,60 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
+import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
-
-// Importações condicionais para plugins opcionais
-let viteCompression: any;
-let visualizer: any;
-
-try {
-  viteCompression = require('vite-plugin-compression').default;
-} catch (e) {
-  console.log('vite-plugin-compression não instalado, pulando compressão...');
-}
-
-try {
-  visualizer = require('rollup-plugin-visualizer').visualizer;
-} catch (e) {
-  console.log('rollup-plugin-visualizer não instalado, pulando análise de bundle...');
-}
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    // React com configuração básica
-    react(),
+    react({
+      babel: {
+        plugins: process.env.NODE_ENV === 'production' 
+          ? ['babel-plugin-transform-react-remove-prop-types']
+          : []
+      }
+    }),
     
-    // PWA configuração
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'gzip',
+      ext: '.gz',
+      deleteOriginFile: false,
+      filter: /\.(js|css|html|svg|json)$/i
+    }),
+    
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      deleteOriginFile: false,
+      filter: /\.(js|css|html|svg|json)$/i
+    }),
+    
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
         cleanupOutdatedCaches: true,
-        skipWaiting: true,
-        clientsClaim: true,
+        sourcemap: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts',
+              cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 ano
+                maxAgeSeconds: 365 * 24 * 60 * 60
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           },
@@ -50,10 +62,13 @@ export default defineConfig({
             urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'unsplash-images',
+              cacheName: 'unsplash-images-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 dias
+                maxAgeSeconds: 30 * 24 * 60 * 60
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
@@ -62,7 +77,7 @@ export default defineConfig({
       manifest: {
         name: 'Juvelina Organics',
         short_name: 'Juvelina',
-        description: 'Suplemento Multivitamínico Líquido Premium',
+        description: 'Suplemento Multivitamínico Líquido Premium com 25 nutrientes essenciais',
         theme_color: '#A9683D',
         background_color: '#ffffff',
         display: 'standalone',
@@ -70,57 +85,22 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          {
-            src: '/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
         ]
       }
     }),
     
-    // Compressão Gzip (apenas se disponível)
-    ...(viteCompression ? [
-      viteCompression({
-        verbose: true,
-        disable: false,
-        threshold: 10240, // 10kb
-        algorithm: 'gzip',
-        ext: '.gz',
-        deleteOriginFile: false,
-        filter: /\.(js|css|html|svg|json)$/i
-      })
-    ] : []),
-    
-    // Compressão Brotli (apenas se disponível)
-    ...(viteCompression ? [
-      viteCompression({
-        verbose: true,
-        disable: false,
-        threshold: 10240,
-        algorithm: 'brotliCompress',
-        ext: '.br',
-        deleteOriginFile: false,
-        filter: /\.(js|css|html|svg|json)$/i
-      })
-    ] : []),
-    
-    // Visualizador (apenas com ANALYZE=true e se disponível)
-    ...(process.env.ANALYZE === 'true' && visualizer ? [
-      visualizer({
-        open: true,
-        filename: 'dist/stats.html',
-        gzipSize: true,
-        brotliSize: true,
-        template: 'treemap'
-      })
-    ] : [])
+    ...(process.env.ANALYZE === 'true' ? [visualizer({
+      open: true,
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap'
+    })] : [])
   ],
+
+  assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.otf'],
 
   resolve: {
     alias: {
@@ -130,82 +110,167 @@ export default defineConfig({
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@styles': path.resolve(__dirname, './src/styles'),
       '@assets': path.resolve(__dirname, './src/assets'),
-      '@utils': path.resolve(__dirname, './src/utils')
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@types': path.resolve(__dirname, './src/types')
     }
   },
   
-  // Build otimizado mas seguro
   build: {
     outDir: 'dist',
-    sourcemap: process.env.NODE_ENV === 'development',
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+        passes: 2,
+      },
+      mangle: {
+        safari10: true,
+      },
+      format: {
+        comments: false,
+      },
+    },
     
-    // Usar esbuild por padrão (mais rápido e confiável)
-    minify: 'esbuild',
-    
-    // Configurações de chunk
     chunkSizeWarningLimit: 500,
     cssCodeSplit: true,
-    
-    // Target moderno
-    target: 'es2015',
+    cssMinify: true,
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     
     rollupOptions: {
       output: {
-        // Manual chunks simplificado e seguro
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'framer-motion': ['framer-motion'],
-          'ui-vendor': ['lucide-react', 'react-intersection-observer']
+        // MANUAL CHUNKS CORRIGIDO PARA WINDOWS
+        manualChunks(id) {
+          // Normalizar caminhos para funcionar no Windows
+          const normalizedId = id.replace(/\\/g, '/');
+          
+          // Debug - remova depois
+          if (normalizedId.includes('/src/')) {
+            console.log('Processing:', normalizedId);
+          }
+          
+          // React e React DOM
+          if (normalizedId.includes('node_modules/react/') || 
+              normalizedId.includes('node_modules/react-dom/')) {
+            return 'react-vendor';
+          }
+          
+          // Framer Motion
+          if (normalizedId.includes('node_modules/framer-motion/')) {
+            return 'framer-motion';
+          }
+          
+          // Lucide React
+          if (normalizedId.includes('node_modules/lucide-react/')) {
+            return 'ui-icons';
+          }
+          
+          // React Intersection Observer
+          if (normalizedId.includes('node_modules/react-intersection-observer/')) {
+            return 'ui-utils';
+          }
+          
+          // PWA
+          if (normalizedId.includes('workbox') || normalizedId.includes('vite-plugin-pwa')) {
+            return 'pwa';
+          }
+          
+          // Componentes UI compartilhados
+          if (normalizedId.includes('/src/components/ui/') || 
+              normalizedId.includes('/src/components/common/')) {
+            return 'ui-components';
+          }
+          
+          // Features
+          if (normalizedId.includes('/src/features/hero/')) {
+            return 'feature-hero';
+          }
+          
+          if (normalizedId.includes('/src/features/testimonials/')) {
+            return 'feature-testimonials';
+          }
+          
+          if (normalizedId.includes('/src/features/benefits/')) {
+            return 'feature-benefits';
+          }
+          
+          if (normalizedId.includes('/src/features/ingredients/')) {
+            return 'feature-ingredients';
+          }
+          
+          if (normalizedId.includes('/src/features/product/')) {
+            return 'feature-product';
+          }
+          
+          // Hooks e utilitários
+          if (normalizedId.includes('/src/hooks/') || 
+              normalizedId.includes('/src/utils/') || 
+              normalizedId.includes('/src/lib/')) {
+            return 'app-utils';
+          }
+          
+          // Estilos
+          if (normalizedId.includes('.css') || normalizedId.includes('/src/styles/')) {
+            return undefined; // CSS é tratado separadamente
+          }
+          
+          // Outras dependências node_modules
+          if (normalizedId.includes('node_modules/')) {
+            return 'vendor-misc';
+          }
         },
         
-        // Nomes de arquivo otimizados
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name].[hash].js',
+        chunkFileNames: 'assets/js/[name].[hash].js',
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.') || [];
+          const name = assetInfo.name || 'asset';
+          const info = name.split('.');
           const ext = info[info.length - 1];
           
-          if (/png|jpe?g|svg|gif|webp|ico/i.test(ext)) {
-            return `assets/images/[name]-[hash][extname]`;
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(ext)) {
+            return `assets/images/[name].[hash][extname]`;
           }
           
           if (/woff|woff2|eot|ttf|otf/i.test(ext)) {
-            return `assets/fonts/[name]-[hash][extname]`;
+            return `assets/fonts/[name].[hash][extname]`;
           }
           
           if (/css/i.test(ext)) {
-            return `assets/css/[name]-[hash][extname]`;
+            return `assets/css/[name].[hash][extname]`;
           }
           
-          return `assets/[name]-[hash][extname]`;
-        }
+          return `assets/[name].[hash][extname]`;
+        },
       },
       
-      // Tree shaking seguro
       treeshake: {
         moduleSideEffects: false,
         propertyReadSideEffects: false,
-        // Não usar pure_funcs aqui
-      }
+      },
     },
     
-    // Report de tamanho comprimido
     reportCompressedSize: true,
   },
   
-  // Dev Server
   server: {
     port: 3000,
     host: true,
     open: true,
     cors: true,
-    strictPort: false,
     hmr: {
       overlay: true,
+    },
+    warmup: {
+      clientFiles: [
+        './src/App.tsx',
+        './src/features/hero/index.tsx',
+        './src/components/common/Header.tsx'
+      ]
     }
   },
   
-  // Otimizar dependências
   optimizeDeps: {
     include: [
       'react',
@@ -214,34 +279,50 @@ export default defineConfig({
       'lucide-react',
       'react-intersection-observer'
     ],
-    exclude: [],
+    exclude: ['@vite/client', '@vite/env'],
     esbuildOptions: {
-      target: 'es2015',
+      target: 'es2020',
     }
   },
   
-  // CSS
   css: {
     modules: {
       localsConvention: 'camelCase',
     },
     preprocessorOptions: {
       css: {
-        charset: false
+        charset: false,
       }
-    }
+    },
+    postcss: './postcss.config.js',
   },
   
-  // Preview
   preview: {
     port: 4173,
     host: true,
-    open: true
+    open: true,
+    cors: true,
+    headers: {
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'SAMEORIGIN',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    }
   },
   
-  // Variáveis de ambiente
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
+  
+  worker: {
+    format: 'es',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/worker.[hash].js',
+      }
+    }
   }
 });

@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext, Suspense, lazy, useMemo } fr
 import { AnimatePresence } from 'framer-motion';
 import './styles/index.css';
 
-// Componentes essenciais (não lazy)
+// Componentes essenciais (não lazy) - Hero e Header devem carregar imediatamente
 import { AnnouncementBar, Header, PurchaseModal } from './components/common';
 import HeroSection from './features/hero';
 import LoadingSection from './components/ui/LoadingSection';
@@ -13,21 +13,46 @@ import { useScrollPosition } from './hooks/ui/useScrollPosition';
 import { useModalState } from './hooks/ui/useModalState';
 import { usePerformanceOptimization } from './hooks/ui/usePerformanceOptimization';
 
-// Lazy loading de seções não críticas
-const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
-const IngredientsSection = lazy(() => import('./features/ingredients/IngredientsSection'));
-const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
-const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
-const PricingSection = lazy(() => import('./features/product/PricingSection'));
-const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
-const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
-const Footer = lazy(() => import('./components/product/Footer'));
+// LAZY LOADING COM WEBPACKCHUNKNAME PARA NOMEAR OS CHUNKS
+const VideoTestimonialsSection = lazy(() => 
+  import(/* webpackChunkName: "video-testimonials" */ './features/testimonials/VideoTestimonialsSection')
+);
 
-// Lazy loading com fallback para VideoTestimonialsSection
-const VideoTestimonialsSection = lazy(() => {
-  return import('./features/testimonials/VideoTestimonialsSection');
-});
+const BenefitsSection = lazy(() => 
+  import(/* webpackChunkName: "benefits" */ './features/benefits/BenefitsSection')
+);
+
+const IngredientsSection = lazy(() => 
+  import(/* webpackChunkName: "ingredients" */ './features/ingredients/IngredientsSection')
+);
+
+const AbsorptionSection = lazy(() => 
+  import(/* webpackChunkName: "absorption" */ './features/benefits/AbsorptionSection')
+);
+
+const UGCGallerySection = lazy(() => 
+  import(/* webpackChunkName: "ugc-gallery" */ './features/testimonials/UGCGallerySection')
+);
+
+const GuaranteeSection = lazy(() => 
+  import(/* webpackChunkName: "guarantee" */ './features/testimonials/GuaranteeSection')
+);
+
+const PricingSection = lazy(() => 
+  import(/* webpackChunkName: "pricing" */ './features/product/PricingSection')
+);
+
+const ViralOfferSection = lazy(() => 
+  import(/* webpackChunkName: "viral-offer" */ './features/product/ViralOfferSection')
+);
+
+const FaqSection = lazy(() => 
+  import(/* webpackChunkName: "faq" */ './features/testimonials/FaqSection')
+);
+
+const Footer = lazy(() => 
+  import(/* webpackChunkName: "footer" */ './components/product/Footer')
+);
 
 // Tipo estendido para Navigator com deviceMemory
 interface NavigatorExtended extends Navigator {
@@ -54,6 +79,17 @@ export const PerformanceContext = createContext<PerformanceContextType>({
   reduceMotion: false,
   isLowPerformance: false,
 });
+
+// Componente de fallback customizado
+const SectionLoader: React.FC<{ section?: string }> = ({ section = "conteúdo" }) => (
+  <div className="py-20 flex flex-col items-center justify-center bg-gradient-to-b from-white to-juvelina-mint/5">
+    <div className="relative">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold" />
+      <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold/20" />
+    </div>
+    <p className="mt-4 text-gray-600 text-sm">Carregando {section}...</p>
+  </div>
+);
 
 function App() {
   const { showScrollTop } = useScrollPosition();
@@ -191,6 +227,23 @@ function App() {
     return () => clearTimeout(timer);
   }, [showModal, exitIntentTriggered, openModal, performanceSettings.isMobile, performanceSettings.isLowEnd]);
 
+  // Prefetch de componentes críticos quando idle
+  useEffect(() => {
+    if ('requestIdleCallback' in window) {
+      const idleCallbackId = requestIdleCallback(() => {
+        // Prefetch dos componentes mais importantes
+        import(/* webpackChunkName: "video-testimonials" */ './features/testimonials/VideoTestimonialsSection');
+        import(/* webpackChunkName: "benefits" */ './features/benefits/BenefitsSection');
+      });
+
+      return () => {
+        if ('cancelIdleCallback' in window) {
+          cancelIdleCallback(idleCallbackId);
+        }
+      };
+    }
+  }, []);
+
   return (
     <PerformanceContext.Provider value={performanceContextValue}>
       <div className="min-h-screen bg-white overflow-x-hidden optimized-scroll">
@@ -199,53 +252,56 @@ function App() {
         
         {/* Seções principais */}
         <main>
+          {/* Hero Section - Sempre carregada imediatamente */}
           <HeroSection onCtaClick={handleCtaClick} />
           
-          {/* VideoTestimonialsSection com fallback otimizado */}
-          <Suspense 
-            fallback={
-              <div className="py-20 text-center bg-gradient-to-b from-white to-juvelina-mint/10">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold mx-auto mb-4" />
-                <p className="text-gray-600">Carregando vídeos incríveis...</p>
-              </div>
-            }
-          >
+          {/* VideoTestimonialsSection - Segunda mais importante */}
+          <Suspense fallback={<SectionLoader section="depoimentos em vídeo" />}>
             <VideoTestimonialsSection onCtaClick={handleCtaClick} />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Benefits Section */}
+          <Suspense fallback={<SectionLoader section="benefícios" />}>
             <BenefitsSection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Ingredients Section */}
+          <Suspense fallback={<SectionLoader section="ingredientes" />}>
             <IngredientsSection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Absorption Section */}
+          <Suspense fallback={<SectionLoader section="tecnologia de absorção" />}>
             <AbsorptionSection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* UGC Gallery */}
+          <Suspense fallback={<SectionLoader section="galeria de clientes" />}>
             <UGCGallerySection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Guarantee Section */}
+          <Suspense fallback={<SectionLoader section="garantia" />}>
             <GuaranteeSection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Pricing Section */}
+          <Suspense fallback={<SectionLoader section="planos e preços" />}>
             <PricingSection onCtaClick={handleCtaClick} />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Viral Offer Section */}
+          <Suspense fallback={<SectionLoader section="oferta especial" />}>
             <ViralOfferSection onCtaClick={handleCtaClick} />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* FAQ Section */}
+          <Suspense fallback={<SectionLoader section="perguntas frequentes" />}>
             <FaqSection />
           </Suspense>
           
-          <Suspense fallback={<LoadingSection />}>
+          {/* Footer */}
+          <Suspense fallback={<SectionLoader section="rodapé" />}>
             <Footer />
           </Suspense>
         </main>
