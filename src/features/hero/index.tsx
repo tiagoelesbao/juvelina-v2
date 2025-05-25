@@ -159,7 +159,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
       )}
       
       {/* Container principal com padding adequado */}
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-20 md:py-24 lg:py-32 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-200 md:py-24 lg:py-32 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
           {/* Conteúdo textual */}
           <motion.div 

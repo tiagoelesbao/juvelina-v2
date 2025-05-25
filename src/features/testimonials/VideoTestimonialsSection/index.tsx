@@ -44,7 +44,7 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
         className="relative overflow-hidden py-20"
         style={{
           backgroundColor: '#C2F7BC',
-          marginTop: '-2px'
+          marginTop: '-120px'
         }}
       >
         {/* Background com padrão hexagonal */}
