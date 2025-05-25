@@ -13,46 +13,17 @@ import { useScrollPosition } from './hooks/ui/useScrollPosition';
 import { useModalState } from './hooks/ui/useModalState';
 import { usePerformanceOptimization } from './hooks/ui/usePerformanceOptimization';
 
-// LAZY LOADING COM WEBPACKCHUNKNAME PARA NOMEAR OS CHUNKS
-const VideoTestimonialsSection = lazy(() => 
-  import(/* webpackChunkName: "video-testimonials" */ './features/testimonials/VideoTestimonialsSection')
-);
-
-const BenefitsSection = lazy(() => 
-  import(/* webpackChunkName: "benefits" */ './features/benefits/BenefitsSection')
-);
-
-const IngredientsSection = lazy(() => 
-  import(/* webpackChunkName: "ingredients" */ './features/ingredients/IngredientsSection')
-);
-
-const AbsorptionSection = lazy(() => 
-  import(/* webpackChunkName: "absorption" */ './features/benefits/AbsorptionSection')
-);
-
-const UGCGallerySection = lazy(() => 
-  import(/* webpackChunkName: "ugc-gallery" */ './features/testimonials/UGCGallerySection')
-);
-
-const GuaranteeSection = lazy(() => 
-  import(/* webpackChunkName: "guarantee" */ './features/testimonials/GuaranteeSection')
-);
-
-const PricingSection = lazy(() => 
-  import(/* webpackChunkName: "pricing" */ './features/product/PricingSection')
-);
-
-const ViralOfferSection = lazy(() => 
-  import(/* webpackChunkName: "viral-offer" */ './features/product/ViralOfferSection')
-);
-
-const FaqSection = lazy(() => 
-  import(/* webpackChunkName: "faq" */ './features/testimonials/FaqSection')
-);
-
-const Footer = lazy(() => 
-  import(/* webpackChunkName: "footer" */ './components/product/Footer')
-);
+// LAZY LOADING SIMPLIFICADO PARA VITE
+const VideoTestimonialsSection = lazy(() => import('./features/testimonials/VideoTestimonialsSection'));
+const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
+const IngredientsSection = lazy(() => import('./features/ingredients/IngredientsSection'));
+const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
+const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
+const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
+const PricingSection = lazy(() => import('./features/product/PricingSection'));
+const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
+const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
+const Footer = lazy(() => import('./components/product/Footer'));
 
 // Tipo estendido para Navigator com deviceMemory
 interface NavigatorExtended extends Navigator {
@@ -61,6 +32,7 @@ interface NavigatorExtended extends Navigator {
     effectiveType?: string;
     saveData?: boolean;
   };
+  hardwareConcurrency: number;
 }
 
 // Context para otimizações de performance
@@ -82,7 +54,7 @@ export const PerformanceContext = createContext<PerformanceContextType>({
 
 // Componente de fallback customizado
 const SectionLoader: React.FC<{ section?: string }> = ({ section = "conteúdo" }) => (
-  <div className="py-20 flex flex-col items-center justify-center bg-gradient-to-b from-white to-juvelina-mint/5">
+  <div className="py-20 flex flex-col items-center justify-center bg-gradient-to-b from-white to-juvelina-mint/5 min-h-[200px]">
     <div className="relative">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold" />
       <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold/20" />
@@ -90,6 +62,49 @@ const SectionLoader: React.FC<{ section?: string }> = ({ section = "conteúdo" }
     <p className="mt-4 text-gray-600 text-sm">Carregando {section}...</p>
   </div>
 );
+
+// ErrorBoundary Component
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="py-20 text-center">
+          <p className="text-red-600">Erro ao carregar o componente.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-juvelina-gold text-white rounded"
+          >
+            Recarregar página
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 function App() {
   const { showScrollTop } = useScrollPosition();
@@ -135,7 +150,7 @@ function App() {
       setPerformanceSettings({
         isMobile,
         isTablet,
-        isLowEnd: Boolean(isLowEnd),
+        isLowEnd: !!isLowEnd,
         reduceMotion,
         isLowPerformance,
       });
@@ -232,8 +247,8 @@ function App() {
     if ('requestIdleCallback' in window) {
       const idleCallbackId = requestIdleCallback(() => {
         // Prefetch dos componentes mais importantes
-        import(/* webpackChunkName: "video-testimonials" */ './features/testimonials/VideoTestimonialsSection');
-        import(/* webpackChunkName: "benefits" */ './features/benefits/BenefitsSection');
+        import('./features/testimonials/VideoTestimonialsSection').catch(console.error);
+        import('./features/benefits/BenefitsSection').catch(console.error);
       });
 
       return () => {
@@ -256,54 +271,74 @@ function App() {
           <HeroSection onCtaClick={handleCtaClick} />
           
           {/* VideoTestimonialsSection - Segunda mais importante */}
-          <Suspense fallback={<SectionLoader section="depoimentos em vídeo" />}>
-            <VideoTestimonialsSection onCtaClick={handleCtaClick} />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="depoimentos em vídeo" />}>
+              <VideoTestimonialsSection onCtaClick={handleCtaClick} />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Benefits Section */}
-          <Suspense fallback={<SectionLoader section="benefícios" />}>
-            <BenefitsSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="benefícios" />}>
+              <BenefitsSection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Ingredients Section */}
-          <Suspense fallback={<SectionLoader section="ingredientes" />}>
-            <IngredientsSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="ingredientes" />}>
+              <IngredientsSection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Absorption Section */}
-          <Suspense fallback={<SectionLoader section="tecnologia de absorção" />}>
-            <AbsorptionSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="tecnologia de absorção" />}>
+              <AbsorptionSection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* UGC Gallery */}
-          <Suspense fallback={<SectionLoader section="galeria de clientes" />}>
-            <UGCGallerySection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="galeria de clientes" />}>
+              <UGCGallerySection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Guarantee Section */}
-          <Suspense fallback={<SectionLoader section="garantia" />}>
-            <GuaranteeSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="garantia" />}>
+              <GuaranteeSection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Pricing Section */}
-          <Suspense fallback={<SectionLoader section="planos e preços" />}>
-            <PricingSection onCtaClick={handleCtaClick} />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="planos e preços" />}>
+              <PricingSection onCtaClick={handleCtaClick} />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Viral Offer Section */}
-          <Suspense fallback={<SectionLoader section="oferta especial" />}>
-            <ViralOfferSection onCtaClick={handleCtaClick} />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="oferta especial" />}>
+              <ViralOfferSection onCtaClick={handleCtaClick} />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* FAQ Section */}
-          <Suspense fallback={<SectionLoader section="perguntas frequentes" />}>
-            <FaqSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="perguntas frequentes" />}>
+              <FaqSection />
+            </Suspense>
+          </ErrorBoundary>
           
           {/* Footer */}
-          <Suspense fallback={<SectionLoader section="rodapé" />}>
-            <Footer />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SectionLoader section="rodapé" />}>
+              <Footer />
+            </Suspense>
+          </ErrorBoundary>
         </main>
         
         {/* Modais e componentes flutuantes */}

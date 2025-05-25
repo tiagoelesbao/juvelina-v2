@@ -1,5 +1,11 @@
 {
   "name": "juvelina-organics",
+  "sideEffects": [
+    "*.css",
+    "*.scss",
+    "*.sass",
+    "src/styles/**/*"
+  ],
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -64,4 +70,5 @@
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   }
+  
 }

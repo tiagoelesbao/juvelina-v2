@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -15,6 +15,9 @@ export default defineConfig({
           : []
       }
     }),
+    
+    // Adicionar splitVendorChunkPlugin para melhor separação de vendors
+    splitVendorChunkPlugin(),
     
     viteCompression({
       verbose: true,
@@ -35,6 +38,31 @@ export default defineConfig({
       deleteOriginFile: false,
       filter: /\.(js|css|html|svg|json)$/i
     }),
+    
+    // Plugin customizado para debug de chunks
+    {
+      name: 'debug-chunks',
+      generateBundle(options, bundle) {
+        console.log('\n=== CHUNK DEBUG ===');
+        for (const [fileName, chunk] of Object.entries(bundle)) {
+          if (chunk.type === 'chunk') {
+            console.log(`\nChunk: ${fileName}`);
+            console.log(`- Modules: ${Object.keys(chunk.modules || {}).length}`);
+            console.log(`- Size: ${chunk.code?.length || 0} bytes`);
+            console.log(`- Is Entry: ${chunk.isEntry}`);
+            console.log(`- Is Dynamic Entry: ${chunk.isDynamicEntry}`);
+            if (chunk.modules) {
+              const moduleKeys = Object.keys(chunk.modules);
+              console.log(`- First modules: ${moduleKeys.slice(0, 3).join(', ')}`);
+              if (moduleKeys.length > 3) {
+                console.log(`  ... and ${moduleKeys.length - 3} more`);
+              }
+            }
+          }
+        }
+        console.log('=================\n');
+      }
+    },
     
     VitePWA({
       registerType: 'autoUpdate',
@@ -118,21 +146,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
-        passes: 2,
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false,
-      },
-    },
+    minify: 'esbuild',
     
     chunkSizeWarningLimit: 500,
     cssCodeSplit: true,
@@ -140,118 +154,169 @@ export default defineConfig({
     target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      
+      preserveEntrySignatures: 'strict',
+      
       output: {
-        // MANUAL CHUNKS CORRIGIDO PARA WINDOWS
-        manualChunks(id) {
-          // Normalizar caminhos para funcionar no Windows
-          const normalizedId = id.replace(/\\/g, '/');
+        // Adicionar experimentalMinChunkSize para garantir chunks mínimos
+        experimentalMinChunkSize: 10000, // 10KB mínimo por chunk
+        
+        // Manual chunks mais explícito com arrays de arquivos
+        manualChunks: {
+          // Vendors principais - forçar inclusão específica
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-framer': ['framer-motion'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-observer': ['react-intersection-observer'],
           
-          // Debug - remova depois
-          if (normalizedId.includes('/src/')) {
-            console.log('Processing:', normalizedId);
-          }
+          // Features - especificar arquivos explicitamente
+          'feature-hero': [
+            './src/features/hero/index.tsx',
+            './src/features/hero/components/HeroHeading.tsx',
+            './src/features/hero/components/HeroButtons.tsx',
+            './src/features/hero/components/HeroStats.tsx',
+            './src/features/hero/components/HeroImage.tsx',
+            './src/features/hero/components/ScrollIndicator.tsx',
+            './src/features/hero/hooks/useCountUp.tsx',
+          ],
           
-          // React e React DOM
-          if (normalizedId.includes('node_modules/react/') || 
-              normalizedId.includes('node_modules/react-dom/')) {
-            return 'react-vendor';
-          }
+          'feature-testimonials': [
+            './src/features/testimonials/VideoTestimonialsSection/index.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/data.ts',
+            './src/features/testimonials/VideoTestimonialsSection/components/VideoSectionHeader.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/components/VideoCarousel.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/components/VideoModal.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/components/LiveViewersIndicator.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselItem.tsx',
+            './src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselControls.tsx',
+            './src/features/testimonials/UGCGallerySection.tsx',
+            './src/features/testimonials/GuaranteeSection.tsx',
+            './src/features/testimonials/FaqSection.tsx',
+          ],
           
-          // Framer Motion
-          if (normalizedId.includes('node_modules/framer-motion/')) {
-            return 'framer-motion';
-          }
+          'feature-benefits': [
+            './src/features/benefits/BenefitsSection.tsx',
+            './src/features/benefits/AbsorptionSection.tsx',
+          ],
           
-          // Lucide React
-          if (normalizedId.includes('node_modules/lucide-react/')) {
-            return 'ui-icons';
-          }
+          'feature-ingredients': [
+            './src/features/ingredients/IngredientsSection.tsx',
+          ],
           
-          // React Intersection Observer
-          if (normalizedId.includes('node_modules/react-intersection-observer/')) {
-            return 'ui-utils';
-          }
+          'feature-product': [
+            './src/features/product/PricingSection.tsx',
+            './src/features/product/ViralOfferSection.tsx',
+          ],
           
-          // PWA
-          if (normalizedId.includes('workbox') || normalizedId.includes('vite-plugin-pwa')) {
-            return 'pwa';
-          }
+          // Componentes compartilhados
+          'shared-ui': [
+            './src/components/ui/ScrollToTop.tsx',
+            './src/components/ui/CreatorBadge.tsx',
+            './src/components/ui/WaveTransition.tsx',
+            './src/components/ui/TikTokIcon.tsx',
+            './src/components/ui/IngredientsList.tsx',
+            './src/components/ui/AnimatedButton.tsx',
+          ],
           
-          // Componentes UI compartilhados
-          if (normalizedId.includes('/src/components/ui/') || 
-              normalizedId.includes('/src/components/common/')) {
-            return 'ui-components';
-          }
+          'shared-common': [
+            './src/components/common/AnnouncementBar.tsx',
+            './src/components/common/Header.tsx',
+            './src/components/common/PurchaseModal.tsx',
+            './src/components/common/index.ts',
+          ],
           
-          // Features
-          if (normalizedId.includes('/src/features/hero/')) {
-            return 'feature-hero';
-          }
+          'shared-product': [
+            './src/components/product/Footer.tsx',
+          ],
           
-          if (normalizedId.includes('/src/features/testimonials/')) {
-            return 'feature-testimonials';
-          }
-          
-          if (normalizedId.includes('/src/features/benefits/')) {
-            return 'feature-benefits';
-          }
-          
-          if (normalizedId.includes('/src/features/ingredients/')) {
-            return 'feature-ingredients';
-          }
-          
-          if (normalizedId.includes('/src/features/product/')) {
-            return 'feature-product';
-          }
-          
-          // Hooks e utilitários
-          if (normalizedId.includes('/src/hooks/') || 
-              normalizedId.includes('/src/utils/') || 
-              normalizedId.includes('/src/lib/')) {
-            return 'app-utils';
-          }
-          
-          // Estilos
-          if (normalizedId.includes('.css') || normalizedId.includes('/src/styles/')) {
-            return undefined; // CSS é tratado separadamente
-          }
-          
-          // Outras dependências node_modules
-          if (normalizedId.includes('node_modules/')) {
-            return 'vendor-misc';
-          }
+          // Hooks
+          'app-hooks': [
+            './src/hooks/ui/useScrollPosition.ts',
+            './src/hooks/ui/useModalState.tsx',
+            './src/hooks/ui/usePerformanceOptimization.tsx',
+          ],
         },
         
-        entryFileNames: 'assets/js/[name].[hash].js',
-        chunkFileNames: 'assets/js/[name].[hash].js',
+        // Configurar melhor os nomes dos arquivos
+        entryFileNames: 'assets/js/entry-[name]-[hash].js',
+        chunkFileNames: (chunkInfo) => {
+          const name = chunkInfo.name || 'chunk';
+          return `assets/js/${name}-[hash].js`;
+        },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.name || 'asset';
           const info = name.split('.');
           const ext = info[info.length - 1];
           
           if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(ext)) {
-            return `assets/images/[name].[hash][extname]`;
+            return `assets/images/[name]-[hash][extname]`;
           }
           
           if (/woff|woff2|eot|ttf|otf/i.test(ext)) {
-            return `assets/fonts/[name].[hash][extname]`;
+            return `assets/fonts/[name]-[hash][extname]`;
           }
           
           if (/css/i.test(ext)) {
-            return `assets/css/[name].[hash][extname]`;
+            return `assets/css/[name]-[hash][extname]`;
           }
           
-          return `assets/[name].[hash][extname]`;
+          return `assets/[name]-[hash][extname]`;
+        },
+        
+        // Configurações adicionais importantes
+        interop: 'auto',
+        exports: 'auto',
+        preserveModules: false,
+        format: 'es',
+        inlineDynamicImports: false,
+        
+        // Adicionar generatedCode para melhor compatibilidade
+        generatedCode: {
+          preset: 'es2015',
+          arrowFunctions: true,
+          constBindings: true,
+          objectShorthand: true,
+          reservedNamesAsProps: false,
+          symbols: true,
         },
       },
       
+      // TEMPORARIAMENTE: Desabilitar tree-shaking para debug
+      treeshake: false,
+      
+      // Quando funcionar, voltar para tree-shaking menos agressivo:
+      /*
       treeshake: {
-        moduleSideEffects: false,
+        moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+        unknownGlobalSideEffects: false,
+        correctVarValueBeforeDeclaration: true,
       },
+      */
+      
+      // Configurar external se necessário
+      external: [],
+      
+      // Plugins adicionais do Rollup se necessário
+      plugins: [],
     },
     
+    // Configurações adicionais de build
     reportCompressedSize: true,
+    assetsInlineLimit: 4096, // 4kb
+    modulePreload: {
+      polyfill: true,
+    },
+    
+    // Adicionar commonjsOptions para melhor compatibilidade
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      defaultIsModuleExports: 'auto',
+    },
   },
   
   server: {
@@ -271,10 +336,13 @@ export default defineConfig({
     }
   },
   
+  // Otimização de dependências melhorada
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
       'framer-motion',
       'lucide-react',
       'react-intersection-observer'
@@ -282,7 +350,17 @@ export default defineConfig({
     exclude: ['@vite/client', '@vite/env'],
     esbuildOptions: {
       target: 'es2020',
-    }
+      jsx: 'automatic',
+      // Adicionar keepNames para melhor debugging
+      keepNames: true,
+    },
+    force: process.env.FORCE_OPTIMIZE === 'true',
+    entries: [
+      'src/main.tsx',
+      'src/App.tsx',
+    ],
+    // Adicionar needsInterop se necessário
+    needsInterop: [],
   },
   
   css: {
@@ -321,8 +399,17 @@ export default defineConfig({
     format: 'es',
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/worker.[hash].js',
+        entryFileNames: 'assets/worker-[hash].js',
       }
     }
-  }
+  },
+  
+  // Adicionar experimental renderBuiltUrl se necessário
+  experimental: {
+    renderBuiltUrl(filename, { hostType }) {
+      if (hostType === 'js') {
+        return { runtime: `window.__publicPath + ${JSON.stringify(filename)}` }
+      }
+    }
+  },
 });
