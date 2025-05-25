@@ -429,8 +429,11 @@ section[id] {
   --black: #000000;
 }
 
-/* Import das otimizações mobile */
+/* src/styles/index.css */
 @import './mobile-optimizations.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Resto do código... */
 
 /* Ajustes para transições de seção */
 section {

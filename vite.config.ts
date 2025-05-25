@@ -214,10 +214,17 @@ export default defineConfig({
       output: {
         // Chunks manuais otimizados
         manualChunks: (id) => {
-          // React ecosystem
-          if (id.includes('node_modules/react/') || 
-              id.includes('node_modules/react-dom/')) {
-            return 'react-vendor';
+          // Corrigir os caminhos para match correto
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-motion';
+            }
+            if (id.includes('lucide-react') || id.includes('react-intersection-observer')) {
+              return 'ui-vendor';
+            }
           }
           
           // Framer Motion (pesado, separar)
@@ -231,20 +238,17 @@ export default defineConfig({
             return 'ui-vendor';
           }
           
-          // Lazy loaded features
-          if (id.includes('src/features/testimonials/')) {
+          // Para features, usar caminhos relativos corretos
+          if (id.includes('/features/testimonials/')) {
             return 'testimonials';
           }
-          
-          if (id.includes('src/features/benefits/')) {
+          if (id.includes('/features/benefits/')) {
             return 'benefits';
           }
-          
-          if (id.includes('src/features/product/')) {
+          if (id.includes('/features/product/')) {
             return 'product';
           }
-          
-          if (id.includes('src/features/ingredients/')) {
+          if (id.includes('/features/ingredients/')) {
             return 'ingredients';
           }
         },
