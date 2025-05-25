@@ -8,6 +8,7 @@ import HeroStats from './components/HeroStats';
 import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
 import { useCountUp, StatItem } from './hooks/useCountUp';
+import WaveTransition from '../../components/ui/WaveTransition';
 
 interface HeroSectionProps {
   onCtaClick: (e?: React.MouseEvent) => void;
@@ -201,6 +202,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
           <ScrollIndicator />
         </div>
       )}
+
+      {/* Transição de onda na parte inferior */}
+      <WaveTransition 
+        color="#C2F7BC" 
+        height={120}
+        variant="dramatic"
+      />
     </section>
   );
 };

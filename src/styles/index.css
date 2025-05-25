@@ -419,3 +419,19 @@ section[id] {
 
 /* Import das otimizações mobile */
 @import './mobile-optimizations.css';
+
+/* Ajustes para transições de seção */
+section {
+  position: relative;
+}
+
+/* Remove espaços indesejados entre seções */
+.section-transition {
+  margin-top: -2px;
+  margin-bottom: -2px;
+}
+
+/* Garante que o fundo verde fique visível */
+#video-depoimentos {
+  background-color: #C2F7BC !important;
+}

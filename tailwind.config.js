@@ -14,7 +14,7 @@ export default {
   mode: 'jit',
   
   // Dark mode desabilitado (se não usar)
-  darkMode: media,
+  darkMode: 'media',
   
   theme: {
     extend: {
@@ -206,7 +206,7 @@ export default {
   corePlugins: {
     // Desabilitar se não usar
     preflight: true, // Reset CSS
-    container: false, // Usar container customizado
+    container: true, // Usar container customizado
     float: false, // Raramente usado
     clear: false, // Raramente usado
     skew: false, // Transformações complexas

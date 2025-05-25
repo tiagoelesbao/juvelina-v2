@@ -18,7 +18,6 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
   const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Hook para animação baseada em scroll
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
@@ -28,35 +27,33 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
 
   return (
     <>
-      {/* Transição de onda estilizada do branco para mint */}
-      <WaveTransition 
-        color="#C2F7BC" 
-        className="relative z-10" 
-        height={120}
-      />
+      {/* Container wrapper para a transição */}
+      <div className="relative">
+        {/* Transição de onda dramática posicionada corretamente */}
+        <WaveTransition 
+          color="#C2F7BC" 
+          className="relative z-10" 
+          height={120}
+          variant="dramatic"
+        />
+      </div>
       
       <section 
         ref={sectionRef}
         id="video-depoimentos" 
-        className="relative overflow-hidden bg-juvelina-mint/20 py-20 -mt-1"
+        className="relative overflow-hidden py-20"
         style={{
-          background: `linear-gradient(180deg, 
-            #C2F7BC 0%, 
-            rgba(194, 247, 188, 0.8) 20%,
-            rgba(194, 247, 188, 0.4) 60%,
-            rgba(255, 255, 255, 0.95) 90%,
-            #ffffff 100%
-          )`
+          backgroundColor: '#C2F7BC',
+          marginTop: '-2px'
         }}
       >
-        {/* Background animado com partículas */}
+        {/* Background com padrão hexagonal */}
         <motion.div 
           className="absolute inset-0 pointer-events-none"
           style={{ y: backgroundY }}
         >
-          {/* Padrão de fundo hexagonal */}
           <div 
-            className="absolute inset-0 opacity-5"
+            className="absolute inset-0 opacity-10"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 17.32v34.64L30 60 0 51.96V17.32L30 0zm0 10.39L8.66 22.17v26.66L30 60l21.34-11.17V22.17L30 10.39z' fill='%23A9683D' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
               backgroundSize: '60px 60px',
@@ -67,7 +64,7 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
           <motion.div
             className="absolute top-20 -left-40 w-96 h-96 rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(194,247,188,0.4) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)",
               filter: "blur(60px)",
             }}
             animate={{
@@ -97,33 +94,6 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
               ease: "easeInOut"
             }}
           />
-          
-          {/* Partículas flutuantes */}
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: i % 2 === 0 ? '12px' : '8px',
-                height: i % 2 === 0 ? '12px' : '8px',
-                background: i % 3 === 0 
-                  ? 'rgba(169,104,61,0.3)' 
-                  : 'rgba(194,247,188,0.4)',
-                left: `${10 + i * 12}%`,
-                top: `${20 + (i % 4) * 20}%`,
-              }}
-              animate={{
-                y: [-20, 20, -20],
-                opacity: [0.3, 0.7, 0.3],
-              }}
-              transition={{
-                duration: 5 + i,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.5
-              }}
-            />
-          ))}
         </motion.div>
 
         {/* Conteúdo da seção */}
@@ -139,6 +109,14 @@ const VideoTestimonialsSection: React.FC<VideoTestimonialsSectionProps> = ({ onC
           
           <LiveViewersIndicator />
         </div>
+        
+        {/* Gradiente inferior para transição suave */}
+        <div 
+          className="absolute bottom-0 left-0 w-full h-32 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.5) 80%, #ffffff 100%)'
+          }}
+        />
       </section>
       
       {/* Modal de vídeo */}
