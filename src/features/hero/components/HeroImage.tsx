@@ -1,6 +1,7 @@
 // src/features/hero/components/HeroImage.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
+import styles from './HeroImage.module.css';
 
 const HeroImage: React.FC = () => {
   // Solução híbrida - simples mas robusta
@@ -18,7 +19,7 @@ const HeroImage: React.FC = () => {
         transition={{ delay: 0.8, duration: 0.5 }}
       >
         <motion.div
-          className="bg-white rounded-full shadow-xl flex items-center p-2 md:p-3 gap-2"
+          className={`bg-white rounded-full shadow-xl p-2 md:p-3 ${styles.tiktokBadge}`}
           animate={{ 
             scale: [1, 1.05, 1],
             boxShadow: [
@@ -61,9 +62,10 @@ const HeroImage: React.FC = () => {
               <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
             </svg>
           </motion.div>
-          <div className="flex flex-col">
+          {/* Usando CSS Module para o container de texto do TikTok */}
+          <div className={styles.tiktokTextContainer}>
             <motion.span 
-              className="font-bold text-xs md:text-sm"
+              className={styles.tiktokTitle}
               animate={{ 
                 color: ["#000000", "#EE1D52", "#000000"],
                 textShadow: [
@@ -80,7 +82,7 @@ const HeroImage: React.FC = () => {
             >
               Viral no TikTok
             </motion.span>
-            <span className="text-[10px] md:text-xs text-gray-500">+2M de visualizações</span>
+            <span className={styles.tiktokSubtitle}>+2M de visualizações</span>
           </div>
         </motion.div>
       </motion.div>
@@ -186,7 +188,7 @@ const HeroImage: React.FC = () => {
             </motion.div>
           </motion.div>
           
-          {/* Selo Dermatologicamente Testado - Mobile (mantém posição) */}
+          {/* Selo Dermatologicamente Testado - Mobile - USANDO CSS MODULE */}
           <motion.div
             className="absolute bottom-9 left-9 z-10"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -200,7 +202,6 @@ const HeroImage: React.FC = () => {
                 y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
               }}
               style={{
-                fontSize: '12px',
                 boxShadow: "0 6px 15px rgba(169,104,61,0.25)",
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
@@ -211,9 +212,14 @@ const HeroImage: React.FC = () => {
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
-              <div className="flex flex-col gap-0">
-                <span className="font-medium text-gray-700 leading-3">Dermatolog.</span>
-                <span className="font-medium text-gray-700 text-[11px] leading-3">Testado</span>
+              {/* Usando CSS Module para o texto */}
+              <div className={styles.dermatoMobileContainer}>
+                <span className={styles.dermatoMobileLine1}>
+                  Dermatolog.
+                </span>
+                <span className={styles.dermatoMobileLine2}>
+                  Testado
+                </span>
               </div>
             </motion.div>
           </motion.div>
@@ -318,7 +324,7 @@ const HeroImage: React.FC = () => {
             </span>
           </motion.div>
           
-          {/* Selo Dermatologicamente Testado - Desktop (SOBREPONDO O FRASCO) */}
+          {/* Selo Dermatologicamente Testado - Desktop - USANDO CSS MODULE */}
           <motion.div 
             className="absolute bottom-4 -left-10 z-20"
             initial={{ opacity: 0, scale: 0.8, x: -20 }}
@@ -343,8 +349,9 @@ const HeroImage: React.FC = () => {
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
-              <span className="font-medium text-sm text-gray-700 whitespace-nowrap">
-                Dermatologicamente<br/>Testado
+              {/* Usando CSS Module para desktop */}
+              <span className={styles.dermatoDesktop}>
+                Dermatologicamente Testado
               </span>
             </motion.div>
           </motion.div>
