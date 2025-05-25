@@ -17,7 +17,7 @@ const HeroHeading: React.FC = () => {
       
       {/* Headline principal */}
       <motion.h1 
-        className="text-4xl md:text-6xl font-['Ws_Paradose'] font-bold leading-tight mb-4"
+        className="text-4xl md:text-6xl font-display font-bold leading-tight mb-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.7 }}
