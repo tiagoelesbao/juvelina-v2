@@ -435,3 +435,151 @@ section {
 #video-depoimentos {
   background-color: #C2F7BC !important;
 }
+
+/* Adicionar ao src/styles/index.css ou criar um novo arquivo */
+
+/* =================================
+   VIDEO TESTIMONIALS OTIMIZAÇÕES
+   ================================= */
+
+/* Otimizações de performance para o carrossel */
+#video-depoimentos {
+  /* Isolamento de layout para evitar reflow */
+  contain: layout style paint;
+  
+  /* Otimizar composição */
+  will-change: auto;
+  
+  /* Suavizar renderização */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container do carrossel com GPU acceleration */
+.video-carousel-container {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+}
+
+/* Items do carrossel */
+.video-carousel-item {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Scroll otimizado para mobile */
+@media (max-width: 768px) {
+  .video-carousel-mobile {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+  }
+  
+  .video-carousel-mobile > * {
+    scroll-snap-align: center;
+    scroll-snap-stop: normal;
+  }
+}
+
+/* Gradientes de borda otimizados */
+.edge-gradient-left,
+.edge-gradient-right {
+  pointer-events: none;
+  mix-blend-mode: normal;
+  z-index: 20;
+}
+
+/* Desabilitar animações pesadas em dispositivos lentos */
+@media (prefers-reduced-motion: reduce), 
+       (max-device-memory: 2GB) {
+  .video-carousel-item {
+    animation: none !important;
+    transition: opacity 0.2s ease !important;
+  }
+  
+  .video-carousel-item:hover {
+    transform: none !important;
+  }
+}
+
+/* Otimizações de imagem */
+.video-thumbnail {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  contain: layout style paint;
+}
+
+/* Skeleton loader otimizado */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+/* Otimizações específicas para o background */
+.video-section-background {
+  transform: translateZ(0);
+  will-change: transform;
+  contain: paint;
+}
+
+/* Melhorar performance de hover em desktop */
+@media (hover: hover) and (pointer: fine) {
+  .video-carousel-item {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .video-carousel-item:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Fix para scroll horizontal em mobile */
+@supports (-webkit-touch-callout: none) {
+  .video-carousel-mobile {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Otimizar transições */
+.video-modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.video-modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* Performance para gradientes de borda */
+@supports (mask-image: linear-gradient(black, transparent)) or 
+         (-webkit-mask-image: linear-gradient(black, transparent)) {
+  .edge-gradient-mask {
+    mask-image: linear-gradient(to right, black 0%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 0%, transparent 100%);
+  }
+}

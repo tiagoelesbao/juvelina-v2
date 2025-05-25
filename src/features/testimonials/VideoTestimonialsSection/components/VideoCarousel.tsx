@@ -30,32 +30,57 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
   const gap = 24;
   const itemWithGap = itemWidth + gap;
   
-  // Duplicar vídeos para loop infinito (apenas se não for mobile)
+  // Duplicar vídeos para loop infinito (desktop apenas)
   const extendedVideos = isMobile ? videos : [...videos, ...videos, ...videos];
   const totalWidth = videos.length * itemWithGap;
   
-  // Versão Mobile - Scroll nativo CSS
-  if (isMobile || isLowEnd) {
+  // Versão Mobile com efeito de borda
+  if (isMobile) {
     return (
       <div className="relative mt-8">
-        {/* Container com scroll nativo e padding nas laterais */}
+        {/* Gradientes laterais mobile */}
+        <div 
+          className="absolute left-0 top-0 w-16 h-full z-10 pointer-events-none"
+          style={{
+            background: `linear-gradient(
+              to right,
+              rgba(194, 247, 188, 1) 0%,
+              rgba(194, 247, 188, 0.8) 40%,
+              rgba(194, 247, 188, 0.3) 70%,
+              transparent 100%
+            )`
+          }}
+        />
+        <div 
+          className="absolute right-0 top-0 w-16 h-full z-10 pointer-events-none"
+          style={{
+            background: `linear-gradient(
+              to left,
+              rgba(194, 247, 188, 1) 0%,
+              rgba(194, 247, 188, 0.8) 40%,
+              rgba(194, 247, 188, 0.3) 70%,
+              transparent 100%
+            )`
+          }}
+        />
+        
+        {/* Container com scroll nativo otimizado */}
         <div 
           ref={carouselRef}
-          className="overflow-x-auto hide-scrollbar snap-x snap-mandatory px-4"
+          className="overflow-x-auto hide-scrollbar snap-x snap-mandatory"
           style={{
             WebkitOverflowScrolling: 'touch',
-            scrollBehavior: 'smooth'
+            scrollBehavior: 'smooth',
+            willChange: 'scroll-position',
+            transform: 'translateZ(0)', // GPU acceleration
           }}
         >
-          <div className="flex gap-4 pb-4">
-            {/* Espaçador inicial */}
-            <div className="w-4 flex-shrink-0" />
-            
+          <div className="flex gap-4 pb-4" style={{ padding: '0 20px' }}>
             {videos.map((video) => (
               <div
                 key={video.id}
                 className="min-w-[280px] snap-center flex-shrink-0"
-                onClick={() => onVideoClick(video)}
+                style={{ transform: 'translateZ(0)' }}
               >
                 <VideoCarouselItem
                   video={video}
@@ -63,23 +88,22 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
                 />
               </div>
             ))}
-            
-            {/* Espaçador final */}
-            <div className="w-4 flex-shrink-0" />
           </div>
         </div>
         
-        {/* Indicadores simples para mobile */}
+        {/* Indicadores mobile */}
         <div className="flex justify-center gap-1.5 mt-4">
           {videos.slice(0, 5).map((_, index) => (
             <button
               key={index}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-juvelina-gold' : 'bg-gray-300'
+              className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                index === currentIndex 
+                  ? 'bg-juvelina-gold w-4' 
+                  : 'bg-gray-300'
               }`}
               onClick={() => {
                 if (carouselRef.current) {
-                  const scrollPosition = index * 296 + 20; // incluindo padding
+                  const scrollPosition = index * (itemWidth + gap) + 20;
                   carouselRef.current.scrollTo({
                     left: scrollPosition,
                     behavior: 'smooth'
@@ -90,9 +114,6 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
               aria-label={`Ir para vídeo ${index + 1}`}
             />
           ))}
-          {videos.length > 5 && (
-            <span className="text-xs text-gray-500">...</span>
-          )}
         </div>
       </div>
     );
@@ -100,15 +121,13 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
   
   // Auto-scroll otimizado para desktop
   useEffect(() => {
-    if (!isPaused && !reduceMotion && !isMobile) {
+    if (!isPaused && !reduceMotion && !isMobile && !isLowEnd) {
       const animation = animate(x, -totalWidth, {
-        duration: 40, // Aumentado para movimento mais suave
+        duration: videos.length * 5, // Ajustado para movimento mais suave
         ease: "linear",
         repeat: Infinity,
         repeatType: "loop",
-        repeatDelay: 0,
         onUpdate: (latest) => {
-          // Reset instantâneo quando chegar ao fim
           if (Math.abs(latest) >= totalWidth) {
             x.jump(0);
           }
@@ -117,112 +136,139 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({
       
       return () => animation.stop();
     }
-  }, [isPaused, x, totalWidth, reduceMotion, isMobile]);
+  }, [isPaused, x, totalWidth, videos.length, reduceMotion, isMobile, isLowEnd]);
   
-  // Navegação manual
+  // Navegação manual otimizada
   const scrollToIndex = (index: number) => {
+    onPauseChange(true);
     const newPosition = -index * itemWithGap;
-    animate(x, newPosition, {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-      onComplete: () => setCurrentIndex(index)
-    });
+    
+    if (reduceMotion) {
+      x.set(newPosition);
+      setCurrentIndex(index);
+    } else {
+      animate(x, newPosition, {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        onComplete: () => setCurrentIndex(index)
+      });
+    }
   };
   
   const handlePrevious = () => {
-    onPauseChange(true);
     const newIndex = currentIndex > 0 ? currentIndex - 1 : videos.length - 1;
     scrollToIndex(newIndex);
   };
   
   const handleNext = () => {
-    onPauseChange(true);
     const newIndex = currentIndex < videos.length - 1 ? currentIndex + 1 : 0;
     scrollToIndex(newIndex);
   };
   
-  // Versão Desktop com animações e gradientes
+  // Versão Desktop com efeito de borda aprimorado
   return (
-    <div className="relative mt-12 mx-auto" style={{ maxWidth: '1600px' }}>
-      {/* Gradiente lateral esquerdo - mais largo e suave */}
-      <div 
-        className="absolute left-0 top-0 w-32 md:w-48 lg:w-64 xl:w-80 h-full z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(
-            to right,
-            rgba(194, 247, 188, 1) 0%,
-            rgba(194, 247, 188, 0.95) 15%,
-            rgba(194, 247, 188, 0.8) 30%,
-            rgba(194, 247, 188, 0.5) 50%,
-            rgba(194, 247, 188, 0.2) 70%,
-            rgba(194, 247, 188, 0.05) 85%,
-            transparent 100%
-          )`
-        }}
-      />
-      
-      {/* Gradiente lateral direito - mais largo e suave */}
-      <div 
-        className="absolute right-0 top-0 w-32 md:w-48 lg:w-64 xl:w-80 h-full z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(
-            to left,
-            rgba(194, 247, 188, 1) 0%,
-            rgba(194, 247, 188, 0.95) 15%,
-            rgba(194, 247, 188, 0.8) 30%,
-            rgba(194, 247, 188, 0.5) 50%,
-            rgba(194, 247, 188, 0.2) 70%,
-            rgba(194, 247, 188, 0.05) 85%,
-            transparent 100%
-          )`
-        }}
-      />
-      
-      {/* Container do carrossel com padding extra */}
-      <div 
-        ref={carouselRef}
-        className="overflow-hidden"
-        style={{
-          paddingLeft: '280px',
-          paddingRight: '280px',
-          marginLeft: '-280px',
-          marginRight: '-280px'
-        }}
-        onMouseEnter={() => onPauseChange(true)}
-        onMouseLeave={() => onPauseChange(false)}
-      >
-        <motion.div 
-          className="flex gap-6"
-          style={{ x }}
-          animate={controls}
-          drag={!reduceMotion ? "x" : false}
-          dragConstraints={{ 
-            left: -(extendedVideos.length * itemWithGap), 
-            right: 0 
+    <div className="relative mt-12">
+      {/* Container com largura total da viewport */}
+      <div className="w-screen relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw]">
+        {/* Gradientes laterais melhorados */}
+        <div 
+          className="absolute left-0 top-0 w-[25%] h-full z-20 pointer-events-none"
+          style={{
+            background: `linear-gradient(
+              to right,
+              rgba(194, 247, 188, 1) 0%,
+              rgba(194, 247, 188, 0.98) 10%,
+              rgba(194, 247, 188, 0.9) 25%,
+              rgba(194, 247, 188, 0.7) 40%,
+              rgba(194, 247, 188, 0.4) 60%,
+              rgba(194, 247, 188, 0.15) 80%,
+              transparent 100%
+            )`,
+            maskImage: 'linear-gradient(to right, black 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 0%, transparent 100%)'
           }}
-          dragElastic={0.1}
-          onDragEnd={(e, { offset, velocity }) => {
-            onPauseChange(true);
-            const swipe = Math.abs(offset.x) * velocity.x;
-            if (swipe < -10000) {
-              handleNext();
-            } else if (swipe > 10000) {
-              handlePrevious();
-            }
+        />
+        
+        <div 
+          className="absolute right-0 top-0 w-[25%] h-full z-20 pointer-events-none"
+          style={{
+            background: `linear-gradient(
+              to left,
+              rgba(194, 247, 188, 1) 0%,
+              rgba(194, 247, 188, 0.98) 10%,
+              rgba(194, 247, 188, 0.9) 25%,
+              rgba(194, 247, 188, 0.7) 40%,
+              rgba(194, 247, 188, 0.4) 60%,
+              rgba(194, 247, 188, 0.15) 80%,
+              transparent 100%
+            )`,
+            maskImage: 'linear-gradient(to left, black 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to left, black 0%, transparent 100%)'
           }}
+        />
+        
+        {/* Container do carrossel */}
+        <div 
+          ref={carouselRef}
+          className="overflow-hidden"
+          style={{
+            willChange: 'transform',
+            transform: 'translateZ(0)', // GPU acceleration
+          }}
+          onMouseEnter={() => !isLowEnd && onPauseChange(true)}
+          onMouseLeave={() => !isLowEnd && onPauseChange(false)}
         >
-          {extendedVideos.map((video, index) => (
-            <VideoCarouselItem
-              key={`${video.id}-${index}`}
-              video={video}
-              onClick={() => {
+          <motion.div 
+            className="flex gap-6"
+            style={{ 
+              x,
+              paddingLeft: 'calc(50vw - 640px)',
+              paddingRight: 'calc(50vw - 640px)',
+              willChange: 'transform',
+            }}
+            animate={controls}
+            drag={!reduceMotion && !isLowEnd ? "x" : false}
+            dragConstraints={{ 
+              left: -(extendedVideos.length * itemWithGap), 
+              right: 0 
+            }}
+            dragElastic={0.1}
+            dragTransition={{ 
+              bounceStiffness: 600, 
+              bounceDamping: 30 
+            }}
+            onDragEnd={(e, { offset, velocity }) => {
+              if (!isLowEnd) {
                 onPauseChange(true);
-                onVideoClick(video);
-              }}
-            />
-          ))}
-        </motion.div>
+                const swipe = Math.abs(offset.x) * velocity.x;
+                if (swipe < -10000) {
+                  handleNext();
+                } else if (swipe > 10000) {
+                  handlePrevious();
+                }
+              }
+            }}
+          >
+            {extendedVideos.map((video, index) => (
+              <motion.div
+                key={`${video.id}-${index}`}
+                style={{
+                  willChange: 'transform',
+                  transform: 'translateZ(0)'
+                }}
+              >
+                <VideoCarouselItem
+                  video={video}
+                  onClick={() => {
+                    onPauseChange(true);
+                    onVideoClick(video);
+                  }}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
       
       {/* Controles de navegação */}

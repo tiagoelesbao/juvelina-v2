@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
+import React, { useState, useEffect, createContext, Suspense, lazy, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './styles/index.css';
 
@@ -11,9 +11,9 @@ import ScrollToTop from './components/ui/ScrollToTop';
 import CreatorBadge from './components/ui/CreatorBadge';
 import { useScrollPosition } from './hooks/ui/useScrollPosition';
 import { useModalState } from './hooks/ui/useModalState';
+import { usePerformanceOptimization } from './hooks/ui/usePerformanceOptimization';
 
 // Lazy loading de seções não críticas
-const VideoTestimonialsSection = lazy(() => import('./features/testimonials/VideoTestimonialsSection'));
 const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
 const IngredientsSection = lazy(() => import('./features/ingredients/IngredientsSection'));
 const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
@@ -23,6 +23,39 @@ const PricingSection = lazy(() => import('./features/product/PricingSection'));
 const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
 const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
 const Footer = lazy(() => import('./components/product/Footer'));
+
+// Lazy loading inteligente para VideoTestimonialsSection
+const VideoTestimonialsSection = lazy(() => {
+  return new Promise(resolve => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          import('./features/testimonials/VideoTestimonialsSection').then(resolve);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    
+    // Observar elemento anterior à seção
+    const checkForElement = () => {
+      const target = document.querySelector('#hero-section');
+      if (target) {
+        observer.observe(target);
+      } else {
+        // Tentar novamente após um breve delay
+        setTimeout(checkForElement, 100);
+      }
+    };
+    
+    checkForElement();
+    
+    // Fallback após 2 segundos se não encontrar o elemento
+    setTimeout(() => {
+      import('./features/testimonials/VideoTestimonialsSection').then(resolve);
+    }, 2000);
+  });
+});
 
 // Tipo estendido para Navigator com deviceMemory
 interface NavigatorExtended extends Navigator {
@@ -39,6 +72,7 @@ interface PerformanceContextType {
   isTablet: boolean;
   isLowEnd: boolean;
   reduceMotion: boolean;
+  isLowPerformance?: boolean;
 }
 
 export const PerformanceContext = createContext<PerformanceContextType>({
@@ -46,6 +80,7 @@ export const PerformanceContext = createContext<PerformanceContextType>({
   isTablet: false,
   isLowEnd: false,
   reduceMotion: false,
+  isLowPerformance: false,
 });
 
 function App() {
@@ -57,6 +92,18 @@ function App() {
     isTablet: false,
     isLowEnd: false,
     reduceMotion: false,
+    isLowPerformance: false,
+  });
+
+  // Hook de otimização de performance
+  const { isLowPerformance, pauseNonEssentialAnimations, resumeAnimations } = usePerformanceOptimization({
+    threshold: 45, // FPS mínimo aceitável
+    onLowPerformance: () => {
+      console.log('Performance baixa detectada, reduzindo animações');
+    },
+    onHighPerformance: () => {
+      console.log('Performance normalizada');
+    }
   });
 
   // Detectar capacidades do dispositivo
@@ -82,6 +129,7 @@ function App() {
         isTablet,
         isLowEnd: Boolean(isLowEnd),
         reduceMotion,
+        isLowPerformance,
       });
     };
 
@@ -89,7 +137,50 @@ function App() {
     window.addEventListener('resize', checkDevice);
     
     return () => window.removeEventListener('resize', checkDevice);
-  }, []);
+  }, [isLowPerformance]);
+
+  // Otimizar scroll
+  useEffect(() => {
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    let isScrolling = false;
+    
+    const handleScrollStart = () => {
+      if (!isScrolling) {
+        isScrolling = true;
+        document.body.classList.add('scrolling');
+        
+        // Pausar animações não essenciais durante scroll
+        if (performanceSettings.isLowEnd || isLowPerformance) {
+          pauseNonEssentialAnimations();
+        }
+      }
+      
+      // Reset timer
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        isScrolling = false;
+        document.body.classList.remove('scrolling');
+        
+        // Retomar animações
+        if (performanceSettings.isLowEnd || isLowPerformance) {
+          resumeAnimations();
+        }
+      }, 150);
+    };
+    
+    window.addEventListener('scroll', handleScrollStart, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScrollStart);
+      clearTimeout(scrollTimer);
+    };
+  }, [performanceSettings.isLowEnd, isLowPerformance, pauseNonEssentialAnimations, resumeAnimations]);
+
+  // Context value otimizado com useMemo
+  const performanceContextValue = useMemo(() => ({
+    ...performanceSettings,
+    isLowPerformance
+  }), [performanceSettings, isLowPerformance]);
 
   // Handler para CTA
   const handleCtaClick = (e?: React.MouseEvent) => {
@@ -129,8 +220,8 @@ function App() {
   }, [showModal, exitIntentTriggered, openModal, performanceSettings.isMobile, performanceSettings.isLowEnd]);
 
   return (
-    <PerformanceContext.Provider value={performanceSettings}>
-      <div className="min-h-screen bg-white overflow-x-hidden">
+    <PerformanceContext.Provider value={performanceContextValue}>
+      <div className="min-h-screen bg-white overflow-x-hidden optimized-scroll">
         <AnnouncementBar />
         <Header onCtaClick={handleCtaClick} />
         
@@ -138,8 +229,15 @@ function App() {
         <main>
           <HeroSection onCtaClick={handleCtaClick} />
           
-          {/* Lazy loaded sections com fallback */}
-          <Suspense fallback={<LoadingSection />}>
+          {/* VideoTestimonialsSection com fallback otimizado */}
+          <Suspense 
+            fallback={
+              <div className="py-20 text-center bg-gradient-to-b from-white to-juvelina-mint/10">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold mx-auto mb-4" />
+                <p className="text-gray-600">Carregando vídeos incríveis...</p>
+              </div>
+            }
+          >
             <VideoTestimonialsSection onCtaClick={handleCtaClick} />
           </Suspense>
           
@@ -191,11 +289,11 @@ function App() {
           )}
         </AnimatePresence>
         
-        {/* Scroll to top button - CORRIGIDO */}
+        {/* Scroll to top button */}
         <ScrollToTop show={showScrollTop} />
         
-        {/* Creator Badge - apenas desktop */}
-        {!performanceSettings.isMobile && !performanceSettings.isLowEnd && <CreatorBadge />}
+        {/* Creator Badge - apenas desktop e não low-end */}
+        {!performanceSettings.isMobile && !performanceSettings.isLowEnd && !isLowPerformance && <CreatorBadge />}
       </div>
     </PerformanceContext.Provider>
   );
