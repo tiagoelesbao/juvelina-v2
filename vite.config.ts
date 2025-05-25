@@ -39,36 +39,16 @@ export default defineConfig({
       filter: /\.(js|css|html|svg|json)$/i
     }),
     
-    // Plugin customizado para debug de chunks
-    {
-      name: 'debug-chunks',
-      generateBundle(options, bundle) {
-        console.log('\n=== CHUNK DEBUG ===');
-        for (const [fileName, chunk] of Object.entries(bundle)) {
-          if (chunk.type === 'chunk') {
-            console.log(`\nChunk: ${fileName}`);
-            console.log(`- Modules: ${Object.keys(chunk.modules || {}).length}`);
-            console.log(`- Size: ${chunk.code?.length || 0} bytes`);
-            console.log(`- Is Entry: ${chunk.isEntry}`);
-            console.log(`- Is Dynamic Entry: ${chunk.isDynamicEntry}`);
-            if (chunk.modules) {
-              const moduleKeys = Object.keys(chunk.modules);
-              console.log(`- First modules: ${moduleKeys.slice(0, 3).join(', ')}`);
-              if (moduleKeys.length > 3) {
-                console.log(`  ... and ${moduleKeys.length - 3} more`);
-              }
-            }
-          }
-        }
-        console.log('=================\n');
-      }
-    },
-    
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: [
+        'favicon.png',
+        'apple-touch-icon.png',
+        'robots.txt',
+        'images/**/*'  // Incluir todas as imagens da pasta public/images
+      ],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,webp,woff,woff2}'],
         cleanupOutdatedCaches: true,
         sourcemap: true,
         runtimeCaching: [
@@ -99,6 +79,34 @@ export default defineConfig({
                 statuses: [0, 200]
               }
             }
+          },
+          // Cache para imagens locais
+          {
+            urlPattern: /^https:\/\/www\.juvelinaorganics\.com\.br\/images\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'local-images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 24 horas
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 3
+            }
+          },
+          // Cache para imagens em desenvolvimento
+          {
+            urlPattern: /^http:\/\/localhost:\d+\/images\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'dev-images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hora
+              }
+            }
           }
         ]
       },
@@ -113,11 +121,35 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+          { 
+            src: '/icon-192x192.png', 
+            sizes: '192x192', 
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          { 
+            src: '/icon-512x512.png', 
+            sizes: '512x512', 
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
         ]
       }
     }),
+    
+    // Plugin para garantir que imagens sejam servidas corretamente
+    {
+      name: 'configure-response-headers',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.startsWith('/images/')) {
+            res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+          }
+          next();
+        });
+      }
+    },
     
     ...(process.env.ANALYZE === 'true' ? [visualizer({
       open: true,
@@ -128,7 +160,8 @@ export default defineConfig({
     })] : [])
   ],
 
-  assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.otf'],
+  // Incluir formatos de imagem adicionais
+  assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.otf', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.webp'],
 
   resolve: {
     alias: {
@@ -161,18 +194,17 @@ export default defineConfig({
       preserveEntrySignatures: 'strict',
       
       output: {
-        // Adicionar experimentalMinChunkSize para garantir chunks mínimos
         experimentalMinChunkSize: 10000, // 10KB mínimo por chunk
         
-        // Manual chunks mais explícito com arrays de arquivos
+        // Manual chunks
         manualChunks: {
-          // Vendors principais - forçar inclusão específica
+          // Vendors principais
           'vendor-react': ['react', 'react-dom'],
           'vendor-framer': ['framer-motion'],
           'vendor-icons': ['lucide-react'],
           'vendor-observer': ['react-intersection-observer'],
           
-          // Features - especificar arquivos explicitamente
+          // Features
           'feature-hero': [
             './src/features/hero/index.tsx',
             './src/features/hero/components/HeroHeading.tsx',
@@ -240,7 +272,7 @@ export default defineConfig({
           ],
         },
         
-        // Configurar melhor os nomes dos arquivos
+        // Configurar nomes dos arquivos
         entryFileNames: 'assets/js/entry-[name]-[hash].js',
         chunkFileNames: (chunkInfo) => {
           const name = chunkInfo.name || 'chunk';
@@ -266,14 +298,12 @@ export default defineConfig({
           return `assets/[name]-[hash][extname]`;
         },
         
-        // Configurações adicionais importantes
         interop: 'auto',
         exports: 'auto',
         preserveModules: false,
         format: 'es',
         inlineDynamicImports: false,
         
-        // Adicionar generatedCode para melhor compatibilidade
         generatedCode: {
           preset: 'es2015',
           arrowFunctions: true,
@@ -284,11 +314,7 @@ export default defineConfig({
         },
       },
       
-      // TEMPORARIAMENTE: Desabilitar tree-shaking para debug
-      treeshake: false,
-      
-      // Quando funcionar, voltar para tree-shaking menos agressivo:
-      /*
+      // Tree-shaking otimizado
       treeshake: {
         moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
@@ -296,23 +322,18 @@ export default defineConfig({
         unknownGlobalSideEffects: false,
         correctVarValueBeforeDeclaration: true,
       },
-      */
       
-      // Configurar external se necessário
       external: [],
-      
-      // Plugins adicionais do Rollup se necessário
       plugins: [],
     },
     
-    // Configurações adicionais de build
+    // Configurações adicionais
     reportCompressedSize: true,
     assetsInlineLimit: 4096, // 4kb
     modulePreload: {
       polyfill: true,
     },
     
-    // Adicionar commonjsOptions para melhor compatibilidade
     commonjsOptions: {
       transformMixedEsModules: true,
       defaultIsModuleExports: 'auto',
@@ -327,6 +348,12 @@ export default defineConfig({
     hmr: {
       overlay: true,
     },
+    headers: {
+      // Headers para desenvolvimento
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     warmup: {
       clientFiles: [
         './src/App.tsx',
@@ -336,7 +363,7 @@ export default defineConfig({
     }
   },
   
-  // Otimização de dependências melhorada
+  // Otimização de dependências
   optimizeDeps: {
     include: [
       'react',
@@ -351,7 +378,6 @@ export default defineConfig({
     esbuildOptions: {
       target: 'es2020',
       jsx: 'automatic',
-      // Adicionar keepNames para melhor debugging
       keepNames: true,
     },
     force: process.env.FORCE_OPTIMIZE === 'true',
@@ -359,7 +385,6 @@ export default defineConfig({
       'src/main.tsx',
       'src/App.tsx',
     ],
-    // Adicionar needsInterop se necessário
     needsInterop: [],
   },
   
@@ -381,7 +406,7 @@ export default defineConfig({
     open: true,
     cors: true,
     headers: {
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
       'X-XSS-Protection': '1; mode=block',
@@ -400,15 +425,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         entryFileNames: 'assets/worker-[hash].js',
-      }
-    }
-  },
-  
-  // Adicionar experimental renderBuiltUrl se necessário
-  experimental: {
-    renderBuiltUrl(filename, { hostType }) {
-      if (hostType === 'js') {
-        return { runtime: `window.__publicPath + ${JSON.stringify(filename)}` }
       }
     }
   },

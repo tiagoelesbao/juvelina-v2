@@ -3,7 +3,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const HeroImage: React.FC = () => {
-  // Remover a declaração de variável e usar diretamente o caminho
+  // Solução híbrida - simples mas robusta
+  const imageUrl = import.meta.env.PROD 
+    ? '/images/juvelina-bottle.png'
+    : `${window.location.origin}/images/juvelina-bottle.png`;
   
   return (
     <div className="md:col-span-1 relative">
@@ -94,7 +97,7 @@ const HeroImage: React.FC = () => {
           }}
         />
         
-        {/* Imagem do produto - USAR CAMINHO DIRETO */}
+        {/* Imagem do produto - SOLUÇÃO HÍBRIDA */}
         <motion.div
           className="relative z-10"
           animate={{ 
@@ -108,7 +111,7 @@ const HeroImage: React.FC = () => {
           }}
         >
           <img 
-            src="/images/juvelina-bottle.png"
+            src={imageUrl}
             alt="Suplemento Líquido Juvelina" 
             className="max-w-full h-auto transform scale-110 md:scale-150"
             style={{ 
@@ -116,8 +119,11 @@ const HeroImage: React.FC = () => {
             }}
             onError={(e) => {
               console.error('Erro ao carregar imagem Juvelina:', e);
-              // Fallback para uma imagem temporária se houver erro
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1607006348458-ff29e31ebb09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+              // Fallback para CDN se falhar
+              const target = e.currentTarget;
+              if (!target.src.includes('unsplash')) {
+                target.src = 'https://images.unsplash.com/photo-1607006348458-ff29e31ebb09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+              }
             }}
           />
         </motion.div>
@@ -182,13 +188,13 @@ const HeroImage: React.FC = () => {
           
           {/* Selo Dermatologicamente Testado - Mobile (mantém posição) */}
           <motion.div
-            className="absolute bottom-8 left-5 z-10"
+            className="absolute bottom-9 left-9 z-10"
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 0.85 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
             <motion.div
-              className="bg-white rounded-full pl-2 pr-3 py-1.5 flex items-center gap-1.5 shadow-md"
+              className="bg-white rounded-full pl-2 pr-4 py-1.5 flex items-center gap-1.5 shadow-md"
               animate={{ y: [0, -2, 0] }}
               transition={{ 
                 y: { duration: 3, repeat: Infinity, repeatType: "reverse" }
@@ -199,15 +205,15 @@ const HeroImage: React.FC = () => {
                 border: "1px solid rgba(169,104,61,0.1)"
               }}
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-100">
+              <div className="w-4 h-6 rounded-full flex items-center justify-center bg-green-100">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-medium text-gray-700">Dermatolog.</span>
-                <span className="font-medium text-gray-700 text-[11px]">Testado</span>
+              <div className="flex flex-col gap-0">
+                <span className="font-medium text-gray-700 leading-3">Dermatolog.</span>
+                <span className="font-medium text-gray-700 text-[11px] leading-3">Testado</span>
               </div>
             </motion.div>
           </motion.div>
@@ -277,7 +283,7 @@ const HeroImage: React.FC = () => {
           <motion.div
             className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute -bottom-8 right-0"
             style={{
-              boxShadow: "0 10px 25px rgba(169,104,61,0.2)",
+                boxShadow: "0 10px 25px rgba(169,104,61,0.2)",
               border: "1px solid rgba(169,104,61,0.1)"
             }}
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -316,7 +322,7 @@ const HeroImage: React.FC = () => {
           <motion.div 
             className="absolute bottom-4 -left-10 z-20"
             initial={{ opacity: 0, scale: 0.8, x: -20 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
+            animate={{ opacity: 1, scale: 0.9, x: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
             <motion.div
