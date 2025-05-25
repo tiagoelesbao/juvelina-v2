@@ -33,10 +33,11 @@ export default {
         }
       },
       
-      // Fontes otimizadas
       fontFamily: {
         display: ['Ws Paradose', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Zap', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Ws Paradose', 'Georgia', 'serif'],
+        body: ['Zap', 'Inter', 'sans-serif'],
       },
       
       // Animações simplificadas para mobile

@@ -20,13 +20,13 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color: #1f2937;
-  background-color: #ffffff;
-  overflow-x: hidden;
-  width: 100%;
-  position: relative;
+  font-family: 'Zap', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-display,
+.font-heading {
+  font-family: 'Ws Paradose', Georgia, serif;
 }
 
 #root {
@@ -40,10 +40,22 @@ body {
    FONTES CUSTOMIZADAS
    ================================= */
 @font-face {
-  font-family: 'Ws Paradose';
-  src: local('Georgia'), local('Palatino'), serif;
+  font-family: 'Zap';
+  src: url('/src/assets/fonts/zap.woff2') format('woff2'),
+       url('/src/assets/fonts/zap.woff') format('woff'),
+       url('/src/assets/fonts/zap.ttf') format('truetype');
   font-weight: normal;
-  font-style: italic;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ws Paradose';
+  src: url('/src/assets/fonts/ws-paradose.woff2') format('woff2'),
+       url('/src/assets/fonts/ws-paradose.woff') format('woff'),
+       url('/src/assets/fonts/ws-paradose.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
   font-display: swap;
 }
 

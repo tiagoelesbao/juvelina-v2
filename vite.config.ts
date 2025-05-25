@@ -159,7 +159,10 @@ export default defineConfig({
       template: 'treemap' // ou 'sunburst', 'network'
     })] : [])
   ],
-  
+
+  // >>> AQUI! <<<
+  assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.otf'],
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
