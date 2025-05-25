@@ -1,9 +1,9 @@
 // src/App.tsx
-import React, { useState, useEffect, createContext, Suspense, lazy, useMemo } from 'react';
+import React, { useState, useEffect, createContext, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './styles/index.css';
 
-// Componentes essenciais (não lazy)
+// Componentes essenciais
 import { AnnouncementBar, Header, PurchaseModal } from './components/common';
 import HeroSection from './features/hero';
 import LoadingSection from './components/ui/LoadingSection';
@@ -13,21 +13,17 @@ import { useScrollPosition } from './hooks/ui/useScrollPosition';
 import { useModalState } from './hooks/ui/useModalState';
 import { usePerformanceOptimization } from './hooks/ui/usePerformanceOptimization';
 
-// Lazy loading de seções não críticas
-const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection'));
-const IngredientsSection = lazy(() => import('./features/ingredients/IngredientsSection'));
-const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
-const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
-const PricingSection = lazy(() => import('./features/product/PricingSection'));
-const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
-const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
-const Footer = lazy(() => import('./components/product/Footer'));
-
-// Lazy loading com fallback para VideoTestimonialsSection
-const VideoTestimonialsSection = lazy(() => {
-  return import('./features/testimonials/VideoTestimonialsSection');
-});
+// Importar todos os componentes diretamente (sem lazy)
+import VideoTestimonialsSection from './features/testimonials/VideoTestimonialsSection';
+import BenefitsSection from './features/benefits/BenefitsSection';
+import IngredientsSection from './features/ingredients/IngredientsSection';
+import AbsorptionSection from './features/benefits/AbsorptionSection';
+import UGCGallerySection from './features/testimonials/UGCGallerySection';
+import GuaranteeSection from './features/testimonials/GuaranteeSection';
+import PricingSection from './features/product/PricingSection';
+import ViralOfferSection from './features/product/ViralOfferSection';
+import FaqSection from './features/testimonials/FaqSection';
+import Footer from './components/product/Footer';
 
 // Tipo estendido para Navigator com deviceMemory
 interface NavigatorExtended extends Navigator {
@@ -201,53 +197,17 @@ function App() {
         <main>
           <HeroSection onCtaClick={handleCtaClick} />
           
-          {/* VideoTestimonialsSection com fallback otimizado */}
-          <Suspense 
-            fallback={
-              <div className="py-20 text-center bg-gradient-to-b from-white to-juvelina-mint/10">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-juvelina-gold mx-auto mb-4" />
-                <p className="text-gray-600">Carregando vídeos incríveis...</p>
-              </div>
-            }
-          >
-            <VideoTestimonialsSection onCtaClick={handleCtaClick} />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <BenefitsSection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <IngredientsSection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <AbsorptionSection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <UGCGallerySection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <GuaranteeSection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <PricingSection onCtaClick={handleCtaClick} />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <ViralOfferSection onCtaClick={handleCtaClick} />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <FaqSection />
-          </Suspense>
-          
-          <Suspense fallback={<LoadingSection />}>
-            <Footer />
-          </Suspense>
+          {/* Todas as seções importadas diretamente - sem Suspense */}
+          <VideoTestimonialsSection onCtaClick={handleCtaClick} />
+          <BenefitsSection />
+          <IngredientsSection />
+          <AbsorptionSection />
+          <UGCGallerySection />
+          <GuaranteeSection />
+          <PricingSection onCtaClick={handleCtaClick} />
+          <ViralOfferSection onCtaClick={handleCtaClick} />
+          <FaqSection />
+          <Footer />
         </main>
         
         {/* Modais e componentes flutuantes */}
