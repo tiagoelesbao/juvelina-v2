@@ -23,17 +23,6 @@ const springTransition = {
 const HeroHeading: React.FC = () => {
   return (
     <>
-      {/* Badge de inovação - APENAS MOBILE */}
-      <motion.div 
-        className="inline-flex sm:hidden items-center gap-2 rounded-full px-2 py-1.5 mb-6 bg-gradient-to-r from-juvelina-mint/30 to-juvelina-mint/10 text-juvelina-gold font-medium"
-        initial={fadeInLeft.initial}
-        animate={fadeInLeft.animate}
-        transition={{ delay: 0.2, duration: 0.5, ...springTransition }}
-      >
-        <span>🏆 #1 Suplemento Líquido do Brasil</span>
-        <span className="text-xs opacity-80">• Inovação 2025</span>
-      </motion.div>
-      
       {/* Headline principal - SIMPLIFICADA NO DESKTOP */}
       <motion.h1 
         className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-4"
@@ -50,14 +39,6 @@ const HeroHeading: React.FC = () => {
             {' '}em{' '}
             <motion.span 
               className="relative inline-block text-juvelina-gold"
-              animate={{ 
-                y: [0, -5, 0],
-              }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
             >
               15 Dias
               <motion.span 
@@ -197,16 +178,9 @@ const HeroHeading: React.FC = () => {
           >
             <span className="text-lg">🛡️</span>
             <span className="font-medium whitespace-nowrap">65% Menos Gripes</span>
-            <motion.div 
-              className="absolute bottom-0 left-0 h-0.5 bg-green-400"
-              initial={{ width: "0%" }}
-              animate={{ width: ["0%", "100%", "0%"] }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+         
+
+        
           </motion.div>
           
           <motion.div
@@ -221,17 +195,8 @@ const HeroHeading: React.FC = () => {
           >
             <span className="text-lg">✨</span>
             <span className="font-medium whitespace-nowrap">Pele 3x Mais Firme</span>
-            <motion.div 
-              className="absolute bottom-0 left-0 h-0.5 bg-purple-400"
-              initial={{ width: "0%" }}
-              animate={{ width: ["0%", "100%", "0%"] }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity,
-                delay: 1,
-                ease: "easeInOut"
-              }}
-            />
+ 
+       
           </motion.div>
         </div>
       </motion.div>

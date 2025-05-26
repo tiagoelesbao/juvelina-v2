@@ -638,7 +638,7 @@ section {
 
 /* Espaçadores mobile */
 .hero-top-spacer {
-  height: 1.5rem; /* Aumentado para dar mais respiro ao topo */
+  height: 0.5rem; /* Aumentado para dar mais respiro ao topo */
 }
 
 .hero-bottom-spacer {
