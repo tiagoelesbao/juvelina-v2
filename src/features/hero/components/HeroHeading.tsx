@@ -67,14 +67,14 @@ const HeroHeading: React.FC = () => {
       >
         {/* Mobile: versão completa */}
         <span className="sm:hidden">
-          Desperte <span className="text-juvelina-gold font-bold">47% mais energia</span> desde a primeira semana
+          Desperte <span className="text-juvelina-gold font-bold">sua juventude</span> desde a primeira semana
           com nossa fórmula líquida de <span className="underline decoration-juvelina-gold decoration-2">absorção instantânea</span> e 
           25 nutrientes premium clinicamente testados.
         </span>
         
         {/* Desktop: versão simplificada */}
         <span className="hidden sm:inline">
-          Desperte <span className="text-juvelina-gold font-bold">47% mais energia</span> com nossa fórmula líquida de{' '}
+          Desperte <span className="text-juvelina-gold font-bold">sua juventude</span> com nossa fórmula líquida de{' '}
           <span className="underline decoration-juvelina-gold decoration-2">absorção instantânea</span>.
         </span>
       </motion.p>

@@ -13,7 +13,7 @@ const HeroImage: React.FC = () => {
     <div className="md:col-span-1 relative">
       {/* TikTok Badge - posicionado no topo da coluna */}
       <motion.div
-        className="absolute -top-1/4 right-0 z-20"
+        className="absolute -top-1/2 right-0 z-20"
         initial={{ opacity: 0, scale: 0.8, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
@@ -257,7 +257,7 @@ const HeroImage: React.FC = () => {
         <div className="hidden md:block">
           {/* Selo 100% Natural - Desktop (posição superior esquerda) */}
           <motion.div 
-            className="absolute top-10 -left-20 transform"
+            className="absolute top-0 -left-1 transform"
             initial={{ opacity: 0, scale: 0.8, x: -20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ delay: 1.2, duration: 0.5 }}
@@ -287,7 +287,7 @@ const HeroImage: React.FC = () => {
           
           {/* Selo de Pureza Certificada - Desktop */}
           <motion.div
-            className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute -bottom-8 right-0"
+            className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute -bottom-28 right-0"
             style={{
                 boxShadow: "0 10px 25px rgba(169,104,61,0.2)",
               border: "1px solid rgba(169,104,61,0.1)"
@@ -358,7 +358,7 @@ const HeroImage: React.FC = () => {
           
           {/* Selo "Absorção 5x" - Desktop */}
           <motion.div
-            className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute top-1/2 -right-20"
+            className="bg-white rounded-full pl-2 pr-4 py-2 flex items-center gap-2 shadow-lg absolute top-7 -right-20"
             style={{
               boxShadow: "0 10px 25px rgba(169,104,61,0.2)",
               border: "1px solid rgba(169,104,61,0.1)"
