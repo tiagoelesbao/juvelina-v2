@@ -183,10 +183,10 @@ const HeroHeading: React.FC = () => {
           ))}
         </div>
         
-        {/* Desktop: apenas 2 chips principais */}
+        {/* Desktop: 65% Menos Gripes e Pele 3x Mais Firme com mesmo tamanho */}
         <div className="hidden sm:flex gap-4">
           <motion.div
-            className="flex items-center gap-2 px-5 py-3 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300 relative overflow-hidden"
+            className="flex items-center gap-2 px-5 py-3 rounded-full bg-green-100 text-green-700 border border-green-300 relative overflow-hidden"
             whileHover={{ 
               scale: 1.05,
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
@@ -195,10 +195,10 @@ const HeroHeading: React.FC = () => {
             animate={fadeInLeft.animate}
             transition={{ delay: 0.6, duration: 0.5 }}
           >
-            <span className="text-lg">⚡</span>
-            <span className="font-medium">+8h de Energia Sustentada</span>
+            <span className="text-lg">🛡️</span>
+            <span className="font-medium whitespace-nowrap">65% Menos Gripes</span>
             <motion.div 
-              className="absolute bottom-0 left-0 h-0.5 bg-yellow-400"
+              className="absolute bottom-0 left-0 h-0.5 bg-green-400"
               initial={{ width: "0%" }}
               animate={{ width: ["0%", "100%", "0%"] }}
               transition={{ 
@@ -220,7 +220,7 @@ const HeroHeading: React.FC = () => {
             transition={{ delay: 0.7, duration: 0.5 }}
           >
             <span className="text-lg">✨</span>
-            <span className="font-medium">25 Nutrientes Premium</span>
+            <span className="font-medium whitespace-nowrap">Pele 3x Mais Firme</span>
             <motion.div 
               className="absolute bottom-0 left-0 h-0.5 bg-purple-400"
               initial={{ width: "0%" }}

@@ -617,39 +617,89 @@ section {
   overflow: hidden;
 }
 
-/* Container do conteúdo hero */
+/* Container principal */
 .hero-content {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 120px); /* Descontar altura do header */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container interno */
+.hero-inner {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  position: relative;
 }
 
-/* Mobile: ajuste de altura */
+/* Espaçadores mobile */
+.hero-top-spacer {
+  height: 1.5rem; /* Aumentado para dar mais respiro ao topo */
+}
+
+.hero-bottom-spacer {
+  height: 2rem; /* Ajustado para melhor proporção */
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .hero-content {
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0; /* Adiciona respiro vertical no desktop */
+  }
+  
+  .hero-inner {
+    width: 100%;
+    min-height: calc(100vh - 4rem); /* Previne compressão do conteúdo */
+  }
+}
+
+/* Mobile específico */
 @media (max-width: 767px) {
   .hero-content {
-    min-height: calc(100vh - 100px); /* Altura menor do header no mobile */
-    padding-top: 4rem;
+    min-height: 100vh; /* Altura total no mobile */
+    padding-top: 1rem; /* Pequeno padding superior */
   }
-}
-
-@media (max-width: 767px) {
+  
+  /* Garante espaçamento adequado entre elementos */
+  .hero-section .container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* Adiciona padding extra no mobile se necessário */
   .hero-section {
-    padding-top: 4rem; /* Adiciona espaço extra no topo */
+    padding-top: 0;
   }
 }
 
-/* Remover qualquer padding do main */
-main {
-  padding-top: 0 !important;
+/* Previne quebra de texto indesejada no desktop */
+@media (min-width: 1024px) {
+  h1 {
+    white-space: normal;
+    word-break: normal;
+  }
+  
+  /* Ajuste específico para o título principal */
+  .hero-section h1 {
+    max-width: 100%;
+  }
 }
 
-/* Garantir que não há margens extras */
+/* Remove margens e paddings indesejados */
 .hero-section {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+main {
+  padding-top: 0 !important;
 }
 
 /* Ajuste para wave transition */

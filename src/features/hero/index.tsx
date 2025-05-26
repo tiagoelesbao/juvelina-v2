@@ -60,8 +60,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
       ref={sectionRef}
       className="hero-section bg-white"
     >
-      {/* Container principal */}
-      <div className="hero-content">
+      {/* Container principal com classes específicas para mobile */}
+      <div className="hero-content relative">
+        {/* Espaçador mobile no topo */}
+        <div className="hero-top-spacer md:hidden"></div>
+        
         {/* Background decorativo */}
         {!isMobile && !isLowEnd && (
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -109,59 +112,62 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
           </div>
         )}
         
-        {/* Conteúdo centralizado */}
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
-            {/* Texto */}
+        {/* Container interno para o conteúdo */}
+        <div className="hero-inner">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+              {/* Texto */}
+              <motion.div 
+                className="order-2 md:order-1 text-center md:text-left"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <HeroHeading />
+                <HeroButtons onCtaClick={onCtaClick} />
+                
+                {/* Stats mobile */}
+                {isMobile && (
+                  <motion.div
+                    className="mt-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                  >
+                    <HeroStats stats={stats} inView={inView} showTitle={false} />
+                  </motion.div>
+                )}
+              </motion.div>
+              
+              {/* Imagem */}
+              <motion.div 
+                className="order-1 md:order-2 relative"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <HeroImage />
+              </motion.div>
+            </div>
+          </div>
+          
+          {/* Scroll indicator */}
+          {!isMobile && (
             <motion.div 
-              className="order-2 md:order-1 text-center md:text-left"
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ delay: 1, duration: 0.5 }}
             >
-              <HeroHeading />
-              <HeroButtons onCtaClick={onCtaClick} />
-              
-              {/* Stats mobile */}
-              {isMobile && (
-                <motion.div
-                  className="mt-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                >
-                  <HeroStats stats={stats} inView={inView} showTitle={false} />
-                </motion.div>
-              )}
+              <ScrollIndicator />
             </motion.div>
-            
-            {/* Imagem */}
-            <motion.div 
-              className="order-1 md:order-2 relative"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <HeroImage />
-            </motion.div>
-          </div>
+          )}
         </div>
         
-        {/* Scroll indicator */}
-        {!isMobile && (
-          <motion.div 
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-          >
-            <ScrollIndicator />
-          </motion.div>
-        )}
+        {/* Espaçador mobile no bottom */}
+        <div className="hero-bottom-spacer md:hidden"></div>
       </div>
 
-      <div className="h-12 md:h-0" />
-      
       {/* Wave transition */}
       <WaveTransition 
         color="#C2F7BC" 
