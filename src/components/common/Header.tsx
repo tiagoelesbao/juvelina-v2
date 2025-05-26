@@ -1,4 +1,4 @@
-// src/components/common/Header.tsx - VERSÃO CORRIGIDA COM MELHOR RESPONSIVIDADE
+// src/components/common/Header.tsx
 import React, { useState, useEffect } from 'react';
 import { Menu, ShoppingCart } from 'lucide-react';
 
@@ -10,6 +10,11 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
   const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // URL do logo
+  const logoUrl = import.meta.env.PROD 
+    ? '/images/logo.png'
+    : `${window.location.origin}/images/logo.png`;
 
   // Navigation items
   const navItems = [
@@ -95,15 +100,35 @@ const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
           <div className="flex justify-between items-center py-4">
             {/* Logo */}
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="cursor-pointer"
               onClick={() => scrollToSection('hero')}
             >
-              <div className="text-juvelina-gold">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
+              <img 
+                src={logoUrl}
+                alt="Juvelina Organics" 
+                className="h-8 md:h-10 w-auto"
+                onError={(e) => {
+                  console.error('Erro ao carregar logo:', e);
+                  // Fallback para o logo em texto se a imagem falhar
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const fallback = document.getElementById('logo-fallback');
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              {/* Fallback do logo */}
+              <div 
+                id="logo-fallback" 
+                className="items-center gap-2" 
+                style={{ display: 'none' }}
+              >
+                <div className="text-juvelina-gold">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <span className="font-['Ws_Paradose'] text-2xl text-juvelina-gold">Juvelina</span>
               </div>
-              <span className="font-['Ws_Paradose'] text-2xl text-juvelina-gold">Juvelina</span>
             </div>
 
             {/* Desktop Navigation - Mudando de md: para lg: ou xl: */}

@@ -48,7 +48,7 @@ const HeroImage: React.FC = () => {
           right: window.innerWidth < 768 ? '0' : desktopControls.tiktok.right,
         }}
         initial={{ opacity: 0, scale: 0.8, y: -20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        animate={{ opacity: 1, scale: 0.85, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
       >
         <motion.div
