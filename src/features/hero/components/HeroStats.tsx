@@ -2,29 +2,26 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Users, Award, Zap } from 'lucide-react';
-
-interface Stat {
-  id: number;
-  value: number;
-  target: number;
-  label: string;
-  icon: React.ReactNode;
-  suffix?: string;
-  description?: string;
-}
+import { useInView } from 'react-intersection-observer';
 
 interface HeroStatsProps {
-  stats: Stat[];
-  inView: boolean;
   showTitle?: boolean;
 }
 
-const HeroStats: React.FC<HeroStatsProps> = ({ stats: initialStats, inView, showTitle = false }) => {
+const HeroStats: React.FC<HeroStatsProps> = ({ showTitle = false }) => {
+  const [hasAnimated, setHasAnimated] = useState(false);
   const [animatedValues, setAnimatedValues] = useState({
     clients: 0,
     nutrients: 0,
     satisfaction: 0,
     growth: 0
+  });
+  
+  // Usar useInView do react-intersection-observer
+  const { ref, inView } = useInView({
+    threshold: 0.3,
+    triggerOnce: true,
+    rootMargin: '-50px',
   });
   
   const formatNumber = (num: number): string => {
@@ -37,7 +34,11 @@ const HeroStats: React.FC<HeroStatsProps> = ({ stats: initialStats, inView, show
   };
   
   useEffect(() => {
-    if (!inView) return;
+    // Só animar quando estiver em view E não tiver animado ainda
+    if (!inView || hasAnimated) return;
+    
+    console.log('Stats animation starting...'); // Debug
+    setHasAnimated(true);
     
     const targets = {
       clients: 13000,
@@ -46,35 +47,34 @@ const HeroStats: React.FC<HeroStatsProps> = ({ stats: initialStats, inView, show
       growth: 47
     };
     
+    // Animação dos valores
     const animateValue = (key: keyof typeof targets, duration: number) => {
       const start = 0;
       const end = targets[key];
-      const increment = end / (duration / 16);
-      let current = start;
+      const startTime = Date.now();
       
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-          current = end;
-          clearInterval(timer);
+      const updateValue = () => {
+        const now = Date.now();
+        const progress = Math.min((now - startTime) / duration, 1);
+        const currentValue = Math.floor(start + (end - start) * progress);
+        
+        setAnimatedValues(prev => ({ ...prev, [key]: currentValue }));
+        
+        if (progress < 1) {
+          requestAnimationFrame(updateValue);
         }
-        setAnimatedValues(prev => ({ ...prev, [key]: Math.floor(current) }));
-      }, 16);
+      };
       
-      return timer;
+      requestAnimationFrame(updateValue);
     };
     
-    const timers = [
-      animateValue('clients', 2000),
-      animateValue('nutrients', 1500),
-      animateValue('satisfaction', 1800),
-      animateValue('growth', 2200)
-    ];
+    // Iniciar todas as animações
+    animateValue('clients', 2000);
+    animateValue('nutrients', 1500);
+    animateValue('satisfaction', 1800);
+    animateValue('growth', 2200);
     
-    return () => {
-      timers.forEach(timer => clearInterval(timer));
-    };
-  }, [inView]);
+  }, [inView, hasAnimated]);
   
   const displayStats = [
     {
@@ -124,7 +124,7 @@ const HeroStats: React.FC<HeroStatsProps> = ({ stats: initialStats, inView, show
   ];
   
   return (
-    <div className="w-full px-4">
+    <div className="w-full px-4" ref={ref}>
       <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-4 shadow-sm">
         <div className="grid grid-cols-2 gap-3">
           {displayStats.map((stat, index) => (
@@ -132,14 +132,17 @@ const HeroStats: React.FC<HeroStatsProps> = ({ stats: initialStats, inView, show
               key={stat.id}
               className={`relative bg-gradient-to-br ${stat.color} rounded-xl p-3 text-center group`}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ 
+              animate={inView ? { 
                 opacity: 1,
-                y: 0,
-                transition: { 
-                  delay: 0.5 + index * 0.1, 
-                  duration: 0.6, 
-                  ease: "easeOut" 
-                }
+                y: 0
+              } : { 
+                opacity: 0, 
+                y: 20 
+              }}
+              transition={{ 
+                delay: 0.1 + index * 0.1, 
+                duration: 0.6, 
+                ease: "easeOut" 
               }}
             >
               <div className={`${stat.iconColor} mb-2 flex justify-center`}>

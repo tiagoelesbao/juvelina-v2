@@ -1,5 +1,5 @@
 // src/features/hero/index.tsx
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { PerformanceContext } from '../../App';
 import HeroHeading from './components/HeroHeading';
@@ -7,7 +7,6 @@ import HeroButtons from './components/HeroButtons';
 import HeroStats from './components/HeroStats';
 import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
-import { useCountUp, StatItem } from './hooks/useCountUp';
 import WaveTransition from '../../components/ui/WaveTransition';
 
 interface HeroSectionProps {
@@ -15,57 +14,16 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
-  const [inView, setInView] = useState(false);
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const { isMobile, isTablet, reduceMotion, isLowEnd } = useContext(PerformanceContext);
-  
-  const initialStats: StatItem[] = [
-    { id: 1, value: 0, target: 13000, label: 'Vidas Transformadas', icon: '✨' },
-    { id: 2, value: 0, target: 25, label: 'Nutrientes Premium', icon: '🌿' },
-    { id: 3, value: 0, target: 98, label: 'Taxa de Recompra', icon: '💚' },
-    { id: 4, value: 0, target: 47, label: 'Mais Energia', icon: '⚡' },
-  ];
-  
-  const { stats } = useCountUp(initialStats, inView);
-  
-  useEffect(() => {
-    if (isLowEnd) {
-      setInView(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, [isLowEnd]);
+  const { isMobile, isLowEnd } = useContext(PerformanceContext);
 
   return (
-    <section 
-      ref={sectionRef}
-      className="hero-section bg-white"
-    >
+    <section className="hero-section bg-white">
       {/* Container principal com classes específicas para mobile */}
       <div className="hero-content relative">
         {/* Espaçador mobile no topo */}
         <div className="hero-top-spacer md:hidden"></div>
         
-        {/* Background decorativo */}
+        {/* Background decorativo - apenas desktop e dispositivos com boa performance */}
         {!isMobile && !isLowEnd && (
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div 
@@ -116,7 +74,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         <div className="hero-inner">
           <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
-              {/* Texto */}
+              {/* Conteúdo de texto */}
               <motion.div 
                 className="order-2 md:order-1 text-center md:text-left"
                 initial={{ opacity: 0, y: 20 }}
@@ -126,20 +84,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
                 <HeroHeading />
                 <HeroButtons onCtaClick={onCtaClick} />
                 
-                {/* Stats mobile */}
+                {/* Stats - apenas mobile com lazy loading via intersection observer interno */}
                 {isMobile && (
                   <motion.div
                     className="mt-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
                   >
-                    <HeroStats stats={stats} inView={inView} showTitle={false} />
+                    <HeroStats />
                   </motion.div>
                 )}
               </motion.div>
               
-              {/* Imagem */}
+              {/* Imagem do produto */}
               <motion.div 
                 className="order-1 md:order-2 relative"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -151,7 +109,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
             </div>
           </div>
           
-          {/* Scroll indicator */}
+          {/* Indicador de scroll - apenas desktop */}
           {!isMobile && (
             <motion.div 
               className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
@@ -168,7 +126,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
         <div className="hero-bottom-spacer md:hidden"></div>
       </div>
 
-      {/* Wave transition */}
+      {/* Transição wave para próxima seção */}
       <WaveTransition 
         color="#C2F7BC" 
         height={120}
