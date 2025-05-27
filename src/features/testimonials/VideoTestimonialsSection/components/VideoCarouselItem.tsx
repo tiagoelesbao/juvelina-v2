@@ -100,7 +100,6 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
           autoPlay
           preload="auto"
           onLoadedData={() => setIsVideoLoaded(true)}
-          poster={video.thumbnail} // Usar a thumbnail do vídeo como poster
           {...{ 'webkit-playsinline': 'true' } as any} // Necessário para iOS
         />
         

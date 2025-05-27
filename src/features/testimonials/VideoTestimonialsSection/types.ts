@@ -3,7 +3,6 @@ export interface VideoTestimonial {
   id: number;
   name: string;
   username: string;
-  thumbnail: string;
   videoUrl?: string;
   caption: string;
   views: string;
