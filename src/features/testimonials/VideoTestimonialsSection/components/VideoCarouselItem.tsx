@@ -1,7 +1,7 @@
 // src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselItem.tsx
-import React, { useState, useContext, memo } from 'react';
+import React, { useState, useContext, memo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Star } from 'lucide-react';
+import { Play, Star, Volume2, VolumeX } from 'lucide-react';
 import { VideoTestimonial } from '../types';
 import { PerformanceContext } from '../../../../App';
 
@@ -11,8 +11,41 @@ interface VideoCarouselItemProps {
 }
 
 const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onClick }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const { isLowEnd, reduceMotion } = useContext(PerformanceContext);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { isLowEnd, reduceMotion, isMobile } = useContext(PerformanceContext);
+  
+  const videoPath = `/videos/v${video.id}.mp4`;
+  
+  // Autoplay para desktop
+  useEffect(() => {
+    if (!isMobile && !isLowEnd && videoRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && videoRef.current) {
+              videoRef.current.play().catch(() => {
+                console.log('Autoplay failed for video', video.id);
+              });
+            } else if (!entry.isIntersecting && videoRef.current) {
+              videoRef.current.pause();
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+
+      observer.observe(videoRef.current);
+
+      return () => {
+        if (videoRef.current) {
+          observer.unobserve(videoRef.current);
+        }
+      };
+    }
+  }, [video.id, isMobile, isLowEnd]);
   
   const renderStars = (rating: number) => (
     <div className="flex gap-0.5">
@@ -26,41 +59,12 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
     </div>
   );
   
-  // Versão simplificada para low-end devices
-  if (isLowEnd) {
-    return (
-      <div
-        className="relative w-[280px] h-[500px] flex-shrink-0 cursor-pointer rounded-xl overflow-hidden shadow-lg bg-gray-100"
-        onClick={onClick}
-      >
-        <img 
-          src={video.thumbnail}
-          alt={`Depoimento de ${video.name}`}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-        />
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-        
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center">
-            <Play className="w-6 h-6 text-juvelina-gold ml-1" />
-          </div>
-        </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="font-bold text-sm">{video.name}</div>
-          <div className="text-xs opacity-90">{video.views}</div>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <motion.div
       className="relative w-[280px] h-[500px] flex-shrink-0 cursor-pointer group"
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       whileHover={!reduceMotion ? { 
         scale: 1.02,
         transition: { duration: 0.2 }
@@ -68,69 +72,59 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
       whileTap={!reduceMotion ? { scale: 0.98 } : {}}
       style={{
         willChange: 'transform',
-        transform: 'translateZ(0)', // GPU acceleration
+        transform: 'translateZ(0)',
       }}
     >
-      {/* Container da thumbnail */}
-      <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg bg-gray-100">
-        {/* Skeleton loader otimizado */}
-        {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-        )}
-        
-        {/* Imagem com lazy loading */}
-        <img 
-          src={video.thumbnail}
-          alt={`Depoimento de ${video.name}`}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          decoding="async"
+      <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg bg-gray-900">
+        {/* Video sempre, sem imagem de fallback */}
+        <video
+          ref={videoRef}
+          src={videoPath}
+          className="absolute inset-0 w-full h-full object-cover"
+          loop
+          muted={isMuted}
+          playsInline
+          preload="metadata"
+          onLoadedData={() => setIsVideoLoaded(true)}
+          poster={`/videos/v${video.id}-poster.jpg`} // Poster frame opcional
         />
         
         {/* Overlay com gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-200" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         
-        {/* Botão de play otimizado */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div 
-            className="relative"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.2 }}
-          >
-            {/* Glow effect simplificado */}
-            {!reduceMotion && (
-              <motion.div
-                className="absolute inset-0 bg-white/20 rounded-full blur-xl"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.4, 0.6, 0.4]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            )}
-            <div className="relative w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:bg-white transition-colors duration-200">
-              <Play className="w-7 h-7 text-juvelina-gold ml-1" />
-            </div>
-          </motion.div>
+        {/* Botão de play - sempre visível no mobile, hover no desktop */}
+        <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
+          isMobile || isHovered ? 'opacity-100' : 'opacity-0'
+        }`}>
+          <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+            <Play className="w-7 h-7 text-juvelina-gold ml-1" />
+          </div>
         </div>
+        
+        {/* Controle de mute - apenas desktop */}
+        {!isMobile && isVideoLoaded && (
+          <button
+            className={`absolute top-4 left-4 bg-black/60 backdrop-blur-sm p-2 rounded-full transition-opacity duration-200 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMuted(!isMuted);
+            }}
+            aria-label={isMuted ? "Ativar som" : "Desativar som"}
+          >
+            {isMuted ? <VolumeX size={16} className="text-white" /> : <Volume2 size={16} className="text-white" />}
+          </button>
+        )}
         
         {/* Badge de visualizações */}
         <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
           <span className="text-white text-xs font-medium">{video.views}</span>
         </div>
         
-        {/* Informações do vídeo otimizadas */}
+        {/* Informações do vídeo */}
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="space-y-2">
-            {/* Avatar e nome */}
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-juvelina-gold to-juvelina-mint flex items-center justify-center font-bold text-white shadow-lg">
@@ -146,10 +140,8 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
               </div>
             </div>
             
-            {/* Caption */}
             <p className="text-sm line-clamp-2 leading-relaxed">{video.caption}</p>
             
-            {/* Rating */}
             <div className="flex items-center justify-between pt-1">
               {renderStars(video.rating)}
               <div className="flex items-center gap-3 text-xs opacity-90">
@@ -162,7 +154,6 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
     </motion.div>
   );
 }, (prevProps, nextProps) => {
-  // Memo comparison para evitar re-renders desnecessários
   return prevProps.video.id === nextProps.video.id;
 });
 

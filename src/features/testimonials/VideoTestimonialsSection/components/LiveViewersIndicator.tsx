@@ -8,14 +8,12 @@ const LiveViewersIndicator: React.FC = () => {
   const [trend, setTrend] = useState<'up' | 'down' | 'stable'>('up');
   const [recentChange, setRecentChange] = useState(12);
   
-  // Simular mudanças no número de espectadores
   useEffect(() => {
     const interval = setInterval(() => {
       setViewersCount(prev => {
-        const change = Math.floor(Math.random() * 21) - 10; // -10 a +10
+        const change = Math.floor(Math.random() * 21) - 10;
         const newCount = prev + change;
         
-        // Determinar tendência
         if (change > 5) {
           setTrend('up');
           setRecentChange(change);
@@ -26,7 +24,6 @@ const LiveViewersIndicator: React.FC = () => {
           setTrend('stable');
         }
         
-        // Manter entre limites realistas
         return Math.max(180, Math.min(320, newCount));
       });
     }, 5000);
@@ -34,7 +31,6 @@ const LiveViewersIndicator: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Gerar avatares aleatórios
   const generateAvatars = () => {
     const colors = [
       'from-blue-400 to-blue-600',
@@ -54,9 +50,9 @@ const LiveViewersIndicator: React.FC = () => {
   const [avatars] = useState(generateAvatars());
   
   return (
-    <div className="text-center mt-8">
+    <div className="text-center mt-6 md:mt-8">
       <motion.div 
-        className="inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-gray-100"
+        className="inline-flex items-center gap-2 md:gap-3 bg-white/90 backdrop-blur-sm px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg border border-gray-100"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -66,7 +62,7 @@ const LiveViewersIndicator: React.FC = () => {
         {/* Indicador pulsante */}
         <div className="relative">
           <motion.div
-            className="w-3 h-3 bg-red-500 rounded-full"
+            className="w-2 md:w-3 h-2 md:h-3 bg-red-500 rounded-full"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [1, 0.7, 1]
@@ -78,7 +74,7 @@ const LiveViewersIndicator: React.FC = () => {
             }}
           />
           <motion.div
-            className="absolute inset-0 w-3 h-3 bg-red-500 rounded-full"
+            className="absolute inset-0 w-2 md:w-3 h-2 md:h-3 bg-red-500 rounded-full"
             animate={{
               scale: [1, 2, 2],
               opacity: [0.7, 0, 0]
@@ -91,13 +87,13 @@ const LiveViewersIndicator: React.FC = () => {
           />
         </div>
         
-        {/* Avatares animados */}
-        <div className="flex -space-x-2">
+        {/* Avatares animados - escondidos em mobile pequeno */}
+        <div className="hidden xs:flex -space-x-2">
           <AnimatePresence mode="popLayout">
             {avatars.slice(0, 4).map((avatar, index) => (
               <motion.div
                 key={avatar.id}
-                className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatar.color} border-2 border-white flex items-center justify-center text-white text-xs font-bold shadow-sm`}
+                className={`w-6 md:w-8 h-6 md:h-8 rounded-full bg-gradient-to-br ${avatar.color} border-2 border-white flex items-center justify-center text-white text-[10px] md:text-xs font-bold shadow-sm`}
                 initial={{ scale: 0, x: -10 }}
                 animate={{ scale: 1, x: 0 }}
                 exit={{ scale: 0, x: 10 }}
@@ -114,7 +110,7 @@ const LiveViewersIndicator: React.FC = () => {
             ))}
             {viewersCount > 5 && (
               <motion.div
-                className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-700 shadow-sm"
+                className="w-6 md:w-8 h-6 md:h-8 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-[10px] md:text-xs font-bold text-gray-700 shadow-sm"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.4 }}
@@ -126,9 +122,9 @@ const LiveViewersIndicator: React.FC = () => {
         </div>
         
         {/* Contador de visualizadores */}
-        <div className="flex items-center gap-2">
-          <Eye size={16} className="text-gray-600" />
-          <span className="text-sm text-gray-700">
+        <div className="flex items-center gap-1 md:gap-2">
+          <Eye size={14} className="text-gray-600 md:w-4 md:h-4" />
+          <span className="text-xs md:text-sm text-gray-700">
             <AnimatePresence mode="wait">
               <motion.span 
                 key={viewersCount}
@@ -141,15 +137,15 @@ const LiveViewersIndicator: React.FC = () => {
                 {viewersCount}
               </motion.span>
             </AnimatePresence>
-            {' '}pessoas estão assistindo agora
+            {' '}pessoas assistindo
           </span>
         </div>
         
-        {/* Indicador de tendência */}
+        {/* Indicador de tendência - escondido em mobile */}
         <AnimatePresence>
           {trend === 'up' && (
             <motion.div
-              className="flex items-center gap-1 text-green-600 text-xs font-medium"
+              className="hidden md:flex items-center gap-1 text-green-600 text-xs font-medium"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}

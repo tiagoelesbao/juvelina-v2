@@ -50,34 +50,6 @@ const VideoSectionHeader: React.FC = () => {
         >
           Assista aos depoimentos autênticos de pessoas que transformaram suas vidas com Juvelina Organics.
         </motion.p>
-        
-        {/* Badges de credibilidade */}
-        <motion.div 
-          className="flex flex-wrap justify-center gap-4 mt-6"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          {[
-            { number: '+50', label: 'Vídeos' },
-            { number: '+10M', label: 'Visualizações' },
-            { number: '98%', label: 'Aprovação' }
-          ].map((stat, index) => (
-            <motion.div 
-              key={index}
-              className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-gray-100"
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <span className="font-bold text-juvelina-gold">{stat.number}</span>
-              <span className="text-gray-600 text-sm ml-1">{stat.label}</span>
-            </motion.div>
-          ))}
-        </motion.div>
       </motion.div>
     </div>
   );
