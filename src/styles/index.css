@@ -572,13 +572,13 @@ section {
     mask-image: linear-gradient(to right, black 0%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 0%, transparent 100%);
   }
+} /* ESTA CHAVE ESTAVA FALTANDO! */
 
 /* Hero Section Específica */
 .hero-section {
   position: relative;
   overflow: hidden;
 }
-
 /* Garantir altura total da viewport no desktop */
 @media (min-width: 768px) {
   .hero-section > div:first-child {
@@ -708,7 +708,9 @@ main {
   margin-top: -2px;
 }
 
-/* Adicione estas classes no final do arquivo index.css */
+/* =================================
+   VIDEO MODAL E CAROUSEL - CORREÇÕES
+   ================================= */
 
 /* Portal do VideoModal - garantir z-index máximo */
 #video-modal-portal {
@@ -729,7 +731,6 @@ main {
     height: auto;
   }
   
-  /* Garantir que o vídeo preencha o container mantendo aspect ratio */
   #video-modal-portal .video-container {
     display: flex;
     align-items: center;
@@ -742,34 +743,98 @@ main {
 /* Scroll otimizado para mobile */
 @media (max-width: 768px) {
   .video-carousel-mobile {
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+    overscroll-behavior-x: contain !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
   }
   
-  .video-carousel-mobile > * {
+  .video-carousel-mobile > div {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  .video-carousel-mobile .video-item {
     scroll-snap-align: center;
-    scroll-snap-stop: normal;
+    scroll-snap-stop: always;
+    flex-shrink: 0;
   }
   
-  /* Fix para Safari iOS */
   .video-carousel-mobile::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
   
-  /* Garantir que o snap funcione no Safari */
+  /* Safari iOS específico */
   @supports (-webkit-touch-callout: none) {
     .video-carousel-mobile {
       -webkit-scroll-snap-type: x mandatory;
       scroll-snap-type: x mandatory;
     }
     
-    .video-carousel-mobile > * {
+    .video-carousel-mobile .video-item {
       -webkit-scroll-snap-align: center;
       scroll-snap-align: center;
     }
   }
+  
+  .video-carousel-mobile {
+    touch-action: pan-x !important;
+  }
 }
 
+/* Indicadores (dots) mobile */
+.video-dots-mobile {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 0 16px;
+}
+
+.video-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.video-dot.active {
+  width: 24px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #A9683D;
+}
+
+.video-dot:hover:not(.active) {
+  background-color: #9ca3af;
+}
+
+/* Correções finais para scroll mobile */
+.hide-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Garantir scroll funcional no mobile */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Prevenir que o pai interfira no scroll */
+  #video-depoimentos {
+    overflow-x: hidden !important;
+  }
 }

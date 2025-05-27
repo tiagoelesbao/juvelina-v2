@@ -232,4 +232,41 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* =================================
+   VIDEO CAROUSEL MOBILE FIXES
+   ================================= */
+@media (max-width: 768px) {
+  /* Garantir que o carousel funcione no mobile */
+  .video-carousel-mobile {
+    width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Prevenir que o container pai interfira */
+  #video-depoimentos {
+    overflow-x: hidden;
+  }
+  
+  /* Touch handling */
+  .video-carousel-mobile * {
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  .video-carousel-mobile {
+    touch-action: pan-x;
+  }
+  
+  /* Garantir tamanho correto dos items */
+  .video-item {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+  }
+}
+
 }
