@@ -1,34 +1,47 @@
 // src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselItem.tsx
 import React, { useState, useContext, memo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Star, Volume2, VolumeX } from 'lucide-react';
+import { Play, Star } from 'lucide-react';
 import { VideoTestimonial } from '../types';
 import { PerformanceContext } from '../../../../App';
 
 interface VideoCarouselItemProps {
   video: VideoTestimonial;
   onClick: () => void;
+  isMobile?: boolean;
 }
 
-const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onClick }) => {
+const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onClick, isMobile: isMobileProp }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isLowEnd, reduceMotion, isMobile } = useContext(PerformanceContext);
+  const { isLowEnd, reduceMotion, isMobile: contextIsMobile } = useContext(PerformanceContext);
+  
+  // Usar prop se fornecida, senão usar do context
+  const isMobile = isMobileProp !== undefined ? isMobileProp : contextIsMobile;
   
   const videoPath = `/videos/v${video.id}.mp4`;
   
-  // Autoplay para desktop
+  // Autoplay para todos os dispositivos (mas apenas quando visível)
   useEffect(() => {
-    if (!isMobile && !isLowEnd && videoRef.current) {
+    if (!isLowEnd && videoRef.current) {
+      const playVideo = async () => {
+        try {
+          if (videoRef.current) {
+            // Garantir que o vídeo está muted antes de tentar o autoplay
+            videoRef.current.muted = true;
+            await videoRef.current.play();
+          }
+        } catch (error) {
+          console.log('Autoplay prevented for video', video.id);
+        }
+      };
+      
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting && videoRef.current) {
-              videoRef.current.play().catch(() => {
-                console.log('Autoplay failed for video', video.id);
-              });
+            if (entry.isIntersecting) {
+              playVideo();
             } else if (!entry.isIntersecting && videoRef.current) {
               videoRef.current.pause();
             }
@@ -45,7 +58,7 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
         }
       };
     }
-  }, [video.id, isMobile, isLowEnd]);
+  }, [video.id, isLowEnd]);
   
   const renderStars = (rating: number) => (
     <div className="flex gap-0.5">
@@ -82,11 +95,13 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
           src={videoPath}
           className="absolute inset-0 w-full h-full object-cover"
           loop
-          muted={isMuted}
+          muted
           playsInline
-          preload="metadata"
+          autoPlay
+          preload="auto"
           onLoadedData={() => setIsVideoLoaded(true)}
-          poster={`/videos/v${video.id}-poster.jpg`} // Poster frame opcional
+          poster={video.thumbnail} // Usar a thumbnail do vídeo como poster
+          {...{ 'webkit-playsinline': 'true' } as any} // Necessário para iOS
         />
         
         {/* Overlay com gradiente */}
@@ -100,22 +115,6 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
             <Play className="w-7 h-7 text-juvelina-gold ml-1" />
           </div>
         </div>
-        
-        {/* Controle de mute - apenas desktop */}
-        {!isMobile && isVideoLoaded && (
-          <button
-            className={`absolute top-4 left-4 bg-black/60 backdrop-blur-sm p-2 rounded-full transition-opacity duration-200 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMuted(!isMuted);
-            }}
-            aria-label={isMuted ? "Ativar som" : "Desativar som"}
-          >
-            {isMuted ? <VolumeX size={16} className="text-white" /> : <Volume2 size={16} className="text-white" />}
-          </button>
-        )}
         
         {/* Badge de visualizações */}
         <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
