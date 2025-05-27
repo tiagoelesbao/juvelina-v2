@@ -283,20 +283,43 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* =================================
-   STICKY HEADER FIX
+   STICKY HEADER FIX (DESKTOP)
    ================================= */
 .announcement-bar {
   position: sticky;
   top: 0;
   z-index: 50;
   background-color: #a9683d;
+  height: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  max-width: 100vw;
+  padding: 0 12px;
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
 .main-header {
   position: sticky;
-  top: 40px;
+  top: 40px;  /* Sempre igual ao height da announcement-bar */
   z-index: 40;
   background-color: #ffffff;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Desktop: zera margens extras no topo de tudo */
+body, html, #root, main, .hero-section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* Ajuste de scroll para sections com header sticky */
