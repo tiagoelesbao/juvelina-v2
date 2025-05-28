@@ -1,158 +1,157 @@
-// src/features/ingredients/IngredientsSection.tsx - VERSÃO APRIMORADA
-import React, { useState, useEffect, useMemo } from 'react';
+// src/features/ingredients/IngredientsSection.tsx
+import React, { useState, useEffect, useMemo, useCallback, useContext, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Leaf, Sparkles, Shield, Zap, Eye, ArrowRight, Search, X, Info } from 'lucide-react';
-import IngredientsList from '../../components/ui/IngredientsList';
+import { PerformanceContext } from '../../App';
+import './IngredientsSection.css';
+
+// Lazy load do modal
+const IngredientsList = lazy(() => import('../../components/ui/IngredientsList'));
 
 interface IngredientsSectionProps {
-  highlightBenefit?: string; // Recebe o benefício ativo da seção anterior
+  highlightBenefit?: string;
 }
+
+// Dados estáticos fora do componente
+const INGREDIENT_CATEGORIES = [
+  {
+    id: 'energy',
+    title: 'Energia & Vitalidade',
+    icon: <Zap className="w-6 h-6" />,
+    color: 'from-yellow-400 to-orange-400',
+    glow: 'shadow-yellow-200',
+    ingredients: [
+      { name: 'BCAAs', amount: '935mg', benefit: 'Energia muscular sustentada' },
+      { name: 'Vitaminas do Complexo B', amount: 'Dose completa', benefit: 'Metabolismo energético' },
+      { name: 'Vitamina B12', amount: '4,8mcg', benefit: 'Combate à fadiga' }
+    ],
+    relatedBenefit: 'energia'
+  },
+  {
+    id: 'immunity',
+    title: 'Imunidade & Proteção',
+    icon: <Shield className="w-6 h-6" />,
+    color: 'from-green-400 to-emerald-400',
+    glow: 'shadow-green-200',
+    ingredients: [
+      { name: 'Vitamina C', amount: '100mg', benefit: 'Fortalece defesas naturais' },
+      { name: 'Zinco', amount: '11mg', benefit: 'Sistema imune robusto' },
+      { name: 'Selênio', amount: '100mcg', benefit: 'Ação antioxidante potente' }
+    ],
+    relatedBenefit: 'imunidade'
+  },
+  {
+    id: 'beauty',
+    title: 'Beleza & Juventude',
+    icon: <Sparkles className="w-6 h-6" />,
+    color: 'from-pink-400 to-purple-400',
+    glow: 'shadow-pink-200',
+    ingredients: [
+      { name: 'Colágeno Bioativo', amount: '2,5g', benefit: 'Pele firme e elástica' },
+      { name: 'Biotina', amount: '45mcg', benefit: 'Cabelos e unhas fortes' },
+      { name: 'Silício Orgânico', amount: '5mg', benefit: 'Rejuvenescimento celular' }
+    ],
+    relatedBenefit: 'beleza'
+  }
+];
+
+const BENEFIT_NAMES: Record<string, string> = {
+  energia: 'Energia Sustentada',
+  imunidade: 'Imunidade Reforçada',
+  beleza: 'Beleza Radiante',
+  absorcao: 'Absorção Superior'
+};
 
 const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefit }) => {
   const [showIngredientsList, setShowIngredientsList] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [debouncedHoveredCategory, setDebouncedHoveredCategory] = useState<string | null>(null);
+  const [loadedCategories, setLoadedCategories] = useState<string[]>([]);
+  const { isMobile, reduceMotion } = useContext(PerformanceContext);
+  
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
 
-  // Mapeamento de benefícios para ingredientes
-  const benefitToIngredients: Record<string, string[]> = {
-    energia: ['BCAAs', 'Vitaminas do Complexo B', 'Vitamina B12'],
-    imunidade: ['Vitamina C', 'Zinco', 'Selênio', 'Glutamina'],
-    beleza: ['Colágeno Bioativo', 'Biotina', 'Silício Orgânico'],
-    absorcao: ['Forma Líquida', 'pH Otimizado']
-  };
-
-  // Mapeamento de benefícios para nomes amigáveis
-  const benefitNames: Record<string, string> = {
-    energia: 'Energia Sustentada',
-    imunidade: 'Imunidade Reforçada',
-    beleza: 'Beleza Radiante',
-    absorcao: 'Absorção Superior'
-  };
-
-  // Categorias de ingredientes destacados
-  const ingredientCategories = [
-    {
-      id: 'energy',
-      title: 'Energia & Vitalidade',
-      icon: <Zap className="w-6 h-6" />,
-      color: 'from-yellow-400 to-orange-400',
-      glow: 'shadow-yellow-200',
-      ingredients: [
-        { name: 'BCAAs', amount: '935mg', benefit: 'Energia muscular sustentada' },
-        { name: 'Vitaminas do Complexo B', amount: 'Dose completa', benefit: 'Metabolismo energético' },
-        { name: 'Vitamina B12', amount: '4,8mcg', benefit: 'Combate à fadiga' }
-      ],
-      relatedBenefit: 'energia'
-    },
-    {
-      id: 'immunity',
-      title: 'Imunidade & Proteção',
-      icon: <Shield className="w-6 h-6" />,
-      color: 'from-green-400 to-emerald-400',
-      glow: 'shadow-green-200',
-      ingredients: [
-        { name: 'Vitamina C', amount: '100mg', benefit: 'Fortalece defesas naturais' },
-        { name: 'Zinco', amount: '11mg', benefit: 'Sistema imune robusto' },
-        { name: 'Selênio', amount: '100mcg', benefit: 'Ação antioxidante potente' }
-      ],
-      relatedBenefit: 'imunidade'
-    },
-    {
-      id: 'beauty',
-      title: 'Beleza & Juventude',
-      icon: <Sparkles className="w-6 h-6" />,
-      color: 'from-pink-400 to-purple-400',
-      glow: 'shadow-pink-200',
-      ingredients: [
-        { name: 'Colágeno Bioativo', amount: '2,5g', benefit: 'Pele firme e elástica' },
-        { name: 'Biotina', amount: '45mcg', benefit: 'Cabelos e unhas fortes' },
-        { name: 'Silício Orgânico', amount: '5mg', benefit: 'Rejuvenescimento celular' }
-      ],
-      relatedBenefit: 'beleza'
-    }
-  ];
-
+  // Memoizar categorias
+  const ingredientCategories = useMemo(() => INGREDIENT_CATEGORIES, []);
+  
+  // Debounce para hover
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedHoveredCategory(hoveredCategory);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [hoveredCategory]);
+  
   // Verificar se a categoria deve ser destacada
-  const shouldHighlight = (categoryId: string) => {
+  const shouldHighlight = useCallback((categoryId: string) => {
     const category = ingredientCategories.find(cat => cat.id === categoryId);
     return category?.relatedBenefit === highlightBenefit;
-  };
-
+  }, [ingredientCategories, highlightBenefit]);
+  
+  // Lazy load de detalhes da categoria
+  const loadCategoryDetails = useCallback((categoryId: string) => {
+    if (!loadedCategories.includes(categoryId)) {
+      setLoadedCategories(prev => [...prev, categoryId]);
+    }
+  }, [loadedCategories]);
+  
   // Contador animado de nutrientes
   const [nutrientCount, setNutrientCount] = useState(0);
   
   useEffect(() => {
-    if (inView) {
+    if (inView && !reduceMotion) {
+      let count = 0;
       const timer = setInterval(() => {
-        setNutrientCount(prev => {
-          if (prev >= 25) {
-            clearInterval(timer);
-            return 25;
-          }
-          return prev + 1;
-        });
+        count += 1;
+        if (count > 25) {
+          clearInterval(timer);
+          setNutrientCount(25);
+        } else {
+          setNutrientCount(count);
+        }
       }, 50);
       
       return () => clearInterval(timer);
+    } else if (inView) {
+      setNutrientCount(25);
     }
-  }, [inView]);
+  }, [inView, reduceMotion]);
 
   return (
     <>
       <section 
         ref={ref}
         id="ingredientes" 
-        className="py-20 bg-gradient-to-b from-white to-juvelina-mint/5 relative overflow-hidden"
+        className="ingredients-section"
       >
-        {/* Background decorativo animado */}
-        <div className="absolute inset-0 opacity-5">
-          <motion.div 
-            className="absolute top-20 -left-20 w-96 h-96 bg-juvelina-gold rounded-full filter blur-3xl"
-            animate={{
-              x: [0, 50, 0],
-              y: [0, -30, 0],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          <motion.div 
-            className="absolute bottom-20 -right-20 w-96 h-96 bg-juvelina-mint rounded-full filter blur-3xl"
-            animate={{
-              x: [0, -50, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        </div>
-
+        {/* Background orgânico marrom */}
+        <div className="ingredients-organic-bg" />
+        
+        {/* Textura de terra/folhas */}
+        <div className="ingredients-texture-overlay" />
+        
         <div className="container mx-auto px-4 relative z-10">
           {/* Indicador de conexão com benefício anterior */}
-          {highlightBenefit && benefitNames[highlightBenefit] && (
+          {highlightBenefit && BENEFIT_NAMES[highlightBenefit] && (
             <motion.div 
               className="text-center mb-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/80">
                 Focando em ingredientes para{' '}
-                <span className="font-bold text-juvelina-gold">{benefitNames[highlightBenefit]}</span>
+                <span className="font-bold text-juvelina-gold">{BENEFIT_NAMES[highlightBenefit]}</span>
               </p>
             </motion.div>
           )}
           
-          {/* Header da seção com contador animado */}
+          {/* Header da seção */}
           <motion.div 
             className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
@@ -160,7 +159,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
             transition={{ duration: 0.6 }}
           >
             <motion.span 
-              className="inline-block bg-juvelina-mint/30 px-4 py-1 rounded-full text-juvelina-gold font-medium mb-4"
+              className="ingredients-badge"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5 }}
@@ -169,41 +168,44 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
               Fórmula Exclusiva
             </motion.span>
             
-            {/* Contador animado de nutrientes */}
+            {/* Contador animado */}
             <div className="mb-6">
               <motion.div
-                className="text-6xl font-bold text-juvelina-gold inline-block"
-                animate={inView ? { scale: [1, 1.1, 1] } : {}}
+                className="text-6xl font-bold text-white inline-block"
+                animate={inView && !reduceMotion ? { scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.5, delay: 1 }}
               >
                 {nutrientCount}
               </motion.div>
-              <p className="text-lg text-gray-600">Nutrientes Premium</p>
+              <p className="text-lg text-white/80">Nutrientes Premium</p>
             </div>
             
-            <h2 className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-black">
+            <h2 className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-white">
               Cada Ingrediente com <span className="text-juvelina-gold">Propósito Específico</span>
             </h2>
             
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-white/80 text-lg max-w-2xl mx-auto">
               Nossa fórmula foi desenvolvida por especialistas para criar a sinergia perfeita entre nutrientes, 
               maximizando os benefícios para sua saúde.
             </p>
           </motion.div>
 
-          {/* Grid de categorias com destaque condicional */}
+          {/* Grid de categorias */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {ingredientCategories.map((category, index) => (
               <motion.div
                 key={category.id}
-                className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all ${
-                  shouldHighlight(category.id) ? 'ring-2 ring-juvelina-gold ring-offset-2' : ''
-                }`}
+                className={`ingredients-category-card ${
+                  shouldHighlight(category.id) ? 'highlighted' : ''
+                } ${debouncedHoveredCategory === category.id ? 'hovered' : ''}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                onMouseEnter={() => setHoveredCategory(category.id)}
+                whileHover={!reduceMotion ? { y: -5 } : {}}
+                onMouseEnter={() => {
+                  setHoveredCategory(category.id);
+                  loadCategoryDetails(category.id);
+                }}
                 onMouseLeave={() => setHoveredCategory(null)}
                 role="article"
                 aria-label={`Categoria de ingredientes: ${category.title}`}
@@ -211,7 +213,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                 {/* Indicador de destaque */}
                 {shouldHighlight(category.id) && (
                   <motion.div
-                    className="absolute -top-2 -right-2 bg-juvelina-gold text-white text-xs px-2 py-1 rounded-full hidden sm:block"
+                    className="ingredients-highlight-badge"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300 }}
@@ -220,9 +222,9 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                   </motion.div>
                 )}
                 
-                {/* Header da categoria com gradiente animado */}
-                <div className={`bg-gradient-to-r ${category.color} p-4 text-white relative overflow-hidden`}>
-                  {hoveredCategory === category.id && (
+                {/* Header da categoria */}
+                <div className={`ingredients-category-header bg-gradient-to-r ${category.color}`}>
+                  {debouncedHoveredCategory === category.id && (
                     <motion.div
                       className="absolute inset-0 bg-white/20"
                       initial={{ x: "-100%" }}
@@ -232,10 +234,10 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                   )}
                   <div className="flex items-center gap-3 relative z-10">
                     <motion.div 
-                      className={`w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ${
-                        hoveredCategory === category.id ? 'shadow-lg ' + category.glow : ''
+                      className={`ingredients-icon-wrapper ${
+                        debouncedHoveredCategory === category.id ? 'shadow-lg ' + category.glow : ''
                       }`}
-                      animate={hoveredCategory === category.id ? { rotate: 360 } : {}}
+                      animate={debouncedHoveredCategory === category.id && !reduceMotion ? { rotate: 360 } : {}}
                       transition={{ duration: 0.6 }}
                     >
                       {category.icon}
@@ -244,38 +246,48 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                   </div>
                 </div>
 
-                {/* Lista de ingredientes com animação sequencial */}
+                {/* Lista de ingredientes */}
                 <div className="p-6 space-y-4">
-                  {category.ingredients.map((ingredient, idx) => (
-                    <motion.div
-                      key={idx}
-                      className="flex items-start gap-3"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={inView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ duration: 0.5, delay: index * 0.1 + idx * 0.05 }}
-                    >
-                      <motion.div 
-                        className="w-2 h-2 bg-juvelina-gold rounded-full mt-2 flex-shrink-0"
-                        animate={hoveredCategory === category.id ? { scale: [1, 1.5, 1] } : {}}
-                        transition={{ duration: 0.5, delay: idx * 0.1 }}
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-baseline justify-between">
-                          <h4 className="font-semibold text-gray-800">{ingredient.name}</h4>
-                          <span className="text-sm text-gray-500">{ingredient.amount}</span>
+                  {(!loadedCategories.includes(category.id) && !inView) ? (
+                    <div className="animate-pulse space-y-3">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-12 bg-gray-200 rounded" />
+                      ))}
+                    </div>
+                  ) : (
+                    category.ingredients.map((ingredient, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="flex items-start gap-3"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={inView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ duration: 0.5, delay: index * 0.1 + idx * 0.05 }}
+                      >
+                        <motion.div 
+                          className="ingredients-bullet"
+                          animate={debouncedHoveredCategory === category.id && !reduceMotion ? { 
+                            scale: [1, 1.5, 1] 
+                          } : {}}
+                          transition={{ duration: 0.5, delay: idx * 0.1 }}
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-baseline justify-between">
+                            <h4 className="font-semibold text-gray-800">{ingredient.name}</h4>
+                            <span className="text-sm text-gray-500">{ingredient.amount}</span>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{ingredient.benefit}</p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{ingredient.benefit}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               </motion.div>
             ))}
           </div>
 
-          {/* Seção de diferenciais com animações */}
+          {/* Seção de diferenciais */}
           <motion.div 
-            className="bg-gradient-to-r from-juvelina-gold/10 to-juvelina-mint/10 rounded-2xl p-8 mb-12"
+            className="ingredients-differentials"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -283,17 +295,17 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
             <div className="grid md:grid-cols-3 gap-6 text-center">
               {[
                 {
-                  icon: <Leaf className="w-8 h-8 text-juvelina-gold" />,
+                  icon: <Leaf className="w-8 h-8" />,
                   title: '100% Natural',
                   description: 'Sem aditivos químicos ou conservantes artificiais'
                 },
                 {
-                  icon: <Eye className="w-8 h-8 text-juvelina-gold" />,
+                  icon: <Eye className="w-8 h-8" />,
                   title: 'Alta Biodisponibilidade',
                   description: 'Forma líquida para máxima absorção'
                 },
                 {
-                  icon: <Shield className="w-8 h-8 text-juvelina-gold" />,
+                  icon: <Shield className="w-8 h-8" />,
                   title: 'Testado e Aprovado',
                   description: 'Rigorosos testes de qualidade e pureza'
                 }
@@ -303,25 +315,25 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                   initial={{ opacity: 0, y: 20 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  whileHover={{ y: -5 }}
+                  whileHover={!reduceMotion ? { y: -5 } : {}}
                 >
                   <motion.div 
-                    className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md"
-                    whileHover={{ 
+                    className="ingredients-differential-icon"
+                    whileHover={!reduceMotion ? { 
                       scale: 1.1,
-                      boxShadow: "0 10px 25px -5px rgba(169, 104, 61, 0.3)"
-                    }}
+                      boxShadow: "0 10px 25px -5px rgba(255, 255, 255, 0.3)"
+                    } : {}}
                   >
                     {item.icon}
                   </motion.div>
-                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-gray-600">{item.description}</p>
+                  <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
+                  <p className="text-white/80">{item.description}</p>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* CTA para ver lista completa com hover effect */}
+          {/* CTA para ver lista completa */}
           <motion.div 
             className="text-center"
             initial={{ opacity: 0 }}
@@ -330,13 +342,13 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
           >
             <motion.button
               onClick={() => setShowIngredientsList(true)}
-              className="inline-flex items-center gap-2 bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-all font-medium group relative overflow-hidden"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="ingredients-cta-button"
+              whileHover={!reduceMotion ? { scale: 1.05 } : {}}
+              whileTap={!reduceMotion ? { scale: 0.95 } : {}}
               aria-label="Abrir lista completa de ingredientes"
             >
               <motion.div
-                className="absolute inset-0 bg-juvelina-gold"
+                className="absolute inset-0 bg-white"
                 initial={{ x: "-100%" }}
                 whileHover={{ x: 0 }}
                 transition={{ duration: 0.3 }}
@@ -346,12 +358,17 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
             </motion.button>
           </motion.div>
         </div>
+        
+        {/* Transição orgânica inferior */}
+        <div className="ingredients-organic-transition" />
       </section>
 
       {/* Modal com lista completa de ingredientes */}
-      {showIngredientsList && (
-        <IngredientsList onClose={() => setShowIngredientsList(false)} />
-      )}
+      <Suspense fallback={null}>
+        {showIngredientsList && (
+          <IngredientsList onClose={() => setShowIngredientsList(false)} />
+        )}
+      </Suspense>
     </>
   );
 };

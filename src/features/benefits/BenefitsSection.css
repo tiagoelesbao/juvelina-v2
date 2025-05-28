@@ -1,0 +1,241 @@
+/* src/features/benefits/BenefitsSection.css */
+
+/* =================================
+   BENEFITS SECTION STYLES
+   ================================= */
+
+.benefits-section {
+  position: relative;
+  padding: 5rem 0;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* Background orgânico */
+.benefits-organic-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='organic'%3E%3CfeTurbulence baseFrequency='0.02' numOctaves='4' /%3E%3CfeColorMatrix values='0 0 0 0 0.65 0 0 0 0 0.41 0 0 0 0 0.24 0 0 0 0.05 0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' filter='url(%23organic)'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  animation: organicFlow 30s ease-in-out infinite;
+}
+
+@keyframes organicFlow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+/* Glassmorphism Badge */
+.benefits-glassmorphism-badge {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  color: #A9683D;
+  font-weight: 500;
+  overflow: hidden;
+  background: rgba(194, 247, 188, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(194, 247, 188, 0.2);
+  box-shadow: 0 4px 6px rgba(194, 247, 188, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  isolation: isolate;
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+/* Efeito de brilho */
+.benefits-glassmorphism-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 100%
+  );
+  animation: shineEffect 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.benefits-glassmorphism-badge > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes shineEffect {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tabs de navegação */
+.benefits-tab {
+  padding: 0.625rem 1.25rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: #374151;
+}
+
+.benefits-tab:hover:not(.active) {
+  background-color: rgba(194, 247, 188, 0.2);
+}
+
+.benefits-tab.active {
+  background-color: #A9683D;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(169, 104, 61, 0.3);
+}
+
+.benefits-tab.transitioning {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.benefits-tab:focus-visible {
+  outline: 2px solid #A9683D;
+  outline-offset: 2px;
+}
+
+/* Cards de desafio e solução */
+.benefits-challenge-card,
+.benefits-solution-card {
+  background-color: white;
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left-width: 4px;
+}
+
+.benefits-challenge-card {
+  border-left-color: #ef4444;
+}
+
+.benefits-solution-card {
+  border-left-color: #357266;
+}
+
+.benefits-challenge-card:hover,
+.benefits-solution-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* CTA Button */
+.benefits-cta-button {
+  background-color: #A9683D;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.benefits-cta-button:hover {
+  background-color: rgba(169, 104, 61, 0.9);
+}
+
+/* Transição orgânica para próxima seção */
+.benefits-organic-transition {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1440 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,50 Q180,20 360,50 T720,50 T1080,50 T1440,50 L1440,150 L0,150 Z' fill='%23A9683D' opacity='0.1'/%3E%3Cpath d='M0,80 Q240,50 480,80 T960,80 T1440,80 L1440,150 L0,150 Z' fill='%23A9683D' opacity='0.15'/%3E%3Cpath d='M0,110 Q360,90 720,110 T1440,110 L1440,150 L0,150 Z' fill='%23A9683D' opacity='0.2'/%3E%3C/svg%3E") no-repeat bottom;
+  background-size: cover;
+  pointer-events: none;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .benefits-section {
+    padding: 3rem 0;
+  }
+  
+  .benefits-glassmorphism-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 1rem;
+  }
+  
+  .benefits-glassmorphism-badge::before {
+    animation-duration: 4s;
+  }
+  
+  .benefits-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .benefits-organic-transition {
+    height: 100px;
+  }
+}
+
+/* Fallback para navegadores sem suporte a backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .benefits-glassmorphism-badge {
+    background: rgba(194, 247, 188, 0.8);
+  }
+}
+
+/* Hover effects para desktop */
+@media (hover: hover) and (pointer: fine) {
+  .benefits-glassmorphism-badge {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .benefits-glassmorphism-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(194, 247, 188, 0.2), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  .benefits-glassmorphism-badge:hover::before {
+    animation-play-state: paused;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .benefits-organic-bg,
+  .benefits-glassmorphism-badge::before {
+    animation: none;
+  }
+  
+  .benefits-tab,
+  .benefits-challenge-card,
+  .benefits-solution-card,
+  .benefits-cta-button {
+    transition: none;
+  }
+}

@@ -12,3 +12,4 @@ export { default as TikTokViralBadge } from './TikTokViralBadge';
 export { default as VideoCarousel } from './VideoCarousel';
 export { default as ScrollToTop } from './ScrollToTop';
 export { default as WaveTransition } from './WaveTransition';
+export { default as WaveTransitionOrganic } from './WaveTransitionOrganic';
