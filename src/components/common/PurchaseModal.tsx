@@ -194,173 +194,196 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           {/* Conteúdo do modal responsivo - VERSÃO MOBILE OTIMIZADA SEM SCROLL */}
           {isMobile ? (
             <motion.div
-              ref={modalRef}
-              className="bg-white rounded-2xl shadow-2xl mx-auto w-[92%] transform-gpu overflow-hidden"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
             >
-              {/* Header */}
-              <div className="bg-juvelina-gold text-white p-3 rounded-t-2xl relative">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold truncate pr-6">{getTitle()}</h3>
-                  <button
-                    onClick={onClose}
-                    className="text-white hover:text-gray-200 transition-colors absolute right-3 top-3"
-                    aria-label="Fechar"
-                  >
-                    <X size={22} />
-                  </button>
-                </div>
-                <div className="mt-1 flex items-center gap-1 text-white/90">
-                  <Clock size={14} />
-                  <div className="text-xs">
-                    Oferta expira em: <span className="font-bold">{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Conteúdo principal - sem scroll */}
-              <div className="p-4">
-                {/* Descrição compacta */}
-                <p className="text-sm text-gray-700 mb-3">
-                  Nosso suplemento líquido premium com 25 nutrientes essenciais e absorção 5x superior garante resultados visíveis desde as primeiras semanas.
-                </p>
-                
-                <p className="font-medium text-gray-800 mb-2">Escolha sua opção:</p>
-                
-                {/* Opção 1: Experimente */}
-                <div 
-                  className={`border rounded-xl p-3 hover:border-juvelina-gold transition-all cursor-pointer mb-2 ${
-                    selectedOption === 'single' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
-                  }`}
-                  onClick={() => setSelectedOption('single')}
-                >
+              <motion.div
+                ref={modalRef}
+                className="bg-white rounded-2xl shadow-2xl mx-4 w-full max-w-[calc(100%-2rem)] sm:max-w-md transform-gpu overflow-hidden"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                style={{
+                  maxHeight: 'calc(100vh - 4rem)',
+                  margin: '2rem auto'
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header - ajustado para mobile */}
+                <div className="bg-juvelina-gold text-white px-4 py-3 rounded-t-2xl relative">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        id="option-single"
-                        name="purchase_option"
-                        checked={selectedOption === 'single'}
-                        onChange={() => setSelectedOption('single')}
-                        className="accent-juvelina-gold w-4 h-4"
-                      />
-                      <div>
-                        <label htmlFor="option-single" className="font-medium block">
-                          Experimente <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm">17% OFF</span>
-                        </label>
-                        <p className="text-xs text-gray-500">Perfeito para iniciar sua jornada</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-juvelina-gold font-bold">R$ 149,90</div>
-                      <div className="text-xs text-gray-400 line-through">R$ 179,90</div>
+                    <h3 className="text-base sm:text-lg font-bold truncate pr-8 max-w-[80%]">{getTitle()}</h3>
+                    <button
+                      onClick={onClose}
+                      className="text-white hover:text-gray-200 transition-colors absolute right-3 top-3 p-1"
+                      aria-label="Fechar"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1 text-white/90">
+                    <Clock size={12} />
+                    <div className="text-xs">
+                      Oferta expira em: <span className="font-bold">{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
                     </div>
                   </div>
                 </div>
                 
-                {/* Opção 2: Assinatura Mensal */}
-                <div 
-                  className={`border rounded-xl p-3 hover:border-juvelina-gold transition-all cursor-pointer mb-2 ${
-                    selectedOption === 'monthly' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
-                  } ${options.monthly.popular ? 'relative' : ''}`}
-                  onClick={() => setSelectedOption('monthly')}
-                >
-                  {options.monthly.popular && (
-                    <div className="absolute -top-2.5 right-3 bg-juvelina-gold text-white text-xs px-2 py-0.5 rounded-md">
-                      MAIS POPULAR
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        id="option-monthly"
-                        name="purchase_option"
-                        checked={selectedOption === 'monthly'}
-                        onChange={() => setSelectedOption('monthly')}
-                        className="accent-juvelina-gold w-4 h-4"
-                      />
-                      <div>
-                        <label htmlFor="option-monthly" className="font-medium block">
-                          Assinatura Mensal <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm">28% OFF</span>
-                        </label>
-                        <p className="text-xs text-gray-500">A escolha inteligente para resultados contínuos</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-juvelina-gold font-bold">R$ 129,90<span className="text-xs font-normal">/mês</span></div>
-                      <div className="text-xs text-gray-400 line-through">R$ 179,90</div>
-                    </div>
-                  </div>
-                  
-                  {/* Benefícios da opção selecionada */}
-                  {selectedOption === 'monthly' && (
-                    <div className="mt-2 grid grid-cols-1 gap-1 pt-2 border-t border-gray-100">
-                      {options.monthly.benefits.map((benefit, index) => (
-                        <div key={index} className="flex items-start gap-1">
-                          <CheckCircle size={12} className="text-juvelina-gold mt-0.5 flex-shrink-0" />
-                          <span className="text-xs text-gray-600">{benefit}</span>
+                {/* Conteúdo principal - com scroll e padding ajustado */}
+                <div className="overflow-y-auto max-h-[calc(100vh-16rem)]" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="p-4 sm:p-5">
+                    {/* Descrição compacta */}
+                    <p className="text-sm text-gray-700 mb-4">
+                      Nosso suplemento líquido premium com 25 nutrientes essenciais e absorção 5x superior garante resultados visíveis desde as primeiras semanas.
+                    </p>
+                    
+                    <p className="font-medium text-gray-800 mb-3">Escolha sua opção:</p>
+                    
+                    {/* Opção 1: Experimente - com melhor espaçamento */}
+                    <div 
+                      className={`border rounded-xl p-3 sm:p-4 hover:border-juvelina-gold transition-all cursor-pointer mb-3 ${
+                        selectedOption === 'single' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
+                      }`}
+                      onClick={() => setSelectedOption('single')}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-start gap-2 flex-1">
+                          <input
+                            type="radio"
+                            id="option-single"
+                            name="purchase_option"
+                            checked={selectedOption === 'single'}
+                            onChange={() => setSelectedOption('single')}
+                            className="accent-juvelina-gold w-4 h-4 mt-0.5 flex-shrink-0"
+                          />
+                          <div className="flex-1">
+                            <label htmlFor="option-single" className="font-medium block text-sm">
+                              Experimente <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm inline-block">17% OFF</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mt-0.5">Perfeito para iniciar sua jornada</p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Opção 3: Kit 3 Meses */}
-                <div 
-                  className={`border rounded-xl p-3 hover:border-juvelina-gold transition-all cursor-pointer ${
-                    selectedOption === 'kit' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
-                  }`}
-                  onClick={() => setSelectedOption('kit')}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        id="option-kit"
-                        name="purchase_option"
-                        checked={selectedOption === 'kit'}
-                        onChange={() => setSelectedOption('kit')}
-                        className="accent-juvelina-gold w-4 h-4"
-                      />
-                      <div>
-                        <label htmlFor="option-kit" className="font-medium block">
-                          Kit 3 Meses <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm">30% OFF</span>
-                        </label>
-                        <p className="text-xs text-gray-500">Economize mais com nosso pacote trimestral</p>
+                        <div className="text-right flex-shrink-0">
+                          <div className="text-juvelina-gold font-bold text-base">R$ 149,90</div>
+                          <div className="text-xs text-gray-400 line-through">R$ 179,90</div>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-juvelina-gold font-bold">R$ 379,90</div>
-                      <div className="text-xs text-gray-400 line-through">R$ 539,70</div>
+                    
+                    {/* Opção 2: Assinatura Mensal - melhorada para mobile */}
+                    <div 
+                      className={`border rounded-xl p-3 sm:p-4 hover:border-juvelina-gold transition-all cursor-pointer mb-3 ${
+                        selectedOption === 'monthly' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
+                      } ${options.monthly.popular ? 'relative' : ''}`}
+                      onClick={() => setSelectedOption('monthly')}
+                    >
+                      {options.monthly.popular && (
+                        <div className="absolute -top-2.5 right-3 bg-juvelina-gold text-white text-xs px-2 py-0.5 rounded-md shadow-sm">
+                          MAIS POPULAR
+                        </div>
+                      )}
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-start gap-2 flex-1">
+                          <input
+                            type="radio"
+                            id="option-monthly"
+                            name="purchase_option"
+                            checked={selectedOption === 'monthly'}
+                            onChange={() => setSelectedOption('monthly')}
+                            className="accent-juvelina-gold w-4 h-4 mt-0.5 flex-shrink-0"
+                          />
+                          <div className="flex-1">
+                            <label htmlFor="option-monthly" className="font-medium block text-sm">
+                              Assinatura Mensal <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm inline-block">28% OFF</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mt-0.5">A escolha inteligente para resultados contínuos</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="text-juvelina-gold font-bold text-base">R$ 129,90<span className="text-xs font-normal">/mês</span></div>
+                          <div className="text-xs text-gray-400 line-through">R$ 179,90</div>
+                        </div>
+                      </div>
+                      
+                      {/* Benefícios da opção selecionada - melhorado para mobile */}
+                      {selectedOption === 'monthly' && (
+                        <motion.div 
+                          className="mt-3 pt-3 border-t border-gray-100"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="grid grid-cols-1 gap-1.5">
+                            {options.monthly.benefits.map((benefit, index) => (
+                              <div key={index} className="flex items-start gap-1.5">
+                                <CheckCircle size={12} className="text-juvelina-gold mt-0.5 flex-shrink-0" />
+                                <span className="text-xs text-gray-600 leading-relaxed">{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                    
+                    {/* Opção 3: Kit 3 Meses - responsivo */}
+                    <div 
+                      className={`border rounded-xl p-3 sm:p-4 hover:border-juvelina-gold transition-all cursor-pointer ${
+                        selectedOption === 'kit' ? 'border-2 border-juvelina-gold bg-juvelina-mint/10' : 'border-gray-200'
+                      }`}
+                      onClick={() => setSelectedOption('kit')}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-start gap-2 flex-1">
+                          <input
+                            type="radio"
+                            id="option-kit"
+                            name="purchase_option"
+                            checked={selectedOption === 'kit'}
+                            onChange={() => setSelectedOption('kit')}
+                            className="accent-juvelina-gold w-4 h-4 mt-0.5 flex-shrink-0"
+                          />
+                          <div className="flex-1">
+                            <label htmlFor="option-kit" className="font-medium block text-sm">
+                              Kit 3 Meses <span className="ml-1 text-xs text-white bg-juvelina-gold px-1.5 py-0.5 rounded-sm inline-block">30% OFF</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mt-0.5">Economize mais com nosso pacote trimestral</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="text-juvelina-gold font-bold text-base">R$ 379,90</div>
+                          <div className="text-xs text-gray-400 line-through">R$ 539,70</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Botão de ação principal */}
-              <div className="p-4 pt-2">
-                <button 
-                  className="w-full py-3 bg-juvelina-gold text-white rounded-full font-medium flex items-center justify-center gap-2 shadow-md"
-                >
-                  <ShoppingCart size={18} />
-                  Garantir Meu Juvelina Agora
-                </button>
                 
-                {/* Elementos de confiança - versão compacta */}
-                <div className="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Shield size={10} className="text-juvelina-gold" />
-                    <span>Pagamento Seguro</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CheckCircle size={10} className="text-juvelina-gold" />
-                    <span>Garantia de 30 dias</span>
+                {/* Botão de ação principal - com padding adequado */}
+                <div className="p-4 sm:p-5 pt-2 bg-gray-50 border-t border-gray-100">
+                  <button 
+                    className="w-full py-3 bg-juvelina-gold text-white rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:bg-juvelina-gold/90 transition-colors active:scale-[0.98]"
+                  >
+                    <ShoppingCart size={18} />
+                    <span className="text-sm sm:text-base">Garantir Meu Juvelina Agora</span>
+                  </button>
+                  
+                  {/* Elementos de confiança - responsivos */}
+                  <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3 text-xs text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Shield size={12} className="text-juvelina-gold" />
+                      <span>Pagamento Seguro</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle size={12} className="text-juvelina-gold" />
+                      <span>Garantia 30 dias</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           ) : (
             // Layout Desktop (cards horizontais)

@@ -14,7 +14,7 @@ interface VideoModalProps {
 }
 
 const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) => {
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Começar muted para permitir autoplay
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOfferExpanded, setIsOfferExpanded] = useState(true);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
@@ -43,7 +43,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
     };
   }, []);
   
-  // Preload do vídeo quando o modal abrir
+  // Preload do vídeo quando o modal abrir e autoplay
   useEffect(() => {
     if (video && videoRef.current) {
       setIsVideoLoading(true);
@@ -54,8 +54,22 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
       videoElement.preload = 'auto';
       
       // Handler para quando o vídeo estiver pronto
-      const handleCanPlay = () => {
+      const handleCanPlay = async () => {
         setIsVideoLoading(false);
+        // Tentar dar play automaticamente
+        try {
+          await videoElement.play();
+          setIsPlaying(true);
+          // Tentar desmutar após 0.5s se o play funcionou
+          setTimeout(() => {
+            if (videoElement.paused === false) {
+              setIsMuted(false);
+              videoElement.muted = false;
+            }
+          }, 500);
+        } catch (err) {
+          console.log('Autoplay bloqueado');
+        }
       };
       
       // Handler para erro
@@ -175,12 +189,14 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 className="w-full h-full object-cover"
                 loop
                 playsInline
+                autoPlay
                 muted={isMuted}
                 preload="auto"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onError={() => setVideoError(true)}
                 onLoadedData={() => setIsVideoLoading(false)}
+                {...{ 'webkit-playsinline': 'true' } as any}
               />
               
               {/* Play/Pause overlay */}
@@ -201,7 +217,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
               
               {/* Imagem do produto - ajustada para não sobrepor conteúdo */}
               <motion.div 
-                className="absolute bottom-4 left-3 w-16 h-20 z-30 pointer-events-none"
+                className="absolute bottom-18 left-5 w-14 h-20 z-30 pointer-events-none"
                 initial={{ opacity: 0, scale: 0.8, x: -20 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
@@ -212,7 +228,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                   className="w-full h-full object-contain"
                   style={{
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
-                    maxHeight: '80px',
+                    maxHeight: '75px',
                     width: 'auto'
                   }}
                 />
@@ -261,7 +277,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 }}
               >
                 <button
-                  className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-sm rounded-full p-0.5"
+                  className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur-sm rounded-full p-0.5"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOfferExpanded(!isOfferExpanded);
@@ -283,7 +299,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Container com padding para a imagem do produto */}
-                      <div className="pl-20">
+                      <div className="pl-16">
                         <blockquote className="text-white text-xs mb-2 italic line-clamp-2">
                           "{video.caption}"
                         </blockquote>
@@ -334,7 +350,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
           </motion.div>
         </motion.div>
       ) : (
-        // VERSÃO DESKTOP - com produto integrado
+        // VERSÃO DESKTOP - sem barras pretas
         <motion.div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
@@ -351,7 +367,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
             onClick={e => e.stopPropagation()}
           >
             {/* Lado esquerdo - Vídeo */}
-            <div className="flex-shrink-0 bg-black relative flex items-center justify-center" style={{ width: '400px' }}>
+            <div className="flex-shrink-0 bg-black relative overflow-hidden" style={{ width: '400px' }}>
               <button
                 className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm rounded-full p-2 z-10 hover:bg-black/70 transition-colors"
                 onClick={onClose}
@@ -389,10 +405,10 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
               )}
               
               {/* Player de vídeo */}
-              <div className="w-full h-full flex items-center justify-center relative">
+              <div className="w-full h-full relative">
                 {!isPlaying && !isVideoLoading && !videoError ? (
                   <div 
-                    className="relative cursor-pointer group w-full h-full flex items-center justify-center"
+                    className="relative cursor-pointer group w-full h-full"
                     onClick={() => {
                       if (videoRef.current) {
                         videoRef.current.play();
@@ -400,48 +416,40 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       }
                     }}
                   >
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <div className="relative" style={{ width: '100%', maxHeight: '100%', aspectRatio: '9/16' }}>
-                        <video 
-                          ref={videoRef}
-                          src={videoPath}
-                          className="w-full h-full object-cover rounded-lg"
-                          muted
-                          preload="auto"
-                          onError={() => setVideoError(true)}
-                          onLoadedData={() => setIsVideoLoading(false)}
-                        />
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors rounded-lg" />
-                        <motion.div 
-                          className="absolute inset-0 flex items-center justify-center"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <div className="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl">
-                            <svg className="w-8 h-8 text-juvelina-gold ml-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                            </svg>
-                          </div>
-                        </motion.div>
+                    <video 
+                      ref={videoRef}
+                      src={videoPath}
+                      className="w-full h-full object-cover"
+                      muted
+                      preload="auto"
+                      onError={() => setVideoError(true)}
+                      onLoadedData={() => setIsVideoLoading(false)}
+                    />
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                    <motion.div 
+                      className="absolute inset-0 flex items-center justify-center"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <div className="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl">
+                        <svg className="w-8 h-8 text-juvelina-gold ml-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                        </svg>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
                 ) : (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="relative" style={{ width: '100%', maxHeight: '100%', aspectRatio: '9/16' }}>
-                      <video 
-                        ref={videoRef}
-                        src={videoPath}
-                        controls={!isVideoLoading}
-                        autoPlay
-                        className="w-full h-full object-cover rounded-lg"
-                        onEnded={() => setIsPlaying(false)}
-                        onError={() => setVideoError(true)}
-                        onLoadedData={() => setIsVideoLoading(false)}
-                        preload="auto"
-                      />
-                    </div>
-                  </div>
+                  <video 
+                    ref={videoRef}
+                    src={videoPath}
+                    className="w-full h-full object-cover"
+                    controls={!isVideoLoading}
+                    autoPlay
+                    onEnded={() => setIsPlaying(false)}
+                    onError={() => setVideoError(true)}
+                    onLoadedData={() => setIsVideoLoading(false)}
+                    preload="auto"
+                  />
                 )}
               </div>
             </div>
