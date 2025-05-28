@@ -5,6 +5,10 @@ import { Play, Star } from 'lucide-react';
 import { VideoTestimonial } from '../types';
 import { PerformanceContext } from '../../../../App';
 
+// Config para desenvolvimento vs produção
+const IS_DEVELOPMENT = import.meta.env.DEV;
+const USE_CDN = !IS_DEVELOPMENT; // Usar CDN apenas em produção
+
 interface VideoCarouselItemProps {
   video: VideoTestimonial;
   onClick: () => void;
@@ -14,51 +18,84 @@ interface VideoCarouselItemProps {
 const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onClick, isMobile: isMobileProp }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { isLowEnd, reduceMotion, isMobile: contextIsMobile } = useContext(PerformanceContext);
   
-  // Usar prop se fornecida, senão usar do context
   const isMobile = isMobileProp !== undefined ? isMobileProp : contextIsMobile;
   
-  const videoPath = `/videos/v${video.id}.mp4`;
+  // Desenvolvimento: usa local | Produção: usa CDN
+  const videoUrl = USE_CDN && video.videoUrl 
+    ? video.videoUrl 
+    : `/videos/v${video.id}.mp4`;
   
-  // Autoplay para todos os dispositivos (mas apenas quando visível)
+  // Lazy loading - carregar vídeo apenas quando próximo
   useEffect(() => {
-    if (!isLowEnd && videoRef.current) {
-      const playVideo = async () => {
-        try {
-          if (videoRef.current) {
-            // Garantir que o vídeo está muted antes de tentar o autoplay
-            videoRef.current.muted = true;
-            await videoRef.current.play();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setShouldLoadVideo(true);
+            observer.disconnect();
           }
-        } catch (error) {
-          console.log('Autoplay prevented for video', video.id);
-        }
-      };
-      
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              playVideo();
-            } else if (!entry.isIntersecting && videoRef.current) {
-              videoRef.current.pause();
-            }
-          });
-        },
-        { threshold: 0.5 }
-      );
+        });
+      },
+      { 
+        rootMargin: isMobile ? '50px' : '200px',
+        threshold: 0.1 
+      }
+    );
 
-      observer.observe(videoRef.current);
-
-      return () => {
-        if (videoRef.current) {
-          observer.unobserve(videoRef.current);
-        }
-      };
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
     }
-  }, [video.id, isLowEnd]);
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, [isMobile]);
+  
+  // Autoplay quando visível
+  useEffect(() => {
+    if (!shouldLoadVideo || !videoRef.current || isLowEnd) return;
+    
+    const playVideo = async () => {
+      try {
+        if (videoRef.current && isVideoLoaded) {
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+        }
+      } catch (error) {
+        console.log('Autoplay prevented for video', video.id);
+      }
+    };
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isVideoLoaded) {
+            playVideo();
+          } else if (!entry.isIntersecting && videoRef.current) {
+            videoRef.current.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
+  }, [video.id, isLowEnd, shouldLoadVideo, isVideoLoaded]);
   
   const renderStars = (rating: number) => (
     <div className="flex gap-0.5">
@@ -74,6 +111,7 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
   
   return (
     <motion.div
+      ref={containerRef}
       className="relative w-[280px] h-[500px] flex-shrink-0 cursor-pointer group"
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -89,24 +127,38 @@ const VideoCarouselItem: React.FC<VideoCarouselItemProps> = memo(({ video, onCli
       }}
     >
       <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg bg-gray-900">
-        {/* Video sempre, sem imagem de fallback */}
-        <video
-          ref={videoRef}
-          src={videoPath}
-          className="absolute inset-0 w-full h-full object-cover"
-          loop
-          muted
-          playsInline
-          autoPlay
-          preload="auto"
-          onLoadedData={() => setIsVideoLoaded(true)}
-          {...{ 'webkit-playsinline': 'true' } as any} // Necessário para iOS
-        />
+        {/* Placeholder enquanto carrega */}
+        {!isVideoLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 animate-pulse" />
+        )}
+        
+        {/* Video - só carrega quando shouldLoadVideo é true */}
+        {shouldLoadVideo && (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="absolute inset-0 w-full h-full object-cover"
+            loop
+            muted
+            playsInline
+            autoPlay
+            preload="metadata"
+            onLoadedData={() => setIsVideoLoaded(true)}
+            {...{ 'webkit-playsinline': 'true' } as any}
+          />
+        )}
+        
+        {/* Loading indicator */}
+        {shouldLoadVideo && !isVideoLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white/50" />
+          </div>
+        )}
         
         {/* Overlay com gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         
-        {/* Botão de play - sempre visível no mobile, hover no desktop */}
+        {/* Botão de play */}
         <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
           isMobile || isHovered ? 'opacity-100' : 'opacity-0'
         }`}>

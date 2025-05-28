@@ -1,15 +1,4 @@
 // src/features/testimonials/VideoTestimonialsSection/components/VideoModal.tsx
-/**
- * VideoModal Component
- * 
- * Este componente usa React Portal para garantir que o modal seja renderizado
- * diretamente no body do documento, fora da hierarquia da VideoTestimonialsSection.
- * Isso garante que:
- * 1. O modal cubra toda a página
- * 2. Tenha o z-index mais alto (99999)
- * 3. Não seja afetado pelos estilos da seção pai
- * 4. Apareça sobre todos os outros elementos, incluindo outros modais
- */
 import React, { useEffect, useState, useRef, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +18,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOfferExpanded, setIsOfferExpanded] = useState(true);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isMobile } = useContext(PerformanceContext);
   
@@ -45,13 +36,43 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
     setPortalContainer(container);
     
     return () => {
-      // Limpar apenas se não houver outros modais usando
       const portalDiv = document.getElementById('video-modal-portal');
       if (portalDiv && portalDiv.childNodes.length === 0) {
         portalDiv.remove();
       }
     };
   }, []);
+  
+  // Preload do vídeo quando o modal abrir
+  useEffect(() => {
+    if (video && videoRef.current) {
+      setIsVideoLoading(true);
+      setVideoError(false);
+      
+      // Configurar o vídeo para preload
+      const videoElement = videoRef.current;
+      videoElement.preload = 'auto';
+      
+      // Handler para quando o vídeo estiver pronto
+      const handleCanPlay = () => {
+        setIsVideoLoading(false);
+      };
+      
+      // Handler para erro
+      const handleError = () => {
+        setVideoError(true);
+        setIsVideoLoading(false);
+      };
+      
+      videoElement.addEventListener('canplay', handleCanPlay);
+      videoElement.addEventListener('error', handleError);
+      
+      return () => {
+        videoElement.removeEventListener('canplay', handleCanPlay);
+        videoElement.removeEventListener('error', handleError);
+      };
+    }
+  }, [video]);
   
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -69,7 +90,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
   
   if (!video || !portalContainer) return null;
   
-  const videoPath = `/videos/v${video.id}.mp4`;
+  // Usar URL externa se disponível, senão usar local
+  const videoPath = video.videoUrl || `/videos/v${video.id}.mp4`;
   
   const renderStars = (rating: number) => (
     <div className="flex gap-0.5">
@@ -86,7 +108,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
   const modalContent = (
     <AnimatePresence>
       {isMobile ? (
-        // VERSÃO MOBILE - Centralizada com blur
+        // VERSÃO MOBILE - com produto no canto inferior esquerdo
         <motion.div
           className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
@@ -108,7 +130,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
             <div 
               className="relative aspect-[9/16]"
               onClick={() => {
-                if (videoRef.current) {
+                if (videoRef.current && !isVideoLoading) {
                   if (isPlaying) {
                     videoRef.current.pause();
                   } else {
@@ -118,6 +140,35 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 }
               }}
             >
+              {/* Loading state */}
+              {isVideoLoading && !videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white" />
+                </div>
+              )}
+              
+              {/* Error state */}
+              {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="text-center">
+                    <p className="text-white mb-2">Erro ao carregar vídeo</p>
+                    <button 
+                      className="text-juvelina-gold underline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setVideoError(false);
+                        setIsVideoLoading(true);
+                        if (videoRef.current) {
+                          videoRef.current.load();
+                        }
+                      }}
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <video
                 ref={videoRef}
                 src={videoPath}
@@ -125,13 +176,16 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 loop
                 playsInline
                 muted={isMuted}
+                preload="auto"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
+                onError={() => setVideoError(true)}
+                onLoadedData={() => setIsVideoLoading(false)}
               />
               
               {/* Play/Pause overlay */}
               <AnimatePresence>
-                {!isPlaying && (
+                {!isPlaying && !isVideoLoading && !videoError && (
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center bg-black/20"
                     initial={{ opacity: 0 }}
@@ -144,6 +198,25 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                   </motion.div>
                 )}
               </AnimatePresence>
+              
+              {/* Imagem do produto - ajustada para não sobrepor conteúdo */}
+              <motion.div 
+                className="absolute bottom-4 left-3 w-16 h-20 z-30 pointer-events-none"
+                initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                <img 
+                  src="/images/juvelina-bottle-2.png" 
+                  alt="Juvelina Organics" 
+                  className="w-full h-full object-contain"
+                  style={{
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                    maxHeight: '80px',
+                    width: 'auto'
+                  }}
+                />
+              </motion.div>
               
               {/* Top controls */}
               <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent">
@@ -203,28 +276,31 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 <AnimatePresence>
                   {isOfferExpanded && (
                     <motion.div
-                      className="p-3 pt-6"
+                      className="p-3 pt-6 pb-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <blockquote className="text-white text-xs mb-2 italic line-clamp-2">
-                        "{video.caption}"
-                      </blockquote>
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-bold text-white text-xs">Juvelina Organics</h5>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={10} className="fill-yellow-400 text-yellow-400" />
-                            ))}
+                      {/* Container com padding para a imagem do produto */}
+                      <div className="pl-20">
+                        <blockquote className="text-white text-xs mb-2 italic line-clamp-2">
+                          "{video.caption}"
+                        </blockquote>
+                        
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-bold text-white text-xs">Juvelina Organics</h5>
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} size={10} className="fill-yellow-400 text-yellow-400" />
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-white/60 line-through text-[10px]">R$ 179,90</span>
-                          <span className="text-white text-sm font-bold ml-1">R$ 129,90</span>
+                          <div className="text-right">
+                            <span className="text-white/60 line-through text-[10px]">R$ 179,90</span>
+                            <span className="text-white text-sm font-bold ml-1">R$ 129,90</span>
+                          </div>
                         </div>
                       </div>
                       
@@ -258,7 +334,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
           </motion.div>
         </motion.div>
       ) : (
-        // VERSÃO DESKTOP - Layout otimizado para vídeo vertical
+        // VERSÃO DESKTOP - com produto integrado
         <motion.div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
@@ -274,7 +350,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
             transition={{ type: "spring", damping: 25 }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Lado esquerdo - Vídeo otimizado para formato vertical */}
+            {/* Lado esquerdo - Vídeo */}
             <div className="flex-shrink-0 bg-black relative flex items-center justify-center" style={{ width: '400px' }}>
               <button
                 className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm rounded-full p-2 z-10 hover:bg-black/70 transition-colors"
@@ -284,20 +360,56 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 <X size={24} />
               </button>
               
+              {/* Loading state */}
+              {isVideoLoading && !videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white" />
+                </div>
+              )}
+              
+              {/* Error state */}
+              {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                  <div className="text-center">
+                    <p className="text-white mb-2">Erro ao carregar vídeo</p>
+                    <button 
+                      className="text-juvelina-gold underline"
+                      onClick={() => {
+                        setVideoError(false);
+                        setIsVideoLoading(true);
+                        if (videoRef.current) {
+                          videoRef.current.load();
+                        }
+                      }}
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               {/* Player de vídeo */}
               <div className="w-full h-full flex items-center justify-center relative">
-                {!isPlaying ? (
+                {!isPlaying && !isVideoLoading && !videoError ? (
                   <div 
                     className="relative cursor-pointer group w-full h-full flex items-center justify-center"
-                    onClick={() => setIsPlaying(true)}
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.play();
+                        setIsPlaying(true);
+                      }
+                    }}
                   >
-                    {/* Vídeo em aspect ratio 9:16 */}
                     <div className="relative w-full h-full flex items-center justify-center">
                       <div className="relative" style={{ width: '100%', maxHeight: '100%', aspectRatio: '9/16' }}>
                         <video 
+                          ref={videoRef}
                           src={videoPath}
                           className="w-full h-full object-cover rounded-lg"
                           muted
+                          preload="auto"
+                          onError={() => setVideoError(true)}
+                          onLoadedData={() => setIsVideoLoading(false)}
                         />
                         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors rounded-lg" />
                         <motion.div 
@@ -320,10 +432,13 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       <video 
                         ref={videoRef}
                         src={videoPath}
-                        controls
+                        controls={!isVideoLoading}
                         autoPlay
                         className="w-full h-full object-cover rounded-lg"
                         onEnded={() => setIsPlaying(false)}
+                        onError={() => setVideoError(true)}
+                        onLoadedData={() => setIsVideoLoading(false)}
+                        preload="auto"
                       />
                     </div>
                   </div>
@@ -356,16 +471,31 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 </blockquote>
               </div>
               
-              {/* Seção do produto */}
+              {/* Seção do produto com imagem */}
               <div className="p-6">
                 <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <span className="text-2xl">✨</span>
                   Experimente a Transformação
                 </h4>
                 
-                {/* Card do produto */}
+                {/* Card do produto com imagem */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
                   <div className="flex gap-4">
+                    {/* Imagem do produto */}
+                    <div className="flex-shrink-0">
+                      <motion.img 
+                        src="/images/juvelina-bottle-3.png" 
+                        alt="Juvelina Organics"
+                        className="w-24 h-32 object-contain"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        style={{
+                          filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
+                        }}
+                      />
+                    </div>
+                    
                     <div className="flex-1">
                       <h5 className="font-bold text-juvelina-gold">Juvelina Organics</h5>
                       <p className="text-sm text-gray-600 mb-2">
@@ -374,6 +504,19 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       <div className="flex items-center gap-2">
                         {renderStars(5)}
                         <span className="text-xs text-gray-500">(12.5k avaliações)</span>
+                      </div>
+                      
+                      {/* Mini lista de benefícios */}
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <span className="text-juvelina-gold">✓</span> Absorção 5x superior
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <span className="text-juvelina-gold">✓</span> 100% Natural e Vegano
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <span className="text-juvelina-gold">✓</span> Sabor delicioso de laranja
+                        </div>
                       </div>
                     </div>
                   </div>
