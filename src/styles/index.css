@@ -1370,5 +1370,16 @@ footer:last-child {
     -webkit-transform: translateX(150%);
     transform: translateX(150%);
   }
+  
 }
+/* DEBUG - Remova após testar */
+.glassmorphism-badge {
+  border: 2px solid red !important;
+}
+
+.glassmorphism-badge::before {
+  background: rgba(255, 0, 0, 0.3) !important;
+  animation: shineEffect 1s linear infinite !important;
+}
+
 }
