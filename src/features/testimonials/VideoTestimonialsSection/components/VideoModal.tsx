@@ -367,7 +367,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
             onClick={e => e.stopPropagation()}
           >
             {/* Lado esquerdo - Vídeo */}
-            <div className="flex-shrink-0 bg-black relative overflow-hidden" style={{ width: '400px' }}>
+            <div className="flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center" style={{ width: '400px' }}>
               <button
                 className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm rounded-full p-2 z-10 hover:bg-black/70 transition-colors"
                 onClick={onClose}
@@ -404,11 +404,11 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 </div>
               )}
               
-              {/* Player de vídeo */}
-              <div className="w-full h-full relative">
+              {/* Player de vídeo - CORRIGIDO */}
+              <div className="w-full h-full relative flex items-center justify-center bg-black">
                 {!isPlaying && !isVideoLoading && !videoError ? (
                   <div 
-                    className="relative cursor-pointer group w-full h-full"
+                    className="relative cursor-pointer group w-full h-full flex items-center justify-center"
                     onClick={() => {
                       if (videoRef.current) {
                         videoRef.current.play();
@@ -419,7 +419,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                     <video 
                       ref={videoRef}
                       src={videoPath}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain" // Mudança aqui: object-contain ao invés de object-cover
                       muted
                       preload="auto"
                       onError={() => setVideoError(true)}
@@ -442,13 +442,14 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                   <video 
                     ref={videoRef}
                     src={videoPath}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain" // Mudança aqui também
                     controls={!isVideoLoading}
                     autoPlay
                     onEnded={() => setIsPlaying(false)}
                     onError={() => setVideoError(true)}
                     onLoadedData={() => setIsVideoLoading(false)}
                     preload="auto"
+                    style={{ maxWidth: '100%', maxHeight: '100%' }} // Adicionar estilo inline para garantir
                   />
                 )}
               </div>
