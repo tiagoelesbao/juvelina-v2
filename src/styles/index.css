@@ -1090,4 +1090,14 @@ footer:last-child {
   z-index: 99999;
 }
 
+/* Portal do PurchaseModal - garantir z-index máximo */
+#purchase-modal-portal {
+  position: relative;
+  z-index: 999999 !important;
+}
+
+#purchase-modal-portal > * {
+  z-index: 999999 !important;
+}
+
 }

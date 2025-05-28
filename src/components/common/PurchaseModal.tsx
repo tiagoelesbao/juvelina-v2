@@ -1,5 +1,6 @@
-// src/components/modals/PurchaseModal.tsx - VERSÃO OTIMIZADA PARA CONVERSÃO
+// src/components/common/PurchaseModal.tsx - VERSÃO CORRIGIDA COM PORTAL
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, CheckCircle, Clock, Shield } from 'lucide-react';
 
@@ -36,6 +37,25 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const [exitIntentShown, setExitIntentShown] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  
+  // Criar ou encontrar o container do portal
+  useEffect(() => {
+    let container = document.getElementById('purchase-modal-portal');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'purchase-modal-portal';
+      document.body.appendChild(container);
+    }
+    setPortalContainer(container);
+    
+    return () => {
+      const portalDiv = document.getElementById('purchase-modal-portal');
+      if (portalDiv && portalDiv.childNodes.length === 0) {
+        portalDiv.remove();
+      }
+    };
+  }, []);
   
   // Verificar se é mobile
   useEffect(() => {
@@ -178,23 +198,18 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
     setSelectedOption('monthly');
   };
 
-  return (
+  // Se o portal container ainda não foi criado, não renderizar nada
+  if (!portalContainer) return null;
+
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            backdropFilter: 'blur(5px)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          {/* Conteúdo do modal responsivo - VERSÃO MOBILE OTIMIZADA SEM SCROLL */}
+        <>
+          {/* Conteúdo do modal responsivo */}
           {isMobile ? (
+            // VERSÃO MOBILE CORRIGIDA
             <motion.div
-              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center"
+              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -202,13 +217,12 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
             >
               <motion.div
                 ref={modalRef}
-                className="bg-white rounded-2xl shadow-2xl mx-4 w-full max-w-[calc(100%-2rem)] sm:max-w-md transform-gpu overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform-gpu overflow-hidden"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 style={{
-                  maxHeight: 'calc(100vh - 4rem)',
-                  margin: '2rem auto'
+                  maxHeight: 'calc(100vh - 2rem)',
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -386,147 +400,156 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               </motion.div>
             </motion.div>
           ) : (
-            // Layout Desktop (cards horizontais)
+            // VERSÃO DESKTOP
             <motion.div
-              ref={modalRef}
-              className="relative max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
             >
-              <div className="bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80 text-white p-4 rounded-t-2xl">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold">{getTitle()}</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Clock size={18} />
-                      <div className="text-sm">
-                        Oferta expira em: <span className="font-bold">{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
+              <motion.div
+                ref={modalRef}
+                className="relative max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80 text-white p-4 rounded-t-2xl">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold">{getTitle()}</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Clock size={18} />
+                        <div className="text-sm">
+                          Oferta expira em: <span className="font-bold">{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
+                        </div>
                       </div>
+                      <button
+                        onClick={onClose}
+                        className="text-white hover:text-gray-200 transition-colors"
+                      >
+                        <X size={24} />
+                      </button>
                     </div>
-                    <button
-                      onClick={onClose}
-                      className="text-white hover:text-gray-200 transition-colors"
-                    >
-                      <X size={24} />
-                    </button>
                   </div>
                 </div>
-              </div>
-              
-              <div className="p-6">
-                <div className="text-center mb-6">
-                  <h4 className="font-bold text-xl text-juvelina-gold mb-2">Escolha seu plano Juvelina</h4>
-                  <p className="text-gray-600 max-w-2xl mx-auto">
-                    Nosso suplemento líquido premium com 25 nutrientes essenciais e absorção 5x superior para transformar seu bem-estar.
-                  </p>
-                </div>
                 
-                {/* Cards horizontais */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  {(Object.entries(options) as [PurchaseOption, typeof options.single][]).map(([key, option]) => (
-                    <div
-                      key={key}
-                      className={`border rounded-xl p-5 hover:border-juvelina-gold transition-all cursor-pointer relative ${
-                        selectedOption === key
-                          ? 'border-2 border-juvelina-gold bg-juvelina-mint bg-opacity-10 transform scale-105 shadow-lg'
-                          : 'border-gray-200'
-                      } ${option.popular ? 'ring-1 ring-juvelina-gold ring-offset-2' : ''}`}
-                      onClick={() => setSelectedOption(key)}
-                    >
-                      {option.popular && (
-                        <motion.div
-                          className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-juvelina-gold text-white text-xs px-4 py-1 rounded-full uppercase font-bold tracking-wide"
-                          animate={{ 
-                            scale: [1, 1.05, 1],
-                            boxShadow: [
-                              '0 0 0 rgba(212, 178, 106, 0.4)',
-                              '0 0 8px rgba(212, 178, 106, 0.8)',
-                              '0 0 0 rgba(212, 178, 106, 0.4)'
-                            ]
-                          }}
-                          transition={{
-                            repeat: Infinity,
-                            repeatType: "mirror",
-                            duration: 2
-                          }}
-                        >
-                          Mais Popular
-                        </motion.div>
-                      )}
-                      
-                      <div className="text-center">
-                        <h5 className="font-bold text-lg mb-1">{option.title}</h5>
-                        <p className="text-sm text-gray-600 h-10">{option.description}</p>
-                        
-                        <div className="mt-4 mb-6">
-                          <div className="text-3xl font-bold text-juvelina-gold">
-                            R$ {formatPrice(option.price)}
-                            {key === 'monthly' && <span className="text-sm font-normal">/mês</span>}
-                          </div>
-                          <div className="flex justify-center items-center gap-2">
-                            <span className="text-gray-500 line-through text-sm">
-                              R$ {formatPrice(option.originalPrice)}
-                            </span>
-                            <span className="bg-juvelina-gold/10 text-juvelina-gold text-xs px-2 py-0.5 rounded-full">
-                              {calculateDiscount(option.originalPrice, option.price)}% OFF
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-3 text-left mb-6">
-                          {option.benefits.map((benefit, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                              <CheckCircle size={16} className="text-juvelina-gold mt-0.5 flex-shrink-0" />
-                              <span className="text-sm">{benefit}</span>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <label htmlFor={`desktop-option-${key}`} className="flex items-center justify-center gap-2 cursor-pointer">
-                          <input
-                            id={`desktop-option-${key}`}
-                            type="radio"
-                            name="desktop_purchase_option"
-                            checked={selectedOption === key}
-                            onChange={() => setSelectedOption(key)}
-                            className="accent-juvelina-gold w-5 h-5"
-                          />
-                          <span className="font-medium">Selecionar</span>
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex justify-center mt-8">
-                  <button
-                    className="bg-juvelina-gold text-white px-10 py-3 rounded-full hover:bg-opacity-90 transition font-medium flex items-center justify-center gap-2 shadow-lg max-w-md w-full"
-                  >
-                    <ShoppingCart size={20} />
-                    Garantir Meu Juvelina Agora
-                  </button>
-                </div>
-                
-                {/* Elementos de confiança no rodapé */}
-                <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap justify-around items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Shield size={18} className="text-juvelina-gold" />
-                    <span>Pagamento 100% Seguro</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={18} className="text-juvelina-gold" />
-                    <span>Satisfação Garantida</span>
+                <div className="p-6">
+                  <div className="text-center mb-6">
+                    <h4 className="font-bold text-xl text-juvelina-gold mb-2">Escolha seu plano Juvelina</h4>
+                    <p className="text-gray-600 max-w-2xl mx-auto">
+                      Nosso suplemento líquido premium com 25 nutrientes essenciais e absorção 5x superior para transformar seu bem-estar.
+                    </p>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" className="h-6 w-auto" alt="Visa" />
-                    <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" className="h-6 w-auto" alt="Mastercard" />
-                    <img src="https://cdn-icons-png.flaticon.com/512/217/217425.png" className="h-6 w-auto" alt="Boleto" />
-                    <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" className="h-6 w-auto" alt="Pix" />
+                  {/* Cards horizontais */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    {(Object.entries(options) as [PurchaseOption, typeof options.single][]).map(([key, option]) => (
+                      <div
+                        key={key}
+                        className={`border rounded-xl p-5 hover:border-juvelina-gold transition-all cursor-pointer relative ${
+                          selectedOption === key
+                            ? 'border-2 border-juvelina-gold bg-juvelina-mint bg-opacity-10 transform scale-105 shadow-lg'
+                            : 'border-gray-200'
+                        } ${option.popular ? 'ring-1 ring-juvelina-gold ring-offset-2' : ''}`}
+                        onClick={() => setSelectedOption(key)}
+                      >
+                        {option.popular && (
+                          <motion.div
+                            className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-juvelina-gold text-white text-xs px-4 py-1 rounded-full uppercase font-bold tracking-wide"
+                            animate={{ 
+                              scale: [1, 1.05, 1],
+                              boxShadow: [
+                                '0 0 0 rgba(212, 178, 106, 0.4)',
+                                '0 0 8px rgba(212, 178, 106, 0.8)',
+                                '0 0 0 rgba(212, 178, 106, 0.4)'
+                              ]
+                            }}
+                            transition={{
+                              repeat: Infinity,
+                              repeatType: "mirror",
+                              duration: 2
+                            }}
+                          >
+                            Mais Popular
+                          </motion.div>
+                        )}
+                        
+                        <div className="text-center">
+                          <h5 className="font-bold text-lg mb-1">{option.title}</h5>
+                          <p className="text-sm text-gray-600 h-10">{option.description}</p>
+                          
+                          <div className="mt-4 mb-6">
+                            <div className="text-3xl font-bold text-juvelina-gold">
+                              R$ {formatPrice(option.price)}
+                              {key === 'monthly' && <span className="text-sm font-normal">/mês</span>}
+                            </div>
+                            <div className="flex justify-center items-center gap-2">
+                              <span className="text-gray-500 line-through text-sm">
+                                R$ {formatPrice(option.originalPrice)}
+                              </span>
+                              <span className="bg-juvelina-gold/10 text-juvelina-gold text-xs px-2 py-0.5 rounded-full">
+                                {calculateDiscount(option.originalPrice, option.price)}% OFF
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3 text-left mb-6">
+                            {option.benefits.map((benefit, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <CheckCircle size={16} className="text-juvelina-gold mt-0.5 flex-shrink-0" />
+                                <span className="text-sm">{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <label htmlFor={`desktop-option-${key}`} className="flex items-center justify-center gap-2 cursor-pointer">
+                            <input
+                              id={`desktop-option-${key}`}
+                              type="radio"
+                              name="desktop_purchase_option"
+                              checked={selectedOption === key}
+                              onChange={() => setSelectedOption(key)}
+                              className="accent-juvelina-gold w-5 h-5"
+                            />
+                            <span className="font-medium">Selecionar</span>
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex justify-center mt-8">
+                    <button
+                      className="bg-juvelina-gold text-white px-10 py-3 rounded-full hover:bg-opacity-90 transition font-medium flex items-center justify-center gap-2 shadow-lg max-w-md w-full"
+                    >
+                      <ShoppingCart size={20} />
+                      Garantir Meu Juvelina Agora
+                    </button>
+                  </div>
+                  
+                  {/* Elementos de confiança no rodapé */}
+                  <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap justify-around items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Shield size={18} className="text-juvelina-gold" />
+                      <span>Pagamento 100% Seguro</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={18} className="text-juvelina-gold" />
+                      <span>Satisfação Garantida</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" className="h-6 w-auto" alt="Visa" />
+                      <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" className="h-6 w-auto" alt="Mastercard" />
+                      <img src="https://cdn-icons-png.flaticon.com/512/217/217425.png" className="h-6 w-auto" alt="Boleto" />
+                      <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" className="h-6 w-auto" alt="Pix" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           )}
           
@@ -534,7 +557,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           <AnimatePresence>
             {showExitIntent && (
               <motion.div
-                className="fixed inset-0 bg-black bg-opacity-70 z-60 flex items-center justify-center p-4"
+                className="fixed inset-0 bg-black bg-opacity-70 z-[99999] flex items-center justify-center p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -602,10 +625,13 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
+
+  // Renderizar no portal
+  return ReactDOM.createPortal(modalContent, portalContainer);
 };
 
 export default PurchaseModal;
