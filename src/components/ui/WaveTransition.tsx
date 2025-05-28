@@ -110,7 +110,7 @@ const WaveTransition: React.FC<WaveTransitionProps> = ({
 
   // Versão dramática com dobras
   return (
-    <div className={`w-full overflow-hidden absolute bottom-0 left-0 w-full -mb-1 ${className}`} 
+    <div className={`w-full overflow-hidden absolute bottom-0 left-0 ${className}`} 
          style={{ marginTop: '-1px', marginBottom: '-1px' }}>
       <svg 
         viewBox="0 0 1440 120" 
