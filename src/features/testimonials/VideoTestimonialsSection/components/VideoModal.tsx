@@ -209,25 +209,6 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 )}
               </AnimatePresence>
               
-              {/* Imagem do produto */}
-              <motion.div 
-                className="absolute bottom-18 left-5 w-14 h-20 z-30 pointer-events-none"
-                initial={{ opacity: 0, scale: 0.8, x: -20 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-              >
-                <img 
-                  src="/images/juvelina-bottle-2.png" 
-                  alt="Juvelina Organics" 
-                  className="w-full h-full object-contain"
-                  style={{
-                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
-                    maxHeight: '75px',
-                    width: 'auto'
-                  }}
-                />
-              </motion.div>
-              
               {/* Top controls */}
               <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent">
                 <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
@@ -295,6 +276,26 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       exit={{ opacity: 0 }}
                       onClick={(e) => e.stopPropagation()}
                     >
+                      {/* Imagem do produto MOVIDA PARA DENTRO DO COLLAPSIBLE */}
+                      <motion.div 
+                        className="absolute bottom-[80px] left-5 w-14 h-20 z-30 pointer-events-none"
+                        initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, x: -20 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                      >
+                        <img 
+                          src="/images/juvelina-bottle-2.png" 
+                          alt="Juvelina Organics" 
+                          className="w-full h-full object-contain"
+                          style={{
+                            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                            maxHeight: '75px',
+                            width: 'auto'
+                          }}
+                        />
+                      </motion.div>
+                      
                       <div className="pl-16">
                         <blockquote className="text-white text-xs mb-2 italic line-clamp-2">
                           "{video.caption}"
@@ -346,7 +347,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
           </motion.div>
         </motion.div>
       ) : (
-        // VERSÃO DESKTOP - CORRIGIDA
+        // VERSÃO DESKTOP - CORRIGIDA PARA ALTURA FIXA
         <motion.div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
@@ -355,20 +356,24 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
           onClick={onClose}
         >
           <motion.div
-            className="bg-white rounded-2xl overflow-hidden w-full max-w-5xl flex"
+            className="bg-white rounded-2xl overflow-hidden flex"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25 }}
             onClick={e => e.stopPropagation()}
-            style={{ maxHeight: '90vh' }}
+            style={{ 
+              maxHeight: '85vh',
+              height: 'auto'
+            }}
           >
             {/* Lado esquerdo - Vídeo */}
             <div 
-              className="flex-shrink-0 bg-black relative overflow-hidden"
+              className="flex-shrink-0 bg-black relative"
               style={{ 
                 width: '400px',
-                aspectRatio: '9/16'
+                aspectRatio: '9/16',
+                maxHeight: '85vh'
               }}
             >
               <button
@@ -455,19 +460,19 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
               )}
             </div>
             
-            {/* Lado direito - Informações do produto */}
+            {/* Lado direito - Informações do produto SEM SCROLL */}
             <div 
-              className="flex-1 bg-gradient-to-b from-white to-juvelina-mint/5"
+              className="flex-1 bg-gradient-to-b from-white to-juvelina-mint/5 flex flex-col"
               style={{ 
-                maxHeight: 'calc(400px * 16 / 9)',
-                overflowY: 'auto'
+                width: '400px',
+                maxHeight: '85vh'
               }}
             >
               {/* Header com informações do criador */}
-              <div className="p-6 border-b border-gray-100">
+              <div className="p-5 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-juvelina-gold to-juvelina-mint flex items-center justify-center font-bold text-white">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-juvelina-gold to-juvelina-mint flex items-center justify-center font-bold text-white text-sm">
                       {video.name.charAt(0)}
                     </div>
                     {video.verified && (
@@ -475,32 +480,34 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold">{video.name}</h3>
-                    <p className="text-sm text-gray-600">{video.username}</p>
+                    <h3 className="font-bold text-sm">{video.name}</h3>
+                    <p className="text-xs text-gray-600">{video.username}</p>
                   </div>
-                  {renderStars(video.rating)}
+                  <div className="scale-90">
+                    {renderStars(video.rating)}
+                  </div>
                 </div>
                 
-                <blockquote className="mt-4 text-gray-700 italic">
+                <blockquote className="mt-3 text-gray-700 italic text-sm">
                   "{video.caption}"
                 </blockquote>
               </div>
               
-              {/* Seção do produto com imagem */}
-              <div className="p-6">
-                <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <span className="text-2xl">✨</span>
+              {/* Seção do produto com imagem - conteúdo compactado */}
+              <div className="p-5 flex-1 flex flex-col">
+                <h4 className="font-bold text-base mb-3 flex items-center gap-2">
+                  <span className="text-lg">✨</span>
                   Experimente a Transformação
                 </h4>
                 
-                {/* Card do produto com imagem */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
-                  <div className="flex gap-4">
+                {/* Card do produto com imagem - compactado */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 mb-3">
+                  <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <motion.img 
                         src="/images/juvelina-bottle-3.png" 
                         alt="Juvelina Organics"
-                        className="w-24 h-32 object-contain"
+                        className="w-20 h-28 object-contain"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
@@ -511,16 +518,16 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                     </div>
                     
                     <div className="flex-1">
-                      <h5 className="font-bold text-juvelina-gold">Juvelina Organics</h5>
-                      <p className="text-sm text-gray-600 mb-2">
+                      <h5 className="font-bold text-juvelina-gold text-sm">Juvelina Organics</h5>
+                      <p className="text-xs text-gray-600 mb-1">
                         Suplemento líquido premium com 25 nutrientes essenciais
                       </p>
                       <div className="flex items-center gap-2">
-                        {renderStars(5)}
+                        <div className="scale-90">{renderStars(5)}</div>
                         <span className="text-xs text-gray-500">(12.5k avaliações)</span>
                       </div>
                       
-                      <div className="mt-2 space-y-1">
+                      <div className="mt-1 space-y-0.5">
                         <div className="flex items-center gap-1 text-xs text-gray-600">
                           <span className="text-juvelina-gold">✓</span> Absorção 5x superior
                         </div>
@@ -535,28 +542,28 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                   </div>
                 </div>
                 
-                {/* Oferta especial */}
-                <div className="bg-gradient-to-r from-juvelina-gold/10 to-juvelina-mint/10 rounded-lg p-4 mb-4">
-                  <div className="flex items-center justify-between mb-2">
+                {/* Oferta especial - compactada */}
+                <div className="bg-gradient-to-r from-juvelina-gold/10 to-juvelina-mint/10 rounded-lg p-3 mb-3">
+                  <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-gray-400 line-through text-sm">R$ 179,90</span>
-                        <span className="text-2xl font-bold text-juvelina-gold">R$ 129,90</span>
+                        <span className="text-xl font-bold text-juvelina-gold">R$ 129,90</span>
                       </div>
-                      <span className="text-green-600 text-sm font-medium">Economize 28%</span>
+                      <span className="text-green-600 text-xs font-medium">Economize 28%</span>
                     </div>
-                    <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                    <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
                       OFERTA LIMITADA
                     </div>
                   </div>
                 </div>
                 
-                {/* Benefícios */}
-                <div className="space-y-2 mb-6">
+                {/* Benefícios - compactados */}
+                <div className="space-y-1.5 mb-4">
                   {[
-                    { icon: <Shield size={16} />, text: "Garantia de 30 dias" },
-                    { icon: <Truck size={16} />, text: "Frete Grátis para todo Brasil" },
-                    { icon: <Star size={16} />, text: "Avaliação 5 estrelas" }
+                    { icon: <Shield size={14} />, text: "Garantia de 30 dias" },
+                    { icon: <Truck size={14} />, text: "Frete Grátis para todo Brasil" },
+                    { icon: <Star size={14} />, text: "Avaliação 5 estrelas" }
                   ].map((benefit, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
                       <span className="text-juvelina-gold">{benefit.icon}</span>
@@ -567,7 +574,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                 
                 {/* CTA Button */}
                 <motion.button 
-                  className="w-full bg-juvelina-gold text-white py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform transition-all"
+                  className="w-full bg-juvelina-gold text-white py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform transition-all text-sm mt-auto"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={(e) => {
@@ -575,15 +582,15 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                     onCtaClick?.(e);
                   }}
                 >
-                  <ShoppingCart size={20} />
+                  <ShoppingCart size={18} />
                   Quero Transformar Minha Vida
                 </motion.button>
                 
-                {/* Trust badges */}
-                <div className="flex justify-center gap-4 mt-4">
-                  <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" className="h-6 w-auto opacity-60" alt="Visa" />
-                  <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" className="h-6 w-auto opacity-60" alt="Mastercard" />
-                  <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" className="h-6 w-auto opacity-60" alt="Pix" />
+                {/* Trust badges - mais compactos */}
+                <div className="flex justify-center gap-3 mt-3">
+                  <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" className="h-5 w-auto opacity-60" alt="Visa" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" className="h-5 w-auto opacity-60" alt="Mastercard" />
+                  <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" className="h-5 w-auto opacity-60" alt="Pix" />
                 </div>
               </div>
             </div>
