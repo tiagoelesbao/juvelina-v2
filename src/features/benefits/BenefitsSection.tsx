@@ -2,10 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight } from 'lucide-react';
+import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown } from 'lucide-react';
 import WaveTransition from '../../components/ui/WaveTransition';
 
-const BenefitsSection: React.FC = () => {
+interface BenefitsSectionProps {
+  onBenefitChange?: (benefit: string) => void;
+}
+
+const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) => {
   const [activeTab, setActiveTab] = useState('energia');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedBenefit, setSelectedBenefit] = useState<string | null>(null);
@@ -14,6 +18,13 @@ const BenefitsSection: React.FC = () => {
     triggerOnce: true,
     threshold: 0.1
   });
+  
+  // Notificar mudança de benefício
+  useEffect(() => {
+    if (onBenefitChange) {
+      onBenefitChange(activeTab);
+    }
+  }, [activeTab, onBenefitChange]);
   
   // Dados dos benefícios expandidos
   const benefits = {
@@ -187,11 +198,12 @@ const BenefitsSection: React.FC = () => {
             <motion.div 
               className="inline-block mb-4"
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5 }}
+              aria-label="Badge de benefícios"
             >
               <div className="glassmorphism-badge">
-                Benefícios Transformadores
+                <span>Benefícios Transformadores</span>
               </div>
             </motion.div>
             
@@ -215,7 +227,7 @@ const BenefitsSection: React.FC = () => {
               </div>
             </div>
             
-            <div className="inline-flex bg-white shadow-md rounded-full p-1 overflow-x-auto hide-scrollbar max-w-full">
+            <div className="inline-flex bg-white shadow-md rounded-full p-1 overflow-x-auto hide-scrollbar max-w-full" role="tablist" aria-label="Navegação de benefícios">
               {Object.entries(benefits).map(([key, benefit]) => (
                 <button
                   key={key}
@@ -225,6 +237,10 @@ const BenefitsSection: React.FC = () => {
                       : 'text-gray-700 hover:bg-juvelina-mint/20'
                   }`}
                   onClick={() => setActiveTab(key)}
+                  role="tab"
+                  aria-selected={activeTab === key}
+                  aria-controls={`benefit-panel-${key}`}
+                  id={`benefit-tab-${key}`}
                 >
                   <div className="flex items-center gap-2">
                     {React.cloneElement(benefit.icon, {
@@ -245,6 +261,9 @@ const BenefitsSection: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              role="tabpanel"
+              id={`benefit-panel-${activeTab}`}
+              aria-labelledby={`benefit-tab-${activeTab}`}
             >
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 {/* Coluna de texto */}
@@ -359,6 +378,23 @@ const BenefitsSection: React.FC = () => {
               </div>
             </motion.div>
           </AnimatePresence>
+          
+          {/* Indicador de continuação para próxima seção */}
+          <motion.div 
+            className="mt-16 text-center"
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ delay: 0.8 }}
+          >
+            <p className="text-gray-600 mb-4">Descubra os ingredientes que tornam esses benefícios possíveis</p>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="inline-block"
+            >
+              <ArrowDown className="w-8 h-8 text-juvelina-gold" />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
       

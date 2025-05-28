@@ -25,6 +25,14 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
     absorcao: ['Forma Líquida', 'pH Otimizado']
   };
 
+  // Mapeamento de benefícios para nomes amigáveis
+  const benefitNames: Record<string, string> = {
+    energia: 'Energia Sustentada',
+    imunidade: 'Imunidade Reforçada',
+    beleza: 'Beleza Radiante',
+    absorcao: 'Absorção Superior'
+  };
+
   // Categorias de ingredientes destacados
   const ingredientCategories = [
     {
@@ -129,6 +137,21 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
+          {/* Indicador de conexão com benefício anterior */}
+          {highlightBenefit && benefitNames[highlightBenefit] && (
+            <motion.div 
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-sm text-gray-600">
+                Focando em ingredientes para{' '}
+                <span className="font-bold text-juvelina-gold">{benefitNames[highlightBenefit]}</span>
+              </p>
+            </motion.div>
+          )}
+          
           {/* Header da seção com contador animado */}
           <motion.div 
             className="text-center mb-16"
@@ -141,6 +164,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
               initial={{ opacity: 0, scale: 0.8 }}
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5 }}
+              aria-label="Badge de fórmula exclusiva"
             >
               Fórmula Exclusiva
             </motion.span>
@@ -181,11 +205,13 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                 whileHover={{ y: -5 }}
                 onMouseEnter={() => setHoveredCategory(category.id)}
                 onMouseLeave={() => setHoveredCategory(null)}
+                role="article"
+                aria-label={`Categoria de ingredientes: ${category.title}`}
               >
                 {/* Indicador de destaque */}
                 {shouldHighlight(category.id) && (
                   <motion.div
-                    className="absolute -top-2 -right-2 bg-juvelina-gold text-white text-xs px-2 py-1 rounded-full"
+                    className="absolute -top-2 -right-2 bg-juvelina-gold text-white text-xs px-2 py-1 rounded-full hidden sm:block"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300 }}
@@ -307,6 +333,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
               className="inline-flex items-center gap-2 bg-white border-2 border-juvelina-gold text-juvelina-gold px-6 py-3 rounded-full hover:bg-juvelina-gold hover:text-white transition-all font-medium group relative overflow-hidden"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              aria-label="Abrir lista completa de ingredientes"
             >
               <motion.div
                 className="absolute inset-0 bg-juvelina-gold"

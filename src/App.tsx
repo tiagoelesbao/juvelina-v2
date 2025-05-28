@@ -110,6 +110,7 @@ function App() {
   const { showScrollTop } = useScrollPosition();
   const { showModal, modalVariant, openModal, closeModal } = useModalState();
   const [exitIntentTriggered, setExitIntentTriggered] = useState(false);
+  const [activeBenefit, setActiveBenefit] = useState<string>('energia');
   const [performanceSettings, setPerformanceSettings] = useState<PerformanceContextType>({
     isMobile: false,
     isTablet: false,
@@ -280,14 +281,14 @@ function App() {
           {/* Benefits Section */}
           <ErrorBoundary>
             <Suspense fallback={<SectionLoader section="benefícios" />}>
-              <BenefitsSection />
+              <BenefitsSection onBenefitChange={setActiveBenefit} />
             </Suspense>
           </ErrorBoundary>
           
           {/* Ingredients Section */}
           <ErrorBoundary>
             <Suspense fallback={<SectionLoader section="ingredientes" />}>
-              <IngredientsSection />
+              <IngredientsSection highlightBenefit={activeBenefit} />
             </Suspense>
           </ErrorBoundary>
           

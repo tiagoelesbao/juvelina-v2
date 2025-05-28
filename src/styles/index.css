@@ -1216,128 +1216,82 @@ footer:last-child {
 }
 
 /* =================================
-   BENEFITS SECTION - MOBILE FIXES
+   BENEFITS SECTION - ANIMAÇÕES E ESTILOS
    ================================= */
 
-/* Mobile específico */
-@media (max-width: 768px) {
-  /* Margem segura entre título e imagem */
-  #beneficios .order-1 {
-    margin-bottom: 2rem !important;
+/* Animação de brilho principal */
+@keyframes shineEffect {
+  0% {
+    transform: translateX(-150%);
   }
-  
-  /* Ajuste do grid para mobile */
-  #beneficios .grid {
-    gap: 2rem;
-  }
-  
-  /* Animações mais suaves no mobile */
-  #beneficios [class*="motion"] {
-    transition-duration: 0.3s !important;
-  }
-  
-  /* Desafio e Solução - animações sincronizadas */
-  .challenge-solution-grid > div {
-    transition: all 0.3s ease-out;
-  }
-  
-  /* Prevenir sobreposição de badges */
-  #beneficios .absolute {
-    position: absolute;
-  }
-  
-  /* Badge "Cientificamente Comprovado" escondido no mobile */
-  @media (max-width: 640px) {
-    .badge-floating-scientific {
-      display: none !important;
-    }
-  }
-  
-  /* Ajuste de tamanho de fontes */
-  #beneficios h3 {
-    font-size: 1.5rem;
-    line-height: 1.3;
-  }
-  
-  /* Padding adicional para conteúdo */
-  #beneficios .order-2 {
-    padding-top: 1rem;
-  }
-  
-  /* Badge glassmorphism menor no mobile */
-  .glassmorphism-badge {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.75rem;
+  100% {
+    transform: translateX(150%);
   }
 }
 
-/* Scroll suave para animações em mobile */
-@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
-  .scroll-animate {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-  }
-  
-  .scroll-animate.in-view {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  /* Delay escalonado para os cards */
-  .scroll-animate:nth-child(1) {
-    transition-delay: 0s;
-  }
-  
-  .scroll-animate:nth-child(2) {
-    transition-delay: 0.15s;
-  }
-}
-
-/* Performance: desabilitar animações complexas em dispositivos fracos */
-@media (max-width: 768px) and (hover: none) {
-  /* Reduzir complexidade de sombras */
-  .shadow-xl {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Simplificar hover effects */
-  [class*="hover:"]:hover {
-    transform: none !important;
-  }
-  
-  /* Desabilitar animação do badge em mobile fraco */
-  .glassmorphism-badge::after {
-    animation: none;
-  }
-}
-
-/* Ajustes específicos para o badge transformadores */
-.benefits-transformadores-badge {
+/* Badge Glassmorphism com animação */
+.glassmorphism-badge {
   position: relative;
   display: inline-block;
-  padding: 0.25rem 1rem;
+  padding: 0.5rem 1.5rem;
   border-radius: 9999px;
-  font-weight: 500;
   color: #A9683D;
+  font-weight: 500;
   overflow: hidden;
+  background: rgba(194, 247, 188, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(194, 247, 188, 0.2);
+  box-shadow: 0 4px 6px rgba(194, 247, 188, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  /* Garantir isolamento do contexto de stacking */
+  isolation: isolate;
 }
 
-/* Safe areas para iPhone */
-@supports (padding: env(safe-area-inset-top)) {
-  @media (max-width: 768px) {
-    #beneficios {
-      padding-left: max(1rem, env(safe-area-inset-left));
-      padding-right: max(1rem, env(safe-area-inset-right));
-    }
+/* Efeito de brilho usando pseudo-elemento - VERSÃO CORRIGIDA */
+.glassmorphism-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 100%
+  );
+  animation: shineEffect 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Garantir que o texto fique sempre acima do brilho */
+.glassmorphism-badge > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Glassmorphism para navegadores que suportam */
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glassmorphism-badge {
+    background: rgba(194, 247, 188, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 
-/* =================================
-   ANIMAÇÕES EXTRAS E MELHORIAS
-   ================================= */
+/* Fallback para navegadores sem suporte */
+@supports not (backdrop-filter: blur(10px)) {
+  .glassmorphism-badge {
+    background: rgba(194, 247, 188, 0.8);
+  }
+}
 
-/* Animação de entrada para o badge */
+/* Animação de entrada */
 @keyframes fadeInScale {
   0% {
     opacity: 0;
@@ -1353,38 +1307,68 @@ footer:last-child {
   animation: fadeInScale 0.5s ease-out forwards;
 }
 
-/* Hover effect para o badge */
-.glassmorphism-badge:hover {
-  transform: scale(1.05);
-  transition: transform 0.3s ease;
-  box-shadow: 0 6px 12px rgba(194, 247, 188, 0.2), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* Garantir que o texto fique sempre legível */
-.glassmorphism-badge span {
-  position: relative;
-  z-index: 1;
-}
-
-.glassmorphism-badge::after {
-  animation: shineEffect 3s infinite !important;
-}
-
-/* Melhorar contraste em diferentes fundos */
-@media (prefers-color-scheme: dark) {
+/* Hover effect para o badge - apenas desktop */
+@media (hover: hover) and (pointer: fine) {
   .glassmorphism-badge {
-    background: rgba(194, 247, 188, 0.4);
-    border: 1px solid rgba(194, 247, 188, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .glassmorphism-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(194, 247, 188, 0.2), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Pausar animação no hover para melhor visibilidade */
+  .glassmorphism-badge:hover::before {
+    animation-play-state: paused;
   }
 }
 
-/* Fix para Safari */
+/* Mobile específico */
+@media (max-width: 768px) {
+  .glassmorphism-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 1rem;
+  }
+  
+  /* Animação mais rápida no mobile */
+  .glassmorphism-badge::before {
+    animation-duration: 4s;
+  }
+}
+
+/* Desktop específico - garantir que funcione */
+@media (min-width: 769px) {
+  .glassmorphism-badge::before {
+    /* Forçar renderização da animação */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Fix para Safari/Chrome */
 @supports (-webkit-backdrop-filter: blur(10px)) {
   .glassmorphism-badge {
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .glassmorphism-badge::before {
+    -webkit-animation: shineEffect 3s ease-in-out infinite;
   }
 }
 
-
+/* Keyframes com prefixo para compatibilidade */
+@-webkit-keyframes shineEffect {
+  0% {
+    -webkit-transform: translateX(-150%);
+    transform: translateX(-150%);
+  }
+  100% {
+    -webkit-transform: translateX(150%);
+    transform: translateX(150%);
+  }
+}
 }

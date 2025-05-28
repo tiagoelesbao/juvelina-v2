@@ -159,7 +159,7 @@ const AbsorptionSection: React.FC = () => {
                     />
                   </motion.div>
                   
-                  {/* Partículas animadas */}
+                  {/* Partículas animadas - movimento linear */}
                   <motion.div 
                     className="absolute top-0 left-0 w-full h-full pointer-events-none"
                     variants={{
@@ -173,13 +173,14 @@ const AbsorptionSection: React.FC = () => {
                     {[...Array(8)].map((_, index) => (
                       <motion.div 
                         key={index} 
-                        className="absolute w-1 h-1 bg-juvelina-gold rounded-full"
+                        className="absolute w-2 h-2 bg-juvelina-gold rounded-full"
                         style={{ 
                           left: `${(index + 1) * 12}%`, 
                           top: '50%',
+                          transform: 'translateY(-50%)'
                         }}
                         animate={{
-                          y: [-4, 4, -4],
+                          x: [0, 10, 0],
                           opacity: [0.3, 1, 0.3],
                           scale: [0.8, 1.2, 0.8]
                         }}
@@ -187,7 +188,7 @@ const AbsorptionSection: React.FC = () => {
                           duration: 2,
                           repeat: Infinity,
                           delay: index * 0.2,
-                          ease: "easeInOut"
+                          ease: "linear"
                         }}
                       />
                     ))}
@@ -278,7 +279,7 @@ const AbsorptionSection: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        Apenas 20% absorvido
+                        20% absorvido
                       </motion.span>
                     )}
                   </motion.div>
@@ -300,38 +301,6 @@ const AbsorptionSection: React.FC = () => {
                       }
                     }}
                   />
-                  
-                  {/* Partículas estáticas indicando perda */}
-                  <motion.div 
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: { 
-                        opacity: 1,
-                        transition: { delay: 0.8 }
-                      }
-                    }}
-                  >
-                    {[...Array(3)].map((_, index) => (
-                      <motion.div 
-                        key={index} 
-                        className="absolute w-1 h-1 bg-gray-400 rounded-full opacity-30"
-                        style={{ 
-                          left: `${25 + index * 15}%`, 
-                          top: '50%',
-                        }}
-                        animate={{
-                          opacity: [0.3, 0.1, 0.3],
-                          y: [0, 20, 0]
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          delay: index * 0.5,
-                        }}
-                      />
-                    ))}
-                  </motion.div>
                 </div>
               </div>
               
