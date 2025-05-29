@@ -1,8 +1,8 @@
 // src/features/ingredients/IngredientsSection.tsx
 import React, { useState, useEffect, useMemo, useCallback, useContext, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Leaf, Sparkles, Shield, Zap, Eye, ArrowRight, Search, X, Info } from 'lucide-react';
+import { Leaf, Sparkles, Shield, Zap, Eye, ArrowRight, Search, X, Info, Heart } from 'lucide-react';
 import { PerformanceContext } from '../../App';
 import './IngredientsSection.css';
 
@@ -12,6 +12,53 @@ const IngredientsList = lazy(() => import('../../components/ui/IngredientsList')
 interface IngredientsSectionProps {
   highlightBenefit?: string;
 }
+
+// Componente de Confetti customizado (sem dependência externa)
+const CustomConfetti: React.FC<{ show: boolean }> = ({ show }) => {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50">
+      {[...Array(30)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-3 h-3 rounded-full"
+          style={{
+            left: `${50 + (Math.random() - 0.5) * 40}%`,
+            top: '40%',
+            backgroundColor: ['#A9683D', '#C2F7BC', '#357266'][Math.floor(Math.random() * 3)]
+          }}
+          initial={{ 
+            scale: 0,
+            y: 0,
+            x: 0,
+            opacity: 1
+          }}
+          animate={{ 
+            scale: [0, 1, 1, 0.5, 0],
+            y: [0, -100, -200, -300, -400],
+            x: [(Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200],
+            opacity: [1, 1, 1, 0.5, 0],
+            rotate: [0, 180, 360, 540, 720]
+          }}
+          transition={{
+            duration: 2,
+            delay: Math.random() * 0.3,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      <motion.div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+        transition={{ duration: 1 }}
+      >
+        <span className="text-4xl font-bold text-juvelina-gold">🎉</span>
+      </motion.div>
+    </div>
+  );
+};
 
 // Dados estáticos fora do componente
 const INGREDIENT_CATEGORIES = [
@@ -63,17 +110,40 @@ const BENEFIT_NAMES: Record<string, string> = {
   absorcao: 'Absorção Superior'
 };
 
+// Componente Tooltip para ingredientes
+const IngredientTooltip: React.FC<{ ingredient: string; amount: string }> = ({ ingredient, amount }) => (
+  <div className="group relative inline-block">
+    <span className="cursor-help border-b border-dotted border-juvelina-mint">
+      {ingredient}
+    </span>
+    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
+                    opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+      <div className="bg-gray-900 text-white text-xs rounded-lg p-2 whitespace-nowrap shadow-xl">
+        <div className="font-bold text-juvelina-mint">{amount}</div>
+        <div className="text-gray-300">Dose diária recomendada</div>
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 
+                        w-2 h-2 bg-gray-900 rotate-45"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefit }) => {
   const [showIngredientsList, setShowIngredientsList] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [debouncedHoveredCategory, setDebouncedHoveredCategory] = useState<string | null>(null);
   const [loadedCategories, setLoadedCategories] = useState<string[]>([]);
+  const [clickCount, setClickCount] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
   const { isMobile, reduceMotion } = useContext(PerformanceContext);
   
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
+
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
 
   // Memoizar categorias
   const ingredientCategories = useMemo(() => INGREDIENT_CATEGORIES, []);
@@ -122,6 +192,27 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
     }
   }, [inView, reduceMotion]);
 
+  // Easter egg handler
+  const handleCounterClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    
+    if (newCount === 5) {
+      setShowConfetti(true);
+      setClickCount(0);
+      
+      // Vibração haptica em mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+      
+      // Resetar confetti após animação
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 2500);
+    }
+  };
+
   return (
     <>
       <section 
@@ -129,31 +220,39 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         id="ingredientes" 
         className="ingredients-section"
       >
-        {/* Background orgânico marrom */}
-        <div className="ingredients-organic-bg" />
+        {/* Background orgânico com parallax */}
+        <motion.div 
+          className="ingredients-organic-bg"
+          style={{ y: backgroundY }}
+        />
         
         {/* Textura de terra/folhas */}
         <div className="ingredients-texture-overlay" />
         
         <div className="container mx-auto px-4 relative z-10">
           {/* Indicador de conexão com benefício anterior */}
-          {highlightBenefit && BENEFIT_NAMES[highlightBenefit] && (
-            <motion.div 
-              className="text-center mb-8"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-sm text-white/80">
-                Focando em ingredientes para{' '}
-                <span className="font-bold text-juvelina-gold">{BENEFIT_NAMES[highlightBenefit]}</span>
-              </p>
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {highlightBenefit && BENEFIT_NAMES[highlightBenefit] && (
+              <motion.div 
+                className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="bg-white rounded-full px-6 py-3 shadow-xl border-2 border-juvelina-mint">
+                  <p className="text-sm font-medium text-juvelina-emerald flex items-center gap-2">
+                    <Heart size={16} className="text-juvelina-gold" />
+                    Ingredientes para <span className="font-bold text-juvelina-gold">{BENEFIT_NAMES[highlightBenefit]}</span>
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Header da seção */}
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 pt-8"
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
@@ -168,20 +267,33 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
               Fórmula Exclusiva
             </motion.span>
             
-            {/* Contador animado */}
-            <div className="mb-6">
+            {/* Contador animado com easter egg */}
+            <div className="mb-6 relative">
               <motion.div
-                className="text-6xl font-bold text-white inline-block"
+                className="text-6xl font-bold text-white inline-block cursor-pointer select-none relative"
                 animate={inView && !reduceMotion ? { scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.5, delay: 1 }}
+                onClick={handleCounterClick}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {nutrientCount}
+                {clickCount > 0 && (
+                  <motion.div
+                    className="absolute -top-2 -right-2 bg-juvelina-mint text-juvelina-emerald text-sm w-6 h-6 rounded-full flex items-center justify-center font-normal"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                  >
+                    {clickCount}
+                  </motion.div>
+                )}
               </motion.div>
               <p className="text-lg text-white/80">Nutrientes Premium</p>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-['Ws_Paradose'] mb-4 text-white">
-              Cada Ingrediente com <span className="text-juvelina-gold">Propósito Específico</span>
+              Cada Ingrediente com <span className="text-juvelina-mint">Propósito Específico</span>
             </h2>
             
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
@@ -258,7 +370,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                     category.ingredients.map((ingredient, idx) => (
                       <motion.div
                         key={idx}
-                        className="flex items-start gap-3"
+                        className="flex items-start gap-3 group"
                         initial={{ opacity: 0, x: -20 }}
                         animate={inView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.5, delay: index * 0.1 + idx * 0.05 }}
@@ -272,8 +384,11 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                         />
                         <div className="flex-1">
                           <div className="flex items-baseline justify-between">
-                            <h4 className="font-semibold text-gray-800">{ingredient.name}</h4>
-                            <span className="text-sm text-gray-500">{ingredient.amount}</span>
+                            <IngredientTooltip 
+                              ingredient={ingredient.name}
+                              amount={ingredient.amount}
+                            />
+                            <span className="text-sm text-juvelina-emerald font-medium">{ingredient.amount}</span>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">{ingredient.benefit}</p>
                         </div>
@@ -333,16 +448,16 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
             </div>
           </motion.div>
 
-          {/* CTA para ver lista completa */}
+          {/* CTA para ver lista completa com margem adequada */}
           <motion.div 
-            className="text-center"
+            className="text-center mt-16 mb-8"
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <motion.button
               onClick={() => setShowIngredientsList(true)}
-              className="ingredients-cta-button"
+              className="ingredients-cta-button group"
               whileHover={!reduceMotion ? { scale: 1.05 } : {}}
               whileTap={!reduceMotion ? { scale: 0.95 } : {}}
               aria-label="Abrir lista completa de ingredientes"
@@ -353,8 +468,10 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                 whileHover={{ x: 0 }}
                 transition={{ duration: 0.3 }}
               />
-              <span className="relative z-10">Ver Composição Completa</span>
-              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+              <span className="relative z-10 group-hover:text-juvelina-gold transition-colors">
+                Ver Composição Completa
+              </span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform group-hover:text-juvelina-gold" />
             </motion.button>
           </motion.div>
         </div>
@@ -362,6 +479,9 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         {/* Transição orgânica inferior */}
         <div className="ingredients-organic-transition" />
       </section>
+
+      {/* Confetti customizado */}
+      <CustomConfetti show={showConfetti} />
 
       {/* Modal com lista completa de ingredientes */}
       <Suspense fallback={null}>

@@ -1,9 +1,8 @@
 // src/features/benefits/BenefitsSection.tsx
 import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown } from 'lucide-react';
-import WaveTransitionOrganic from '../../components/ui/WaveTransitionOrganic';
+import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown, Info } from 'lucide-react';
 import { PerformanceContext } from '../../App';
 import './BenefitsSection.css';
 
@@ -83,17 +82,67 @@ const BENEFITS_DATA = {
   }
 };
 
+// Partículas flutuantes que conectam as seções
+const FloatingParticles = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    {[...Array(5)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-2 h-2 bg-juvelina-gold/30 rounded-full"
+        initial={{ 
+          x: Math.random() * window.innerWidth,
+          y: -20 
+        }}
+        animate={{
+          y: window.innerHeight + 20,
+          x: Math.random() * window.innerWidth,
+        }}
+        transition={{
+          duration: 10 + Math.random() * 10,
+          repeat: Infinity,
+          delay: i * 2,
+          ease: "linear"
+        }}
+      />
+    ))}
+  </div>
+);
+
+// Componente Tooltip melhorado
+const IngredientTooltip: React.FC<{ children: React.ReactNode; content: string; amount?: string }> = ({ 
+  children, 
+  content, 
+  amount 
+}) => (
+  <div className="group relative inline-block">
+    {children}
+    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
+                    opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+      <div className="bg-gray-900 text-white text-xs rounded-lg p-3 whitespace-nowrap shadow-xl">
+        {amount && <div className="font-bold text-juvelina-mint mb-1">{amount}</div>}
+        <div className="text-gray-300">{content}</div>
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 
+                        w-2 h-2 bg-gray-900 rotate-45"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) => {
   const [activeTab, setActiveTab] = useState('energia');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedBenefit, setSelectedBenefit] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { isMobile, reduceMotion } = useContext(PerformanceContext);
   
   const [sectionRef, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
+
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
   
   // Memoizar os dados dos benefícios
   const benefits = useMemo(() => BENEFITS_DATA, []);
@@ -112,15 +161,35 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
     }
   }, [activeTab, onBenefitChange]);
   
-  // Handler para mudança de tab com loading state
+  // Handler para mudança de tab com loading state e haptic feedback
   const handleTabChange = useCallback((newTab: string) => {
     if (newTab === activeTab) return;
     
-    setIsTransitioning(true);
-    setActiveTab(newTab);
+    // Adicionar haptic feedback em mobile
+    if ('vibrate' in navigator && isMobile) {
+      navigator.vibrate(10);
+    }
     
-    setTimeout(() => setIsTransitioning(false), 300);
-  }, [activeTab]);
+    setIsTransitioning(true);
+    
+    // Scroll suave para o topo da seção
+    const section = document.getElementById('beneficios');
+    if (section) {
+      const headerOffset = 120;
+      const elementPosition = section.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+    
+    setTimeout(() => {
+      setActiveTab(newTab);
+      setIsTransitioning(false);
+    }, 150);
+  }, [activeTab, isMobile]);
   
   // Handler para navegação por teclado
   const handleKeyDown = useCallback((e: React.KeyboardEvent, currentIndex: number) => {
@@ -148,6 +217,24 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
     setSelectedBenefit(benefitKey);
     setShowDetailModal(true);
   }, []);
+
+  // Scroll progress para modal
+  useEffect(() => {
+    if (!showDetailModal) return;
+
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLDivElement;
+      const scrollPercentage = (target.scrollTop / (target.scrollHeight - target.clientHeight)) * 100;
+      setScrollProgress(scrollPercentage);
+    };
+
+    const modalContent = document.querySelector('.modal-scroll-content');
+    modalContent?.addEventListener('scroll', handleScroll);
+
+    return () => {
+      modalContent?.removeEventListener('scroll', handleScroll);
+    };
+  }, [showDetailModal]);
   
   // Modal de Detalhes do Benefício
   const BenefitDetailModal = () => {
@@ -166,66 +253,92 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
             onClick={() => setShowDetailModal(false)}
           >
             <motion.div
-              className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative">
-                <img 
-                  src={getOptimizedImageUrl(benefit.image)}
-                  alt={benefit.title}
-                  className="w-full h-64 object-cover rounded-t-2xl"
-                  loading="lazy"
-                />
-                <button
-                  onClick={() => setShowDetailModal(false)}
-                  className="absolute top-4 right-4 bg-white/90 rounded-full p-2 hover:bg-white transition"
-                  aria-label="Fechar modal"
-                >
-                  <X size={24} />
-                </button>
+              {/* Progress Bar */}
+              <div className="sticky top-0 bg-white z-10 p-4 border-b">
+                <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-juvelina-gold"
+                    style={{ width: `${scrollProgress}%` }}
+                    transition={{ duration: 0.1 }}
+                  />
+                </div>
               </div>
-              
-              <div className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  {benefit.icon}
-                  <h2 className="text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
+
+              <div className="modal-scroll-content overflow-y-auto max-h-[calc(90vh-4rem)]">
+                <div className="relative">
+                  <img 
+                    src={getOptimizedImageUrl(benefit.image)}
+                    alt={benefit.title}
+                    className="w-full h-64 object-cover"
+                    loading="lazy"
+                  />
+                  <button
+                    onClick={() => setShowDetailModal(false)}
+                    className="absolute top-4 right-4 bg-white/90 rounded-full p-2 hover:bg-white transition"
+                    aria-label="Fechar modal"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
                 
-                <p className="text-lg text-gray-700 mb-8">{benefit.description}</p>
-                
-                <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  <div>
-                    <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Ingredientes Principais</h3>
-                    <ul className="space-y-2">
-                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
-                          <span>{ingredient}</span>
-                        </li>
-                      ))}
-                    </ul>
+                <div className="p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    {benefit.icon}
+                    <h2 className="text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
+                  </div>
+                  
+                  <p className="text-lg text-gray-700 mb-8">{benefit.description}</p>
+                  
+                  <div className="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Ingredientes Principais</h3>
+                      <ul className="space-y-2">
+                        {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
+                          <li key={idx} className="flex items-center gap-2">
+                            <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
+                            <IngredientTooltip 
+                              content="Dose diária recomendada"
+                              amount={ingredient.split('(')[1]?.replace(')', '')}
+                            >
+                              <span className="cursor-help border-b border-dotted border-gray-400">
+                                {ingredient}
+                              </span>
+                            </IngredientTooltip>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Evidência Científica</h3>
+                      <p className="text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
+                        "{benefit.detailedInfo.scientificEvidence}"
+                      </p>
+                    </div>
                   </div>
                   
                   <div>
-                    <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Evidência Científica</h3>
-                    <p className="text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
-                      "{benefit.detailedInfo.scientificEvidence}"
-                    </p>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">O que nossos clientes dizem</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
-                      <div key={idx} className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-gray-700 mb-2">"{testimonial.text}"</p>
-                        <p className="text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
-                      </div>
-                    ))}
+                    <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">O que nossos clientes dizem</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
+                        <motion.div 
+                          key={idx} 
+                          className="bg-gray-50 p-4 rounded-lg"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                        >
+                          <p className="text-gray-700 mb-2">"{testimonial.text}"</p>
+                          <p className="text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -243,8 +356,14 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
         className="benefits-section"
         ref={sectionRef}
       >
-        {/* Background orgânico */}
-        <div className="benefits-organic-bg" />
+        {/* Background orgânico animado */}
+        <motion.div 
+          className="benefits-organic-bg"
+          style={{ y: backgroundY }}
+        />
+        
+        {/* Partículas flutuantes */}
+        {!reduceMotion && <FloatingParticles />}
         
         <div className="section-container relative z-10">
           <div className="text-center mb-16">
@@ -272,14 +391,16 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
           
           {/* Tabs de navegação com suporte a teclado */}
           <div className="flex flex-col items-center mb-12">
-            <div className="md:hidden mb-4 flex items-center gap-2 text-juvelina-gold">
-              <div className="flex items-center animate-pulse">
-                <span className="text-sm">Deslize</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+            {isMobile && (
+              <div className="mb-4 flex items-center gap-2 text-juvelina-gold">
+                <div className="flex items-center animate-pulse">
+                  <span className="text-sm">Deslize</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
             
             <div 
               className="inline-flex bg-white shadow-md rounded-full p-1 overflow-x-auto hide-scrollbar max-w-full" 
@@ -308,6 +429,18 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
               ))}
             </div>
           </div>
+
+          {/* Anúncio ARIA para mudanças de estado */}
+          <div 
+            role="status" 
+            aria-live="polite" 
+            aria-atomic="true" 
+            className="sr-only"
+          >
+            {isTransitioning 
+              ? `Carregando informações sobre ${benefits[activeTab as keyof typeof benefits].title}` 
+              : `Mostrando benefícios de ${benefits[activeTab as keyof typeof benefits].title}`}
+          </div>
           
           {/* Conteúdo do benefício ativo */}
           <AnimatePresence mode="wait">
@@ -334,10 +467,10 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
                     {benefits[activeTab as keyof typeof benefits].description}
                   </p>
                   
-                  {/* Comparação Desafio vs. Solução */}
+                  {/* Comparação Desafio vs. Solução com microinterações */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <motion.div 
-                      className="benefits-challenge-card"
+                      className="benefits-challenge-card group"
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-50px" }}
@@ -357,7 +490,7 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
                     </motion.div>
                     
                     <motion.div 
-                      className="benefits-solution-card"
+                      className="benefits-solution-card group"
                       initial={{ opacity: 0, x: 20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-50px" }}
@@ -380,13 +513,13 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
                   
                   {/* Botão para ver mais detalhes */}
                   <motion.button
-                    className="benefits-cta-button"
+                    className="benefits-cta-button group"
                     onClick={() => handleOpenDetails(activeTab)}
                     whileHover={!reduceMotion ? { scale: 1.05 } : {}}
                     whileTap={!reduceMotion ? { scale: 0.95 } : {}}
                   >
                     <span>Ver Detalhes Científicos</span>
-                    <ArrowRight size={18} />
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </motion.button>
                 </div>
                 
@@ -434,9 +567,9 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
             </motion.div>
           </AnimatePresence>
           
-          {/* Indicador de continuação */}
+          {/* Indicador de continuação com margem adequada */}
           <motion.div 
-            className="mt-16 text-center"
+            className="mt-20 mb-8 text-center"
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ delay: 0.8 }}
@@ -451,10 +584,10 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
             </motion.div>
           </motion.div>
         </div>
-        
-        {/* Transição orgânica para próxima seção */}
-        <div className="benefits-organic-transition" />
       </section>
+      
+      {/* Transição orgânica melhorada */}
+      <div className="benefits-to-ingredients-transition" />
       
       {/* Modal de Detalhes */}
       <BenefitDetailModal />
