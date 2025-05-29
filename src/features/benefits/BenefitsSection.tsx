@@ -587,7 +587,19 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
       </section>
       
       {/* Transição orgânica melhorada */}
-      <div className="benefits-to-ingredients-transition" />
+      <div className="benefits-to-ingredients-transition">
+        <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%">
+          <defs>
+            <filter id="benefits-wave">
+              <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" />
+              <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" />
+            </filter>
+          </defs>
+          <path d="M0,80 C200,40 400,120 600,80 C800,40 1000,120 1200,80 C1300,60 1400,70 1440,80 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.3"/>
+          <path d="M0,120 C300,80 600,160 900,120 C1100,90 1300,130 1440,120 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.5"/>
+          <path d="M0,160 C400,140 800,180 1200,160 C1320,155 1400,158 1440,160 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)"/>
+        </svg>
+      </div>
       
       {/* Modal de Detalhes */}
       <BenefitDetailModal />

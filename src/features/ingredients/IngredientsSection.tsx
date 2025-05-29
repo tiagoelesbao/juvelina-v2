@@ -1,4 +1,5 @@
-// src/features/ingredients/IngredientsSection.tsx
+// src/features/ingredients/IngredientsSection.tsx - REFATORADO COMPLETO
+
 import React, { useState, useEffect, useMemo, useCallback, useContext, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -13,7 +14,7 @@ interface IngredientsSectionProps {
   highlightBenefit?: string;
 }
 
-// Componente de Confetti customizado (sem dependência externa)
+// Componente de Confetti customizado
 const CustomConfetti: React.FC<{ show: boolean }> = ({ show }) => {
   if (!show) return null;
 
@@ -60,7 +61,7 @@ const CustomConfetti: React.FC<{ show: boolean }> = ({ show }) => {
   );
 };
 
-// Dados estáticos fora do componente
+// Dados estáticos
 const INGREDIENT_CATEGORIES = [
   {
     id: 'energy',
@@ -110,7 +111,7 @@ const BENEFIT_NAMES: Record<string, string> = {
   absorcao: 'Absorção Superior'
 };
 
-// Componente Tooltip para ingredientes
+// Componente Tooltip
 const IngredientTooltip: React.FC<{ ingredient: string; amount: string }> = ({ ingredient, amount }) => (
   <div className="group relative inline-block">
     <span className="cursor-help border-b border-dotted border-juvelina-mint">
@@ -230,45 +231,49 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         <div className="ingredients-texture-overlay" />
         
         <div className="container mx-auto px-4 relative z-10">
-          {/* Indicador de conexão com benefício anterior */}
-          <AnimatePresence>
-            {highlightBenefit && BENEFIT_NAMES[highlightBenefit] && (
-              <motion.div 
-                className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <div className="bg-white rounded-full px-6 py-3 shadow-xl border-2 border-juvelina-mint">
-                  <p className="text-sm font-medium text-juvelina-emerald flex items-center gap-2">
-                    <Heart size={16} className="text-juvelina-gold" />
-                    Ingredientes para <span className="font-bold text-juvelina-gold">{BENEFIT_NAMES[highlightBenefit]}</span>
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
           {/* Header da seção */}
           <motion.div 
-            className="text-center mb-16 pt-8"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <motion.span 
-              className="ingredients-badge"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.5 }}
-              aria-label="Badge de fórmula exclusiva"
-            >
-              Fórmula Exclusiva
-            </motion.span>
+            {/* Container para badges alinhados */}
+            <div className="flex flex-col items-center">
+              {/* Indicador de conexão com benefício anterior */}
+              <AnimatePresence>
+                {highlightBenefit && BENEFIT_NAMES[highlightBenefit] && (
+                  <motion.div 
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="ingredients-connection-badge">
+                      <p className="text-sm font-medium text-juvelina-emerald flex items-center gap-2">
+                        <Heart size={16} className="text-juvelina-gold" />
+                        Ingredientes para <span className="font-bold text-juvelina-gold">{BENEFIT_NAMES[highlightBenefit]}</span>
+                        <span className="text-gray-600">e muito mais!</span>
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {/* Badge Fórmula Exclusiva */}
+              <motion.span 
+                className="ingredients-badge"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={inView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.5, delay: highlightBenefit ? 0.1 : 0 }}
+                aria-label="Badge de fórmula exclusiva"
+              >
+                Fórmula Exclusiva
+              </motion.span>
+            </div>
             
             {/* Contador animado com easter egg */}
-            <div className="mb-6 relative">
+            <div className="mb-6 mt-8 relative">
               <motion.div
                 className="text-6xl font-bold text-white inline-block cursor-pointer select-none relative"
                 animate={inView && !reduceMotion ? { scale: [1, 1.1, 1] } : {}}
@@ -336,15 +341,16 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                 
                 {/* Header da categoria */}
                 <div className={`ingredients-category-header bg-gradient-to-r ${category.color}`}>
+                  {/* Efeito de brilho contido */}
                   {debouncedHoveredCategory === category.id && (
                     <motion.div
-                      className="absolute inset-0 bg-white/20"
+                      className="ingredients-shine-effect"
                       initial={{ x: "-100%" }}
-                      animate={{ x: "100%" }}
+                      animate={{ x: "200%" }}
                       transition={{ duration: 0.6 }}
                     />
                   )}
-                  <div className="flex items-center gap-3 relative z-10">
+                  <div className="flex items-center gap-3 ingredients-card-content">
                     <motion.div 
                       className={`ingredients-icon-wrapper ${
                         debouncedHoveredCategory === category.id ? 'shadow-lg ' + category.glow : ''
@@ -448,9 +454,9 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
             </div>
           </motion.div>
 
-          {/* CTA para ver lista completa com margem adequada */}
+          {/* CTA para ver lista completa */}
           <motion.div 
-            className="text-center mt-16 mb-8"
+            className="ingredients-cta-container"
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.6 }}
@@ -477,7 +483,19 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         </div>
         
         {/* Transição orgânica inferior */}
-        <div className="ingredients-organic-transition" />
+        <div className="ingredients-organic-transition">
+          <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%">
+            <defs>
+              <filter id="organic-wave">
+                <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" />
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="12" />
+              </filter>
+            </defs>
+            <path d="M0,120 C200,80 400,160 600,120 C800,80 1000,160 1200,120 C1300,100 1400,110 1440,120 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)" opacity="0.3"/>
+            <path d="M0,150 C300,110 600,190 900,150 C1100,120 1300,160 1440,150 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)" opacity="0.5"/>
+            <path d="M0,190 C400,170 800,210 1200,190 C1320,185 1400,188 1440,190 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)"/>
+          </svg>
+        </div>
       </section>
 
       {/* Confetti customizado */}

@@ -6,9 +6,9 @@
 
 .benefits-section {
   position: relative;
-  padding: 5rem 0 2rem; /* Reduzido padding inferior para transição */
+  padding: 5rem 0 2rem;
   background-color: #ffffff;
-  overflow: hidden;
+  overflow: visible; /* Mudado de hidden para visible para permitir que a transição extravase */
 }
 
 /* Background orgânico */
@@ -198,12 +198,14 @@
   height: 300px;
 }
 
-/* Transição orgânica NOVA - similar à de ingredients para absorption */
+/* Transição orgânica - Largura total da viewport */
 .benefits-to-ingredients-transition {
   position: relative;
-  width: 100%;
-  height: 200px;
-  margin-top: -2px;
+  width: 100vw;
+  height: 240px;
+  margin-top: 0rem;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
   background: linear-gradient(to bottom, #ffffff 0%, #A9683D 100%);
   overflow: hidden;
 }
@@ -248,7 +250,7 @@
   }
   
   .benefits-to-ingredients-transition {
-    height: 120px;
+    height: 160px;
   }
 }
 
