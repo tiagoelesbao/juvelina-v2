@@ -19,8 +19,6 @@ const BenefitsSection = lazy(() => import('./features/benefits/BenefitsSection')
 const IngredientsSection = lazy(() => import('./features/ingredients/IngredientsSection'));
 const AbsorptionSection = lazy(() => import('./features/benefits/AbsorptionSection'));
 const UGCGallerySection = lazy(() => import('./features/testimonials/UGCGallerySection'));
-const GuaranteeSection = lazy(() => import('./features/testimonials/GuaranteeSection'));
-const PricingSection = lazy(() => import('./features/product/PricingSection'));
 const ViralOfferSection = lazy(() => import('./features/product/ViralOfferSection'));
 const FaqSection = lazy(() => import('./features/testimonials/FaqSection'));
 const Footer = lazy(() => import('./components/product/Footer'));
@@ -303,20 +301,6 @@ function App() {
           <ErrorBoundary>
             <Suspense fallback={<SectionLoader section="galeria de clientes" />}>
               <UGCGallerySection />
-            </Suspense>
-          </ErrorBoundary>
-          
-          {/* Guarantee Section */}
-          <ErrorBoundary>
-            <Suspense fallback={<SectionLoader section="garantia" />}>
-              <GuaranteeSection />
-            </Suspense>
-          </ErrorBoundary>
-          
-          {/* Pricing Section */}
-          <ErrorBoundary>
-            <Suspense fallback={<SectionLoader section="planos e preços" />}>
-              <PricingSection onCtaClick={handleCtaClick} />
             </Suspense>
           </ErrorBoundary>
           

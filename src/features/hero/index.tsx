@@ -3,8 +3,8 @@ import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { PerformanceContext } from '../../App';
 import HeroHeading from './components/HeroHeading';
-import HeroButtons from './components/HeroButtons';
-import HeroStats from './components/HeroStats';
+
+
 import HeroImage from './components/HeroImage';
 import ScrollIndicator from './components/ScrollIndicator';
 import WaveTransition from '../../components/ui/WaveTransition';
@@ -82,7 +82,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
                 transition={{ duration: 0.5 }}
               >
                 <HeroHeading />
-                <HeroButtons onCtaClick={onCtaClick} />
+                
                 
                 {/* Stats - apenas mobile com lazy loading via intersection observer interno */}
                 {isMobile && (
@@ -92,7 +92,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onCtaClick }) => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.5 }}
                   >
-                    <HeroStats />
+               
                   </motion.div>
                 )}
               </motion.div>

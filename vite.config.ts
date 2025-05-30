@@ -225,7 +225,6 @@ export default defineConfig({
             './src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselItem.tsx',
             './src/features/testimonials/VideoTestimonialsSection/components/VideoCarouselControls.tsx',
             './src/features/testimonials/UGCGallerySection.tsx',
-            './src/features/testimonials/GuaranteeSection.tsx',
             './src/features/testimonials/FaqSection.tsx',
           ],
           
