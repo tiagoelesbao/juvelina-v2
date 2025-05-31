@@ -1,322 +1,673 @@
-/* src/features/benefits/BenefitsSection.css */
+// src/features/benefits/BenefitsSection.tsx
+import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown } from 'lucide-react';
+import { PerformanceContext } from '../../App';
+import './BenefitsSection.css';
 
-/* =================================
-   BENEFITS SECTION STYLES
-   ================================= */
-
-.benefits-section {
-  position: relative;
-  padding: 5rem 0 2rem;
-  background-color: #ffffff;
-  overflow: visible; /* Mudado de hidden para visible para permitir que a transição extravase */
+interface BenefitsSectionProps {
+  onBenefitChange?: (benefit: string) => void;
 }
 
-/* Background orgânico */
-.benefits-organic-bg {
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='organic'%3E%3CfeTurbulence baseFrequency='0.02' numOctaves='4' /%3E%3CfeColorMatrix values='0 0 0 0 0.65 0 0 0 0 0.41 0 0 0 0 0.24 0 0 0 0.05 0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' filter='url(%23organic)'/%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  animation: organicFlow 30s ease-in-out infinite;
+// Hook aprimorado para bloquear scroll e salvar posição
+const useScrollLock = (isLocked: boolean) => {
+  const scrollPosition = useRef(0);
+  
+  useEffect(() => {
+    if (isLocked) {
+      // Salvar posição atual do scroll
+      scrollPosition.current = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // Salvar largura da scrollbar
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Aplicar estilos para travar o scroll mantendo a posição visual
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPosition.current}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+      
+      // Compensar a largura da scrollbar para evitar layout shift
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+      
+      // Adicionar classe para CSS adicional
+      document.body.classList.add('modal-open');
+      
+    } else {
+      // Remover estilos
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      document.body.classList.remove('modal-open');
+      
+      // Restaurar posição do scroll
+      window.scrollTo(0, scrollPosition.current);
+    }
+    
+    // Cleanup function
+    return () => {
+      if (isLocked) {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.body.classList.remove('modal-open');
+      }
+    };
+  }, [isLocked]);
+};
+
+// Dados estáticos movidos para fora do componente
+const BENEFITS_DATA = {
+  energia: {
+    icon: <Zap className="h-10 w-10 text-juvelina-gold" />,
+    title: "Energia Sustentada",
+    description: "Nosso complexo exclusivo de BCAAs e vitaminas do complexo B proporciona energia constante ao longo do dia, sem os picos e quedas de cafeína e açúcar.",
+    image: "https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=800&q=80&fm=webp",
+    challenge: "Falta de energia constante durante o dia, especialmente à tarde",
+    solution: "BCAAs e vitaminas B em forma líquida para absorção imediata",
+    statistic: "97% relatam mais energia",
+    detailedInfo: {
+      ingredients: ['L-Leucina (410mg)', 'L-Isoleucina (250mg)', 'L-Valina (275mg)', 'Complexo B completo'],
+      scientificEvidence: 'Estudos mostram que BCAAs podem aumentar a síntese proteica em até 22% e reduzir a fadiga mental em 15%',
+      testimonials: [
+        { name: 'Maria Silva', text: 'Acabou o cansaço das 15h! Energia o dia todo.' },
+        { name: 'João Santos', text: 'Treino melhor e rendo mais no trabalho.' }
+      ]
+    }
+  },
+  imunidade: {
+    icon: <Shield className="h-10 w-10 text-juvelina-gold" />,
+    title: "Imunidade Reforçada",
+    description: "A combinação sinérgica de Vitamina C, Zinco e Glutamina fortalece suas defesas naturais, deixando seu corpo preparado para enfrentar qualquer desafio.",
+    image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&w=800&q=80&fm=webp",
+    challenge: "Sistema imunológico comprometido por estresse e má alimentação",
+    solution: "Glutamina, Zinco e Vitamina C em proporção ideal para defesa celular",
+    statistic: "89% menos doenças",
+    detailedInfo: {
+      ingredients: ['Vitamina C (100mg)', 'Zinco (11mg)', 'Selênio (100mcg)', 'Glutamina (310mg)'],
+      scientificEvidence: 'A suplementação com zinco pode reduzir a duração de resfriados em 33% quando tomada nas primeiras 24 horas',
+      testimonials: [
+        { name: 'Ana Costa', text: 'Não fico mais doente como antes!' },
+        { name: 'Pedro Lima', text: 'Atravessei o inverno sem gripes.' }
+      ]
+    }
+  },
+  beleza: {
+    icon: <Heart className="h-10 w-10 text-juvelina-gold" />,
+    title: "Beleza Radiante",
+    description: "Colágeno peptídico, Biotina e Vitamina E trabalham juntos para promover pele firme, cabelos fortes e unhas saudáveis, revelando sua beleza natural.",
+    image: "https://images.unsplash.com/photo-1614194248104-73b258197987?auto=format&fit=crop&w=800&q=80&fm=webp",
+    challenge: "Pele, cabelos e unhas sem vida e fragilizados",
+    solution: "Colágeno peptídico e Biotina de alta absorção para nutrição interna",
+    statistic: "92% pele mais bonita",
+    detailedInfo: {
+      ingredients: ['Colágeno Bioativo (2,5g)', 'Biotina (45mcg)', 'Silício Orgânico (5mg)', 'Vitamina E (30mg)'],
+      scientificEvidence: 'Peptídeos de colágeno aumentam a hidratação da pele em 28% e reduzem rugas em 13% após 8 semanas',
+      testimonials: [
+        { name: 'Carla Mendes', text: 'Minha pele nunca esteve tão bonita!' },
+        { name: 'Fernanda Dias', text: 'Cabelos e unhas super fortalecidos.' }
+      ]
+    }
+  },
+  absorcao: {
+    icon: <Droplets className="h-10 w-10 text-juvelina-gold" />,
+    title: "Absorção Superior",
+    description: "Nossa fórmula líquida permite absorção até 5x maior que cápsulas tradicionais, garantindo que cada nutriente seja aproveitado ao máximo pelo seu organismo.",
+    image: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=800&q=80&fm=webp",
+    challenge: "Baixa absorção de suplementos tradicionais em cápsulas",
+    solution: "Tecnologia de absorção líquida que ultrapassa barreiras digestivas",
+    statistic: "5x mais absorção",
+    detailedInfo: {
+      ingredients: ['Forma líquida pré-digerida', 'Nanoemulsão avançada', 'pH otimizado'],
+      scientificEvidence: 'Nutrientes líquidos apresentam biodisponibilidade até 98% maior comparado a formas sólidas',
+      testimonials: [
+        { name: 'Roberto Alves', text: 'Senti diferença já na primeira semana!' },
+        { name: 'Lucia Ferreira', text: 'Finalmente um suplemento que funciona.' }
+      ]
+    }
+  }
+};
+
+// Partículas flutuantes que conectam as seções
+const FloatingParticles = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    {[...Array(5)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-2 h-2 bg-juvelina-gold/30 rounded-full"
+        initial={{ 
+          x: Math.random() * window.innerWidth,
+          y: -20 
+        }}
+        animate={{
+          y: window.innerHeight + 20,
+          x: Math.random() * window.innerWidth,
+        }}
+        transition={{
+          duration: 10 + Math.random() * 10,
+          repeat: Infinity,
+          delay: i * 2,
+          ease: "linear"
+        }}
+      />
+    ))}
+  </div>
+);
+
+// Modal Component com Portal
+interface BenefitDetailModalProps {
+  isOpen: boolean;
+  selectedBenefit: string | null;
+  onClose: () => void;
+  isMobile: boolean;
+  benefits: typeof BENEFITS_DATA;
+  getOptimizedImageUrl: (url: string) => string;
 }
 
-@keyframes organicFlow {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
-}
-
-/* Glassmorphism Badge */
-.benefits-glassmorphism-badge {
-  position: relative;
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  border-radius: 9999px;
-  color: #A9683D;
-  font-weight: 500;
-  overflow: hidden;
-  background: rgba(194, 247, 188, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(194, 247, 188, 0.2);
-  box-shadow: 0 4px 6px rgba(194, 247, 188, 0.1), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  isolation: isolate;
-  animation: fadeInScale 0.5s ease-out forwards;
-}
-
-/* Efeito de brilho */
-.benefits-glassmorphism-badge::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 150%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 40%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 255, 255, 0.4) 60%,
-    transparent 100%
+const BenefitDetailModal: React.FC<BenefitDetailModalProps> = ({ 
+  isOpen, 
+  selectedBenefit, 
+  onClose, 
+  isMobile,
+  benefits,
+  getOptimizedImageUrl
+}) => {
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  
+  // Criar ou encontrar o container do portal
+  useEffect(() => {
+    let container = document.getElementById('benefits-modal-portal');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'benefits-modal-portal';
+      container.style.position = 'relative';
+      container.style.zIndex = '9999';
+      document.body.appendChild(container);
+    }
+    setPortalContainer(container);
+    
+    return () => {
+      // Cleanup: remover container apenas se estiver vazio
+      const portalDiv = document.getElementById('benefits-modal-portal');
+      if (portalDiv && portalDiv.childNodes.length === 0) {
+        portalDiv.remove();
+      }
+    };
+  }, []);
+  
+  if (!portalContainer || !selectedBenefit || !isOpen) return null;
+  
+  const benefit = benefits[selectedBenefit as keyof typeof benefits];
+  
+  const modalContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="benefits-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
+          <motion.div
+            className={`benefits-modal-content ${isMobile ? 'benefits-modal-mobile' : 'benefits-modal-desktop'}`}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header da imagem */}
+            <div className="benefits-modal-header">
+              <img 
+                src={getOptimizedImageUrl(benefit.image)}
+                alt={benefit.title}
+                className="benefits-modal-image"
+                loading="lazy"
+              />
+              <button
+                onClick={onClose}
+                className="benefits-modal-close"
+                aria-label="Fechar modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            {/* Conteúdo com scroll interno no mobile */}
+            <div className={`benefits-modal-body ${isMobile ? 'benefits-modal-scrollable' : ''}`}>
+              <div className="benefits-modal-inner">
+                <div className="flex items-center gap-4 mb-6">
+                  {benefit.icon}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
+                </div>
+                
+                <p className="text-base sm:text-lg text-gray-700 mb-6">{benefit.description}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Ingredientes Principais</h3>
+                    <ul className="space-y-2">
+                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
+                          <span className="text-sm sm:text-base">{ingredient}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Evidência Científica</h3>
+                    <p className="text-sm sm:text-base text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
+                      "{benefit.detailedInfo.scientificEvidence}"
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">O que nossos clientes dizem</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
+                      <motion.div 
+                        key={idx} 
+                        className="bg-gray-50 p-4 rounded-lg"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
+                        <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
-  animation: shineEffect 3s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.benefits-glassmorphism-badge > * {
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes shineEffect {
-  0% { transform: translateX(-150%); }
-  100% { transform: translateX(150%); }
-}
-
-@keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Tabs de navegação */
-.benefits-tab {
-  padding: 0.625rem 1.25rem;
-  border-radius: 9999px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  color: #374151;
-}
-
-.benefits-tab:hover:not(.active) {
-  background-color: rgba(194, 247, 188, 0.2);
-}
-
-.benefits-tab.active {
-  background-color: #A9683D;
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(169, 104, 61, 0.3);
-}
-
-.benefits-tab.transitioning {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.benefits-tab:focus-visible {
-  outline: 2px solid #A9683D;
-  outline-offset: 2px;
-}
-
-/* Cards de desafio e solução com micro-interações */
-.benefits-challenge-card,
-.benefits-solution-card {
-  background-color: white;
-  padding: 1.25rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  border-left-width: 4px;
-  position: relative;
-  overflow: hidden;
-}
-
-.benefits-challenge-card {
-  border-left-color: #ef4444;
-}
-
-.benefits-solution-card {
-  border-left-color: #357266;
-}
-
-.benefits-challenge-card:hover,
-.benefits-solution-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-/* Micro-interação nos bullets dos cards */
-.benefits-challenge-card:hover svg,
-.benefits-solution-card:hover svg {
-  animation: bulletPulse 1s ease-in-out infinite;
-}
-
-@keyframes bulletPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
-}
-
-/* CTA Button */
-.benefits-cta-button {
-  background-color: #A9683D;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.benefits-cta-button:hover {
-  background-color: rgba(169, 104, 61, 0.9);
-  box-shadow: 0 10px 25px -5px rgba(169, 104, 61, 0.3);
-}
-
-.benefits-cta-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  transition: width 0.6s, height 0.6s;
-}
-
-.benefits-cta-button:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-/* Transição orgânica - Largura total da viewport */
-.benefits-to-ingredients-transition {
-  position: relative;
-  width: 100vw;
-  height: 240px;
-  margin-top: 0rem;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  background: linear-gradient(to bottom, #ffffff 0%, #A9683D 100%);
-  overflow: hidden;
-}
-
-.benefits-to-ingredients-transition::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1440 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='organic-wave'%3E%3CfeTurbulence baseFrequency='0.02' numOctaves='1' /%3E%3CfeDisplacementMap in='SourceGraphic' scale='10' /%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M0,100 C200,50 400,150 600,100 C800,50 1000,150 1200,100 C1300,80 1400,90 1440,100 L1440,200 L0,200 Z' fill='%23A9683D' filter='url(%23organic-wave)' opacity='0.3'/%3E%3Cpath d='M0,120 C300,80 600,160 900,120 C1100,90 1300,130 1440,120 L1440,200 L0,200 Z' fill='%23A9683D' filter='url(%23organic-wave)' opacity='0.5'/%3E%3Cpath d='M0,150 C400,130 800,170 1200,150 C1320,145 1400,148 1440,150 L1440,200 L0,200 Z' fill='%23A9683D' filter='url(%23organic-wave)'/%3E%3C/svg%3E") no-repeat center;
-  background-size: cover;
-  animation: waveMotion 20s ease-in-out infinite;
-}
-
-@keyframes waveMotion {
-  0%, 100% { transform: translateX(0) translateY(0); }
-  25% { transform: translateX(-50px) translateY(-10px); }
-  50% { transform: translateX(0) translateY(-20px); }
-  75% { transform: translateX(50px) translateY(-10px); }
-}
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .benefits-section {
-    padding: 3rem 0 1rem;
-  }
   
-  .benefits-glassmorphism-badge {
-    font-size: 0.875rem;
-    padding: 0.375rem 1rem;
-  }
+  // Renderizar no portal
+  return ReactDOM.createPortal(modalContent, portalContainer);
+};
+
+const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) => {
+  const [activeTab, setActiveTab] = useState('energia');
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedBenefit, setSelectedBenefit] = useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const { isMobile, reduceMotion } = useContext(PerformanceContext);
   
-  .benefits-glassmorphism-badge::before {
-    animation-duration: 4s;
-  }
+  const [sectionRef, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  });
+
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
   
-  .benefits-tab {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
+  // Usar scroll lock quando modal estiver aberto
+  useScrollLock(showDetailModal);
   
-  .benefits-to-ingredients-transition {
-    height: 160px;
-  }
-}
-
-/* Fallback para navegadores sem suporte a backdrop-filter */
-@supports not (backdrop-filter: blur(10px)) {
-  .benefits-glassmorphism-badge {
-    background: rgba(194, 247, 188, 0.8);
-  }
-}
-
-/* Hover effects para desktop */
-@media (hover: hover) and (pointer: fine) {
-  .benefits-glassmorphism-badge {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+  // Memoizar os dados dos benefícios
+  const benefits = useMemo(() => BENEFITS_DATA, []);
   
-  .benefits-glassmorphism-badge:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(194, 247, 188, 0.2), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
+  // Otimizar imagens com parâmetros para diferentes dispositivos
+  const getOptimizedImageUrl = useCallback((url: string) => {
+    const width = isMobile ? 400 : 800;
+    const quality = isMobile ? 70 : 80;
+    return `${url}&w=${width}&q=${quality}&fm=webp&fit=crop`;
+  }, [isMobile]);
   
-  .benefits-glassmorphism-badge:hover::before {
-    animation-play-state: paused;
-  }
-}
-
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  .benefits-organic-bg,
-  .benefits-glassmorphism-badge::before,
-  .benefits-to-ingredients-transition::before {
-    animation: none;
-  }
+  // Notificar mudança de benefício
+  useEffect(() => {
+    if (onBenefitChange) {
+      onBenefitChange(activeTab);
+    }
+  }, [activeTab, onBenefitChange]);
   
-  .benefits-tab,
-  .benefits-challenge-card,
-  .benefits-solution-card,
-  .benefits-cta-button {
-    transition: none;
-  }
+  // Handler para mudança de tab
+  const handleTabChange = useCallback((newTab: string) => {
+    if (newTab === activeTab) return;
+    
+    // Adicionar haptic feedback em mobile
+    if ('vibrate' in navigator && isMobile) {
+      navigator.vibrate(10);
+    }
+    
+    setIsTransitioning(true);
+    
+    // Scroll suave para o topo da seção
+    const section = document.getElementById('beneficios');
+    if (section) {
+      const headerOffset = 120;
+      const elementPosition = section.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+    
+    setTimeout(() => {
+      setActiveTab(newTab);
+      setIsTransitioning(false);
+    }, 150);
+  }, [activeTab, isMobile]);
   
-  .benefits-cta-button::before {
-    display: none;
-  }
-}
+  // Handler para navegação por teclado
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, currentIndex: number) => {
+    const tabs = Object.keys(benefits);
+    
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      handleTabChange(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      handleTabChange(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      handleTabChange(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      handleTabChange(tabs[tabs.length - 1]);
+    }
+  }, [benefits, handleTabChange]);
+  
+  // Handler para abrir modal de detalhes
+  const handleOpenDetails = useCallback((benefitKey: string) => {
+    setSelectedBenefit(benefitKey);
+    setShowDetailModal(true);
+  }, []);
 
-/* Estilo para scroll do modal */
-.modal-scroll-content {
-  scrollbar-width: thin;
-  scrollbar-color: #A9683D rgba(0, 0, 0, 0.1);
-}
+  // Handler para fechar modal
+  const handleCloseModal = useCallback(() => {
+    setShowDetailModal(false);
+    // Pequeno delay para aguardar animação de saída
+    setTimeout(() => {
+      setSelectedBenefit(null);
+    }, 300);
+  }, []);
 
-.modal-scroll-content::-webkit-scrollbar {
-  width: 8px;
-}
+  return (
+    <>
+      <section 
+        id="beneficios" 
+        className="benefits-section"
+        ref={sectionRef}
+      >
+        {/* Background orgânico animado */}
+        <motion.div 
+          className="benefits-organic-bg"
+          style={{ y: backgroundY }}
+        />
+        
+        {/* Partículas flutuantes */}
+        {!reduceMotion && <FloatingParticles />}
+        
+        <div className="section-container relative z-10">
+          <div className="text-center mb-16">
+            {/* Badge com efeito glassmorphism */}
+            <motion.div 
+              className="inline-block mb-4"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
+              transition={{ duration: 0.5 }}
+              aria-label="Badge de benefícios"
+            >
+              <div className="benefits-glassmorphism-badge">
+                <span>Benefícios Transformadores</span>
+              </div>
+            </motion.div>
+            
+            <h2 className="heading-secondary text-juvelina-emerald">
+              Transformando Desafios em Bem-Estar
+            </h2>
+            
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto mt-4">
+              Entendemos os obstáculos do dia a dia que dificultam sua jornada de saúde. Juvelina foi criada para superar esses desafios.
+            </p>
+          </div>
+          
+          {/* Tabs de navegação com suporte a teclado */}
+          <div className="flex flex-col items-center mb-12">
+            {isMobile && (
+              <div className="mb-4 flex items-center gap-2 text-juvelina-gold">
+                <div className="flex items-center animate-pulse">
+                  <span className="text-sm">Deslize</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </div>
+            )}
+            
+            <div 
+              className="inline-flex bg-white shadow-md rounded-full p-1 overflow-x-auto hide-scrollbar max-w-full" 
+              role="tablist" 
+              aria-label="Navegação de benefícios"
+            >
+              {Object.entries(benefits).map(([key, benefit], index) => (
+                <button
+                  key={key}
+                  className={`benefits-tab ${activeTab === key ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}
+                  onClick={() => handleTabChange(key)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  role="tab"
+                  aria-selected={activeTab === key}
+                  aria-controls={`benefit-panel-${key}`}
+                  id={`benefit-tab-${key}`}
+                  tabIndex={activeTab === key ? 0 : -1}
+                >
+                  <div className="flex items-center gap-2">
+                    {React.cloneElement(benefit.icon, {
+                      className: `h-4 w-4 ${activeTab === key ? 'text-white' : 'text-juvelina-gold'}`
+                    })}
+                    <span>{benefit.title}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-.modal-scroll-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-}
+          {/* Anúncio ARIA para mudanças de estado */}
+          <div 
+            role="status" 
+            aria-live="polite" 
+            aria-atomic="true" 
+            className="sr-only"
+          >
+            {isTransitioning 
+              ? `Carregando informações sobre ${benefits[activeTab as keyof typeof benefits].title}` 
+              : `Mostrando benefícios de ${benefits[activeTab as keyof typeof benefits].title}`}
+          </div>
+          
+          {/* Conteúdo do benefício ativo */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              role="tabpanel"
+              id={`benefit-panel-${activeTab}`}
+              aria-labelledby={`benefit-tab-${activeTab}`}
+              className={isTransitioning ? 'opacity-50' : ''}
+            >
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                {/* Coluna de texto */}
+                <div className="order-2 md:order-1">
+                  <div className="flex items-center gap-4 mb-6">
+                    {benefits[activeTab as keyof typeof benefits].icon}
+                    <h3 className="text-2xl font-bold">{benefits[activeTab as keyof typeof benefits].title}</h3>
+                  </div>
+                  
+                  <p className="text-gray-700 text-lg mb-8">
+                    {benefits[activeTab as keyof typeof benefits].description}
+                  </p>
+                  
+                  {/* Comparação Desafio vs. Solução com microinterações */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <motion.div 
+                      className="benefits-challenge-card group"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ 
+                        duration: 0.5,
+                        ease: "easeOut"
+                      }}
+                      whileHover={!reduceMotion ? { x: -5 } : {}}
+                    >
+                      <h4 className="font-bold text-lg mb-3 text-red-500 flex items-center gap-2">
+                        <X size={18} />
+                        O Desafio
+                      </h4>
+                      <p className="text-gray-700">
+                        {benefits[activeTab as keyof typeof benefits].challenge}
+                      </p>
+                    </motion.div>
+                    
+                    <motion.div 
+                      className="benefits-solution-card group"
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ 
+                        duration: 0.5,
+                        delay: 0.15,
+                        ease: "easeOut"
+                      }}
+                      whileHover={!reduceMotion ? { x: 5 } : {}}
+                    >
+                      <h4 className="font-bold text-lg mb-3 text-juvelina-emerald flex items-center gap-2">
+                        <CheckCircle size={18} />
+                        Nossa Solução
+                      </h4>
+                      <p className="text-gray-700">
+                        {benefits[activeTab as keyof typeof benefits].solution}
+                      </p>
+                    </motion.div>
+                  </div>
+                  
+                  {/* Botão para ver mais detalhes */}
+                  <motion.button
+                    className="benefits-cta-button group"
+                    onClick={() => handleOpenDetails(activeTab)}
+                    whileHover={!reduceMotion ? { scale: 1.05 } : {}}
+                    whileTap={!reduceMotion ? { scale: 0.95 } : {}}
+                  >
+                    <span>Ver Detalhes Científicos</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </motion.button>
+                </div>
+                
+                {/* Imagem do benefício */}
+                <div className="order-1 md:order-2 relative mb-8 md:mb-0">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <img
+                      src={getOptimizedImageUrl(benefits[activeTab as keyof typeof benefits].image)}
+                      alt={benefits[activeTab as keyof typeof benefits].title}
+                      className="rounded-lg shadow-xl w-full h-auto object-cover"
+                      style={{ maxHeight: '500px' }}
+                      loading="lazy"
+                    />
+                    
+                    {/* Badge flutuante */}
+                    <motion.div 
+                      className="absolute -bottom-5 right-5 bg-white p-4 rounded-lg shadow-lg hidden sm:flex"
+                      animate={!reduceMotion ? { y: [0, -10, 0] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <div className="flex items-center gap-2 text-juvelina-emerald">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span className="font-bold">Cientificamente Comprovado</span>
+                      </div>
+                    </motion.div>
+                    
+                    {/* Badge com estatística */}
+                    <motion.div 
+                      className="absolute top-5 left-5 bg-juvelina-gold text-white px-4 py-2 rounded-lg shadow-lg text-sm sm:text-base"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <span className="font-bold">{benefits[activeTab as keyof typeof benefits].statistic}</span>
+                    </motion.div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Indicador de continuação com margem adequada */}
+          <motion.div 
+            className="mt-20 mb-8 text-center"
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ delay: 0.8 }}
+          >
+            <p className="text-gray-600 mb-4">Descubra os ingredientes que tornam esses benefícios possíveis</p>
+            <motion.div
+              animate={!reduceMotion ? { y: [0, 10, 0] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="inline-block"
+            >
+              <ArrowDown className="w-8 h-8 text-juvelina-gold" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+      
+      {/* Transição orgânica melhorada */}
+      <div className="benefits-to-ingredients-transition">
+        <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%">
+          <defs>
+            <filter id="benefits-wave">
+              <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" />
+              <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" />
+            </filter>
+          </defs>
+          <path d="M0,80 C200,40 400,120 600,80 C800,40 1000,120 1200,80 C1300,60 1400,70 1440,80 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.3"/>
+          <path d="M0,120 C300,80 600,160 900,120 C1100,90 1300,130 1440,120 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.5"/>
+          <path d="M0,160 C400,140 800,180 1200,160 C1320,155 1400,158 1440,160 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)"/>
+        </svg>
+      </div>
+      
+      {/* Modal de Detalhes com Portal */}
+      <BenefitDetailModal
+        isOpen={showDetailModal}
+        selectedBenefit={selectedBenefit}
+        onClose={handleCloseModal}
+        isMobile={isMobile}
+        benefits={benefits}
+        getOptimizedImageUrl={getOptimizedImageUrl}
+      />
+    </>
+  );
+};
 
-.modal-scroll-content::-webkit-scrollbar-thumb {
-  background-color: #A9683D;
-  border-radius: 4px;
-}
-
-.modal-scroll-content::-webkit-scrollbar-thumb:hover {
-  background-color: #8a5430;
-}
+export default BenefitsSection;

@@ -2,13 +2,35 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown, Info } from 'lucide-react';
+import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown } from 'lucide-react';
 import { PerformanceContext } from '../../App';
 import './BenefitsSection.css';
 
 interface BenefitsSectionProps {
   onBenefitChange?: (benefit: string) => void;
 }
+
+// Hook para bloquear scroll
+const useScrollLock = (isLocked: boolean) => {
+  useEffect(() => {
+    if (isLocked) {
+      // Salvar largura da scrollbar para evitar layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Aplicar estilos para travar o scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.classList.add('modal-open');
+      
+      return () => {
+        // Restaurar estilos
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.body.classList.remove('modal-open');
+      };
+    }
+  }, [isLocked]);
+};
 
 // Dados estáticos movidos para fora do componente
 const BENEFITS_DATA = {
@@ -82,6 +104,13 @@ const BENEFITS_DATA = {
   }
 };
 
+const BENEFIT_NAMES: Record<string, string> = {
+  energia: 'Energia Sustentada',
+  imunidade: 'Imunidade Reforçada',
+  beleza: 'Beleza Radiante',
+  absorcao: 'Absorção Superior'
+};
+
 // Partículas flutuantes que conectam as seções
 const FloatingParticles = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -108,32 +137,11 @@ const FloatingParticles = () => (
   </div>
 );
 
-// Componente Tooltip melhorado
-const IngredientTooltip: React.FC<{ children: React.ReactNode; content: string; amount?: string }> = ({ 
-  children, 
-  content, 
-  amount 
-}) => (
-  <div className="group relative inline-block">
-    {children}
-    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
-                    opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
-      <div className="bg-gray-900 text-white text-xs rounded-lg p-3 whitespace-nowrap shadow-xl">
-        {amount && <div className="font-bold text-juvelina-mint mb-1">{amount}</div>}
-        <div className="text-gray-300">{content}</div>
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 
-                        w-2 h-2 bg-gray-900 rotate-45"></div>
-      </div>
-    </div>
-  </div>
-);
-
 const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) => {
   const [activeTab, setActiveTab] = useState('energia');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedBenefit, setSelectedBenefit] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const { isMobile, reduceMotion } = useContext(PerformanceContext);
   
   const [sectionRef, inView] = useInView({
@@ -143,6 +151,9 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
 
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
+  
+  // Usar scroll lock quando modal estiver aberto
+  useScrollLock(showDetailModal);
   
   // Memoizar os dados dos benefícios
   const benefits = useMemo(() => BENEFITS_DATA, []);
@@ -218,23 +229,14 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
     setShowDetailModal(true);
   }, []);
 
-  // Scroll progress para modal
-  useEffect(() => {
-    if (!showDetailModal) return;
-
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLDivElement;
-      const scrollPercentage = (target.scrollTop / (target.scrollHeight - target.clientHeight)) * 100;
-      setScrollProgress(scrollPercentage);
-    };
-
-    const modalContent = document.querySelector('.modal-scroll-content');
-    modalContent?.addEventListener('scroll', handleScroll);
-
-    return () => {
-      modalContent?.removeEventListener('scroll', handleScroll);
-    };
-  }, [showDetailModal]);
+  // Handler para fechar modal
+  const handleCloseModal = useCallback(() => {
+    setShowDetailModal(false);
+    // Pequeno delay para aguardar animação de saída antes de limpar o estado
+    setTimeout(() => {
+      setSelectedBenefit(null);
+    }, 300);
+  }, []);
   
   // Modal de Detalhes do Benefício
   const BenefitDetailModal = () => {
@@ -246,99 +248,87 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
       <AnimatePresence>
         {showDetailModal && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center modal-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowDetailModal(false)}
+            onClick={handleCloseModal}
+            style={{ padding: isMobile ? '1rem' : '2rem' }}
           >
             <motion.div
-              className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+              className={`bg-white rounded-2xl shadow-2xl ${isMobile ? 'max-w-lg w-full' : 'max-w-4xl w-full'} relative`}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
+              style={isMobile ? {
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column'
+              } : undefined}
             >
-              {/* Progress Bar */}
-              <div className="sticky top-0 bg-white z-10 p-4 border-b">
-                <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-juvelina-gold"
-                    style={{ width: `${scrollProgress}%` }}
-                    transition={{ duration: 0.1 }}
-                  />
-                </div>
+              {/* Header da imagem */}
+              <div className="relative flex-shrink-0">
+                <img 
+                  src={getOptimizedImageUrl(benefit.image)}
+                  alt={benefit.title}
+                  className="w-full h-48 sm:h-64 object-cover rounded-t-2xl"
+                  loading="lazy"
+                />
+                <button
+                  onClick={handleCloseModal}
+                  className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 hover:bg-white transition shadow-lg"
+                  aria-label="Fechar modal"
+                >
+                  <X size={24} />
+                </button>
               </div>
-
-              <div className="modal-scroll-content overflow-y-auto max-h-[calc(90vh-4rem)]">
-                <div className="relative">
-                  <img 
-                    src={getOptimizedImageUrl(benefit.image)}
-                    alt={benefit.title}
-                    className="w-full h-64 object-cover"
-                    loading="lazy"
-                  />
-                  <button
-                    onClick={() => setShowDetailModal(false)}
-                    className="absolute top-4 right-4 bg-white/90 rounded-full p-2 hover:bg-white transition"
-                    aria-label="Fechar modal"
-                  >
-                    <X size={24} />
-                  </button>
+              
+              {/* Conteúdo com scroll interno no mobile */}
+              <div className={`${isMobile ? 'flex-1 overflow-y-auto overscroll-contain modal-scroll-container' : ''} p-6 sm:p-8`}>
+                <div className="flex items-center gap-4 mb-6">
+                  {benefit.icon}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
                 </div>
                 
-                <div className="p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    {benefit.icon}
-                    <h2 className="text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
-                  </div>
-                  
-                  <p className="text-lg text-gray-700 mb-8">{benefit.description}</p>
-                  
-                  <div className="grid md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                      <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Ingredientes Principais</h3>
-                      <ul className="space-y-2">
-                        {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
-                          <li key={idx} className="flex items-center gap-2">
-                            <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
-                            <IngredientTooltip 
-                              content="Dose diária recomendada"
-                              amount={ingredient.split('(')[1]?.replace(')', '')}
-                            >
-                              <span className="cursor-help border-b border-dotted border-gray-400">
-                                {ingredient}
-                              </span>
-                            </IngredientTooltip>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">Evidência Científica</h3>
-                      <p className="text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
-                        "{benefit.detailedInfo.scientificEvidence}"
-                      </p>
-                    </div>
+                <p className="text-base sm:text-lg text-gray-700 mb-6">{benefit.description}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Ingredientes Principais</h3>
+                    <ul className="space-y-2">
+                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
+                          <span className="text-sm sm:text-base">{ingredient}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                   
                   <div>
-                    <h3 className="font-bold text-xl mb-4 text-juvelina-emerald">O que nossos clientes dizem</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
-                        <motion.div 
-                          key={idx} 
-                          className="bg-gray-50 p-4 rounded-lg"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                        >
-                          <p className="text-gray-700 mb-2">"{testimonial.text}"</p>
-                          <p className="text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
-                        </motion.div>
-                      ))}
-                    </div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Evidência Científica</h3>
+                    <p className="text-sm sm:text-base text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
+                      "{benefit.detailedInfo.scientificEvidence}"
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">O que nossos clientes dizem</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
+                      <motion.div 
+                        key={idx} 
+                        className="bg-gray-50 p-4 rounded-lg"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
+                        <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>

@@ -1,9 +1,9 @@
-// src/features/ingredients/IngredientsSection.tsx - REFATORADO COMPLETO
+// src/features/ingredients/IngredientsSection.tsx - SEM TOOLTIPS DE DOSE
 
 import React, { useState, useEffect, useMemo, useCallback, useContext, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Leaf, Sparkles, Shield, Zap, Eye, ArrowRight, Search, X, Info, Heart } from 'lucide-react';
+import { Leaf, Sparkles, Shield, Zap, Eye, ArrowRight, Heart } from 'lucide-react';
 import { PerformanceContext } from '../../App';
 import './IngredientsSection.css';
 
@@ -110,24 +110,6 @@ const BENEFIT_NAMES: Record<string, string> = {
   beleza: 'Beleza Radiante',
   absorcao: 'Absorção Superior'
 };
-
-// Componente Tooltip
-const IngredientTooltip: React.FC<{ ingredient: string; amount: string }> = ({ ingredient, amount }) => (
-  <div className="group relative inline-block">
-    <span className="cursor-help border-b border-dotted border-juvelina-mint">
-      {ingredient}
-    </span>
-    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
-                    opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-      <div className="bg-gray-900 text-white text-xs rounded-lg p-2 whitespace-nowrap shadow-xl">
-        <div className="font-bold text-juvelina-mint">{amount}</div>
-        <div className="text-gray-300">Dose diária recomendada</div>
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 
-                        w-2 h-2 bg-gray-900 rotate-45"></div>
-      </div>
-    </div>
-  </div>
-);
 
 const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefit }) => {
   const [showIngredientsList, setShowIngredientsList] = useState(false);
@@ -390,10 +372,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
                         />
                         <div className="flex-1">
                           <div className="flex items-baseline justify-between">
-                            <IngredientTooltip 
-                              ingredient={ingredient.name}
-                              amount={ingredient.amount}
-                            />
+                            <span className="font-medium">{ingredient.name}</span>
                             <span className="text-sm text-juvelina-emerald font-medium">{ingredient.amount}</span>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">{ingredient.benefit}</p>
