@@ -1,6 +1,5 @@
 // src/features/benefits/BenefitsSection.tsx
-import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Droplets, Shield, Heart, Zap, CheckCircle, X, ArrowRight, ArrowDown } from 'lucide-react';
@@ -13,48 +12,30 @@ interface BenefitsSectionProps {
 
 // Hook para bloquear scroll
 const useScrollLock = (isLocked: boolean) => {
-  const scrollPosition = useRef(0);
-  
   useEffect(() => {
     if (isLocked) {
-      scrollPosition.current = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      // Salvar posição atual do scroll
+      const scrollY = window.scrollY;
       
+      // Aplicar estilos para travar o scroll
       document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollPosition.current}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
       
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-      }
-      
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-      document.body.classList.remove('modal-open');
-      
-      if (scrollPosition.current > 0) {
-        window.scrollTo(0, scrollPosition.current);
-      }
+      return () => {
+        // Restaurar estilos e posição do scroll
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
     }
-    
-    return () => {
-      if (isLocked) {
-        document.body.style.cssText = '';
-        document.body.classList.remove('modal-open');
-      }
-    };
   }, [isLocked]);
 };
 
-// Dados estáticos
+// Dados estáticos movidos para fora do componente
 const BENEFITS_DATA = {
   energia: {
     icon: <Zap className="h-10 w-10 text-juvelina-gold" />,
@@ -126,7 +107,14 @@ const BENEFITS_DATA = {
   }
 };
 
-// Partículas flutuantes
+const BENEFIT_NAMES: Record<string, string> = {
+  energia: 'Energia Sustentada',
+  imunidade: 'Imunidade Reforçada',
+  beleza: 'Beleza Radiante',
+  absorcao: 'Absorção Superior'
+};
+
+// Partículas flutuantes que conectam as seções
 const FloatingParticles = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
     {[...Array(5)].map((_, i) => (
@@ -152,201 +140,23 @@ const FloatingParticles = () => (
   </div>
 );
 
-// Modal Component
-interface BenefitDetailModalProps {
-  isOpen: boolean;
-  selectedBenefit: string | null;
-  onClose: () => void;
-  isMobile: boolean;
-  benefits: typeof BENEFITS_DATA;
-  getOptimizedImageUrl: (url: string) => string;
-}
-
-const BenefitDetailModal: React.FC<BenefitDetailModalProps> = ({ 
-  isOpen, 
-  selectedBenefit, 
-  onClose, 
-  isMobile,
-  benefits,
-  getOptimizedImageUrl
-}) => {
-  const [mounted, setMounted] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  // Calcular progresso do scroll no mobile
-  useEffect(() => {
-    if (!isMobile || !scrollContainerRef.current) return;
-
-    const handleScroll = () => {
-      const container = scrollContainerRef.current;
-      if (!container) return;
-
-      const scrollTop = container.scrollTop;
-      const scrollHeight = container.scrollHeight - container.clientHeight;
-      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-      setScrollProgress(progress);
-    };
-
-    const container = scrollContainerRef.current;
-    container.addEventListener('scroll', handleScroll);
-    handleScroll(); // Calcular inicial
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [isMobile, isOpen]);
-
-  // Handler para fechar modal sem scroll para hero
-  const handleClose = useCallback(() => {
-    // Prevenir o scroll automático salvando a posição antes de fechar
-    const benefitsSection = document.getElementById('beneficios');
-    if (benefitsSection) {
-      const rect = benefitsSection.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const offsetTop = rect.top + scrollTop - 100; // 100px de offset para o header
-      
-      onClose();
-      
-      // Aguardar o modal fechar e então ajustar a posição
-      setTimeout(() => {
-        window.scrollTo({
-          top: offsetTop,
-          behavior: 'instant'
-        });
-      }, 50);
-    } else {
-      onClose();
-    }
-  }, [onClose]);
-
-  if (!mounted || !selectedBenefit || !isOpen) return null;
-
-  const benefit = benefits[selectedBenefit as keyof typeof benefits];
-
-  const modalContent = (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-[999999] bg-black/80 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={handleClose}
-        >
-          <motion.div
-            className={`bg-white rounded-2xl shadow-2xl w-full relative overflow-hidden ${
-              isMobile ? 'max-w-lg' : 'max-w-4xl'
-            }`}
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxHeight: '90vh',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            {/* Indicador de scroll para mobile */}
-            {isMobile && (
-              <motion.div 
-                className="benefits-scroll-indicator"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <div 
-                  className="benefits-scroll-progress"
-                  style={{ height: `${scrollProgress}%` }}
-                />
-              </motion.div>
-            )}
-
-            {/* Header da imagem */}
-            <div className="benefits-modal-header">
-              <img 
-                src={getOptimizedImageUrl(benefit.image)}
-                alt={benefit.title}
-                className="benefits-modal-image"
-                loading="lazy"
-              />
-              <button
-                onClick={handleClose}
-                className="benefits-modal-close"
-                aria-label="Fechar modal"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            {/* Conteúdo com scroll interno no mobile */}
-            <div 
-              ref={scrollContainerRef}
-              className={`benefits-modal-body ${isMobile ? 'benefits-modal-scrollable' : ''}`}
-            >
-              <div className="benefits-modal-inner">
-                <div className="flex items-center gap-4 mb-6">
-                  {benefit.icon}
-                  <h2 className="text-2xl sm:text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
-                </div>
-                
-                <p className="text-base sm:text-lg text-gray-700 mb-6">{benefit.description}</p>
-                
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Ingredientes Principais</h3>
-                    <ul className="space-y-2">
-                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
-                          <span className="text-sm sm:text-base">{ingredient}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Evidência Científica</h3>
-                    <p className="text-sm sm:text-base text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
-                      "{benefit.detailedInfo.scientificEvidence}"
-                    </p>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">O que nossos clientes dizem</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
-                      <motion.div 
-                        key={idx} 
-                        className="bg-gray-50 p-4 rounded-lg"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                      >
-                        <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
-                        <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
-  // Renderizar no portal
-  return ReactDOM.createPortal(modalContent, document.body);
-};
+// Componente Tooltip melhorado (removido amount)
+const IngredientTooltip: React.FC<{ children: React.ReactNode; content: string }> = ({ 
+  children, 
+  content
+}) => (
+  <div className="group relative inline-block">
+    {children}
+    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
+                    opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+      <div className="bg-gray-900 text-white text-xs rounded-lg p-3 whitespace-nowrap shadow-xl">
+        <div className="text-gray-300">{content}</div>
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 
+                        w-2 h-2 bg-gray-900 rotate-45"></div>
+      </div>
+    </div>
+  </div>
+);
 
 const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) => {
   const [activeTab, setActiveTab] = useState('energia');
@@ -383,7 +193,7 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
     }
   }, [activeTab, onBenefitChange]);
   
-  // Handler para mudança de tab
+  // Handler para mudança de tab com loading state e haptic feedback
   const handleTabChange = useCallback((newTab: string) => {
     if (newTab === activeTab) return;
     
@@ -443,11 +253,103 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
   // Handler para fechar modal
   const handleCloseModal = useCallback(() => {
     setShowDetailModal(false);
-    // Pequeno delay para aguardar animação de saída
     setTimeout(() => {
       setSelectedBenefit(null);
     }, 300);
   }, []);
+  
+  // Modal de Detalhes do Benefício
+  const BenefitDetailModal = () => {
+    if (!selectedBenefit || !showDetailModal) return null;
+    
+    const benefit = benefits[selectedBenefit as keyof typeof benefits];
+    
+    return (
+      <AnimatePresence>
+        {showDetailModal && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              className={`bg-white rounded-2xl ${isMobile ? 'max-w-lg w-full max-h-[90vh] overflow-y-auto' : 'max-w-4xl w-full'}`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative">
+                <img 
+                  src={getOptimizedImageUrl(benefit.image)}
+                  alt={benefit.title}
+                  className="w-full h-48 sm:h-64 object-cover rounded-t-2xl"
+                  loading="lazy"
+                />
+                <button
+                  onClick={handleCloseModal}
+                  className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 hover:bg-white transition shadow-lg"
+                  aria-label="Fechar modal"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  {benefit.icon}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
+                </div>
+                
+                <p className="text-base sm:text-lg text-gray-700 mb-6">{benefit.description}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Ingredientes Principais</h3>
+                    <ul className="space-y-2">
+                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
+                          <span className="text-sm sm:text-base">{ingredient}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Evidência Científica</h3>
+                    <p className="text-sm sm:text-base text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
+                      "{benefit.detailedInfo.scientificEvidence}"
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">O que nossos clientes dizem</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
+                      <motion.div 
+                        key={idx} 
+                        className="bg-gray-50 p-4 rounded-lg"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
+                        <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
 
   return (
     <>
@@ -701,15 +603,8 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
         </svg>
       </div>
       
-      {/* Modal de Detalhes com Portal */}
-      <BenefitDetailModal
-        isOpen={showDetailModal}
-        selectedBenefit={selectedBenefit}
-        onClose={handleCloseModal}
-        isMobile={isMobile}
-        benefits={benefits}
-        getOptimizedImageUrl={getOptimizedImageUrl}
-      />
+      {/* Modal de Detalhes */}
+      <BenefitDetailModal />
     </>
   );
 };

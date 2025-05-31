@@ -496,11 +496,30 @@
   }
 }
 
-/* Previne scroll do body quando modal está aberto */
-body.modal-open {
-  overflow: hidden;
-  position: fixed;
+/* CORREÇÕES PARA SCROLL LOCK */
+html.scroll-locked,
+body.scroll-locked {
+  overflow: hidden !important;
+}
+
+/* Container fixo para scroll lock */
+#scroll-lock-container {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
+  height: 100vh;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  background: white;
+  z-index: 1;
+}
+
+/* Garantir que o modal fique acima */
+.benefits-modal-backdrop {
+  z-index: 999999 !important;
 }
 
 /* Container de scroll específico para iOS */
@@ -532,8 +551,9 @@ body.modal-open {
     bottom: 0;
     background: linear-gradient(to top, white 0%, transparent 100%);
   }
+}
 
-  /* Indicador de scroll para mobile */
+/* Indicador de scroll para mobile */
 .benefits-scroll-indicator {
   position: absolute;
   right: 2px;
@@ -568,6 +588,4 @@ body.modal-open {
   .benefits-modal-scrollable {
     padding-right: 8px;
   }
-}
-
 }
