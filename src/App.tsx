@@ -2,6 +2,12 @@
 import React, { useState, useEffect, createContext, Suspense, lazy, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './styles/index.css';
+import { 
+  prefetchCriticalResources, 
+  addResourceHints, 
+  registerServiceWorker,
+  monitorPerformanceBudget 
+} from './utils/performance';
 
 // Componentes essenciais (não lazy) - Hero e Header devem carregar imediatamente
 import { AnnouncementBar, Header, PurchaseModal } from './components/common';
@@ -128,7 +134,7 @@ function App() {
     }
   });
 
-  // Detectar capacidades do dispositivo
+  // Detectar capacidades do dispositivo e inicializar otimizações
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
@@ -157,6 +163,12 @@ function App() {
 
     checkDevice();
     window.addEventListener('resize', checkDevice);
+    
+    // Inicializar otimizações de performance
+    addResourceHints();
+    prefetchCriticalResources();
+    registerServiceWorker();
+    monitorPerformanceBudget();
     
     return () => window.removeEventListener('resize', checkDevice);
   }, [isLowPerformance]);

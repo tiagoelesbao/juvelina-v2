@@ -4,6 +4,7 @@
    IMPORTS - DEVEM VIR PRIMEIRO!
    ================================= */
 @import './mobile-optimizations.css';
+@import './performance.css';
 
 /* =================================
    RESET E BASE

@@ -340,7 +340,7 @@ const AbsorptionSection: React.FC = () => {
       {/* Wave transition no final como no video testimonials */}
       <WaveTransition 
         color="#C2F7BC" 
-        className="mt-16"
+        className="mt-32"
         height={120}
         animated={true}
         variant="dramatic"

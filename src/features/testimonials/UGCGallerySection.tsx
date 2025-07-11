@@ -249,65 +249,7 @@ const UGCGallerySection: React.FC = () => {
   };
   
   return (
-    <section id="ugc-gallery" className="py-20 bg-gradient-to-b from-juvelina-mint/20 via-juvelina-mint/10 to-juvelina-mint/20 relative overflow-hidden" ref={ref}>
-      {/* Background orgânico dinâmico */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Padrão de folhas flutuantes */}
-        <motion.div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 5c15 15 30 25 30 40 0 15-15 25-30 25s-30-10-30-25c0-15 15-25 30-40z' fill='%23A9683D' fill-opacity='0.6' fill-rule='evenodd'/%3E%3Cpath d='M20 45c10 10 20 15 20 25 0 10-10 15-20 15s-20-5-20-15c0-10 10-15 20-25z' fill='%23C2F7BC' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-            backgroundSize: '120px 120px',
-          }}
-          animate={{
-            backgroundPosition: ['0px 0px', '60px 60px', '0px 0px'],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        
-        {/* Efeito de gradiente orgânico animado */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-juvelina-mint/5 via-transparent to-juvelina-mint/10"
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        
-        {/* Círculos flutuantes */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-juvelina-mint/20"
-            style={{
-              width: `${40 + i * 20}px`,
-              height: `${40 + i * 20}px`,
-              left: `${Math.random() * 80 + 10}%`,
-              top: `${Math.random() * 80 + 10}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 20, 0],
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 10 + i * 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 1.5,
-            }}
-          />
-        ))}
-      </div>
+    <section id="ugc-gallery" className="py-20 bg-juvelina-mint relative overflow-hidden" ref={ref}>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
@@ -417,7 +359,7 @@ const UGCGallerySection: React.FC = () => {
                                 <TikTokIcon size={14} />
                                 <span>TikTok</span>
                               </button>
-                              <button className="flex items-center gap-2 hover:text-juvelina-gold" onClick={(e) => {
+                              <button className="flex items-center gap-2 hover:text-juvelina-gold" onClick={(e: React.MouseEvent) => {
                                 e.stopPropagation();
                                 navigator.clipboard.writeText(`Veja os resultados incríveis com Juvelina Organics! #JuvelinaOrganics ${window.location.href}`);
                                 setShowShareTooltip(null);
@@ -455,30 +397,6 @@ const UGCGallerySection: React.FC = () => {
           </AnimatePresence>
         </div>
         
-        
-        {/* CTA para Instagram */}
-        <motion.div 
-          className="mt-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80 rounded-xl p-8 text-white text-center max-w-3xl mx-auto shadow-lg"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.7 }}
-        >
-          <Instagram size={48} className="mx-auto mb-4" />
-          <h3 className="text-2xl font-bold mb-2">Siga-nos no Instagram</h3>
-          <p className="mb-6">
-            Acompanhe mais transformações reais e dicas de bem-estar na nossa página oficial
-          </p>
-          <a 
-            href="https://www.instagram.com/juvelinaorganics" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex bg-white text-juvelina-gold px-8 py-3 rounded-full hover:bg-opacity-90 transition-colors font-medium items-center gap-2"
-          >
-            <Instagram size={20} />
-            @juvelinaorganics
-          </a>
-        </motion.div>
       </div>
       
       {/* Modal para visualização de posts */}

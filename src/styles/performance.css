@@ -1,0 +1,253 @@
+/* src/styles/performance.css - Otimizações CSS para máxima performance */
+
+/* GPU Acceleration para elementos críticos */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Otimizações para scroll */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* Will-change otimizado */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* Compositing layers para animações */
+.compositing-layer {
+  transform: translateZ(0);
+  opacity: 0.99;
+}
+
+/* Otimizações para imagens */
+.image-crisp {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.image-smooth {
+  image-rendering: auto;
+  image-rendering: smooth;
+}
+
+/* Contenção de layout para melhor performance */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-style {
+  contain: style;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-size {
+  contain: size;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Otimizações para texto */
+.text-optimized {
+  text-rendering: optimizeSpeed;
+  font-smooth: never;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* Redução de motion para dispositivos com preferência */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Otimizações para dispositivos low-end */
+@media (max-width: 480px) and (max-device-pixel-ratio: 1.5) {
+  .low-end-optimize {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* Prefers-reduced-data para economizar banda */
+@media (prefers-reduced-data: reduce) {
+  .high-quality-image {
+    display: none;
+  }
+  
+  .low-quality-image {
+    display: block;
+  }
+  
+  video {
+    preload: none;
+  }
+}
+
+/* Loading states otimizados */
+.skeleton-loader {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Otimizações para scroll durante carregamento */
+.scrolling .non-critical-animation {
+  animation-play-state: paused;
+}
+
+.scrolling .heavy-filter {
+  filter: none;
+}
+
+/* Contenção para seções independentes */
+.section-contained {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Lazy loading placeholder */
+.lazy-placeholder {
+  background-color: #f5f5f5;
+  background-image: 
+    linear-gradient(45deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%);
+  background-size: 20px 20px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -20px 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
+}
+
+/* Otimizações para hover em touch devices */
+@media (hover: none) {
+  .hover-only {
+    display: none;
+  }
+}
+
+/* Força hardware acceleration para elementos específicos */
+.force-hw-accel {
+  transform: translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+}
+
+/* Otimizações para gradientes */
+.gradient-optimized {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Critical CSS inlined - principais estilos */
+.critical-above-fold {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Non-critical content */
+.below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 300px;
+}
+
+/* Otimizações para fontes */
+@font-display: swap;
+
+/* Preload crítico */
+.preload-critical {
+  font-display: swap;
+  unicode-range: U+0020-007E;
+}
+
+/* Animações otimizadas que usam apenas transform e opacity */
+.slide-up-optimized {
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.slide-up-optimized.in-view {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-in-optimized {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.fade-in-optimized.in-view {
+  opacity: 1;
+}
+
+/* Container queries para layout responsivo mais eficiente */
+@container (min-width: 768px) {
+  .container-responsive {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Melhoria da First Contentful Paint */
+.above-fold-content {
+  contain: layout;
+  font-display: swap;
+}
+
+/* Lazy loading com Intersection Observer */
+.lazy-load {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.lazy-load.loaded {
+  opacity: 1;
+  transform: translateY(0);
+}

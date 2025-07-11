@@ -186,6 +186,9 @@ export default defineConfig({
     cssMinify: true,
     target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     
+    // Otimizações adicionais para performance
+    assetsInlineLimit: 2048, // 2kb - inline assets pequenos
+    
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
@@ -209,7 +212,6 @@ export default defineConfig({
             './src/features/hero/index.tsx',
             './src/features/hero/components/HeroHeading.tsx',
             './src/features/hero/components/HeroButtons.tsx',
-            './src/features/hero/components/HeroStats.tsx',
             './src/features/hero/components/HeroImage.tsx',
             './src/features/hero/components/ScrollIndicator.tsx',
             './src/features/hero/hooks/useCountUp.tsx',
@@ -327,8 +329,7 @@ export default defineConfig({
     },
     
     // Configurações adicionais
-    reportCompressedSize: true,
-    assetsInlineLimit: 4096, // 4kb
+    reportCompressedSize: false,
     modulePreload: {
       polyfill: true,
     },

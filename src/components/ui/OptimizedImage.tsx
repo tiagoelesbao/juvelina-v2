@@ -1,6 +1,7 @@
 // src/components/ui/OptimizedImage.tsx
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { PerformanceContext } from '../../App';
+import { motion } from 'framer-motion';
 
 interface OptimizedImageProps {
   src: string;
@@ -138,32 +139,76 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       style={{
         paddingBottom: height ? undefined : getAspectRatioPadding(),
         height: height ? `${height}px` : undefined,
-        width: width ? `${width}px` : undefined
+        width: width ? `${width}px` : undefined,
+        transform: 'translateZ(0)', // GPU acceleration
+        backfaceVisibility: 'hidden'
       }}
     >
       {/* Placeholder de baixa qualidade */}
       {!loaded && getLowQualityPlaceholder() && (
-        <img
+        <motion.img
           src={getLowQualityPlaceholder()}
           alt=""
           className="absolute inset-0 w-full h-full object-cover filter blur-lg scale-110"
           aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         />
       )}
       
       {/* Skeleton loader se não tiver placeholder */}
       {!loaded && !getLowQualityPlaceholder() && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        <motion.div 
+          className="absolute inset-0 bg-gray-200"
+          animate={{
+            opacity: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       )}
       
       {/* Imagem real só carrega quando visível */}
       {isInView && !error && (
-        <img {...imgProps} />
+        <motion.img 
+          src={imgProps.src}
+          alt={imgProps.alt}
+          width={imgProps.width}
+          height={imgProps.height}
+          loading={imgProps.loading}
+          decoding={imgProps.decoding}
+          onLoad={imgProps.onLoad}
+          onError={imgProps.onError}
+          className={imgProps.className}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ 
+            opacity: loaded ? 1 : 0,
+            scale: loaded ? 1 : 1.05
+          }}
+          transition={{ 
+            duration: 0.4,
+            ease: "easeOut"
+          }}
+          style={{
+            ...imgProps.style,
+            willChange: loaded ? 'auto' : 'opacity, transform'
+          }}
+        />
       )}
       
       {/* Fallback em caso de erro */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center bg-gray-200"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="text-center p-4">
             <svg 
               className="w-12 h-12 mx-auto text-gray-400 mb-2" 
@@ -180,7 +225,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
             </svg>
             <p className="text-sm text-gray-500">Erro ao carregar imagem</p>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
