@@ -309,7 +309,7 @@ const AbsorptionSection: React.FC = () => {
         
         {/* Seção de Estudo */}
         <motion.div 
-          className="mt-16 mx-auto max-w-3xl"
+          className="mt-16 mb-16 mx-auto max-w-3xl"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
