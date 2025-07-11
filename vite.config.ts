@@ -209,7 +209,6 @@ export default defineConfig({
             './src/features/hero/index.tsx',
             './src/features/hero/components/HeroHeading.tsx',
             './src/features/hero/components/HeroButtons.tsx',
-            './src/features/hero/components/HeroStats.tsx',
             './src/features/hero/components/HeroImage.tsx',
             './src/features/hero/components/ScrollIndicator.tsx',
             './src/features/hero/hooks/useCountUp.tsx',
@@ -273,11 +272,11 @@ export default defineConfig({
         
         // Configurar nomes dos arquivos
         entryFileNames: 'assets/js/entry-[name]-[hash].js',
-        chunkFileNames: (chunkInfo) => {
+        chunkFileNames: (chunkInfo: any) => {
           const name = chunkInfo.name || 'chunk';
           return `assets/js/${name}-[hash].js`;
         },
-        assetFileNames: (assetInfo) => {
+        assetFileNames: (assetInfo: any) => {
           const name = assetInfo.name || 'asset';
           const info = name.split('.');
           const ext = info[info.length - 1];
