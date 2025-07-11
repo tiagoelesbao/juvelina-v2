@@ -17,19 +17,28 @@ const useScrollLock = (isLocked: boolean) => {
       // Salvar posição atual do scroll
       const scrollY = window.scrollY;
       
-      // Aplicar estilos para travar o scroll
+      // Aplicar estilos para travar o scroll mantendo a posição visual
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflowY = 'scroll';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
       
       return () => {
-        // Restaurar estilos e posição do scroll
+        // Remover estilos primeiro
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
+        document.body.style.overflowY = '';
+        document.body.style.paddingRight = '';
+        
+        // Restaurar posição do scroll instantaneamente
+        window.scrollTo({
+          top: scrollY,
+          left: 0,
+          behavior: 'instant'
+        });
       };
     }
   }, [isLocked]);
@@ -252,7 +261,9 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
 
   // Handler para fechar modal
   const handleCloseModal = useCallback(() => {
+    // Primeiro define o modal como fechando para permitir animação de saída
     setShowDetailModal(false);
+    // Limpa o benefício selecionado após a animação
     setTimeout(() => {
       setSelectedBenefit(null);
     }, 300);

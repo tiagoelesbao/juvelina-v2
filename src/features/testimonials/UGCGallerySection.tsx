@@ -44,7 +44,7 @@ const UGCGallerySection: React.FC = () => {
     {
       id: 3,
       username: "@carolnutri",
-      platform: "tiktok",
+      platform: "instagram",
       image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80",
       caption: "NUTRI APROVA! ✅ Analisei a composição da Juvelina e precisamos falar sobre esse multivitamínico! Ingredientes premium e alta biodisponibilidade! #JuvelinaOrganics #NutriAprova",
       likes: 5423,
@@ -64,7 +64,7 @@ const UGCGallerySection: React.FC = () => {
     {
       id: 5,
       username: "@marciofit",
-      platform: "tiktok",
+      platform: "instagram",
       image: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1450&q=80",
       caption: "COMPARATIVO: Absorção da Juvelina vs cápsulas tradicionais! O teste com corante mostra a diferença ABSURDA! 🧪 #JuvelinaOrganics #CiênciaDaAbsorção",
       likes: 9812,
@@ -84,7 +84,7 @@ const UGCGallerySection: React.FC = () => {
     {
       id: 7,
       username: "@rodrigofitness",
-      platform: "tiktok",
+      platform: "instagram",
       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
       caption: "Desafio de 30 dias com Juvelina: Fui de cansado o tempo todo para DISPOSIÇÃO MÁXIMA! 📈 Vale muito a pena, galera! #JuvelinaChallenge #Resultados",
       likes: 8521,
@@ -104,7 +104,7 @@ const UGCGallerySection: React.FC = () => {
     {
       id: 9,
       username: "@fernandasaude",
-      platform: "tiktok",
+      platform: "instagram",
       image: "https://images.unsplash.com/photo-1541971297127-c4e6f5726568?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
       caption: "1 MÊS DEPOIS 😱 O antes e depois do meu cabelo com Juvelina! Está muito mais brilhante e caindo menos! #JuvelinaCabelos #AntesDespois",
       likes: 12445,
@@ -134,7 +134,7 @@ const UGCGallerySection: React.FC = () => {
     {
       id: 12,
       username: "@marcelowellness",
-      platform: "tiktok",
+      platform: "instagram",
       image: "https://images.unsplash.com/photo-1579529547132-0c2c484ecc8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80",
       caption: "COMPARATIVO DE ENERGIA: Usando Juvelina vs sem usar nada. Filmei durante 7 dias e a diferença é clara! Muito mais produtivo e alerta! #JuvelinaResults #EnergiaNatural",
       likes: 7645,
@@ -143,40 +143,11 @@ const UGCGallerySection: React.FC = () => {
     }
   ];
 
-  // Categorias para filtrar
-  const categories = [
-    { id: 'all', label: 'Todos' },
-    { id: 'instagram', label: 'Instagram' },
-    { id: 'tiktok', label: 'TikTok' },
-  ];
+  // Todos os posts são do Instagram agora
+  const filteredPosts = ugcPosts;
   
-  const [activeCategory, setActiveCategory] = useState('all');
-  
-  // Filtrar posts baseado na categoria selecionada
-  const filteredPosts = activeCategory === 'all' 
-    ? ugcPosts 
-    : activeCategory === 'instagram' || activeCategory === 'tiktok'
-      ? ugcPosts.filter(post => post.platform === activeCategory)
-      : ugcPosts.filter(post => {
-          // Filtrar por tema (baseado no conteúdo da legenda)
-          if (activeCategory === 'energy') {
-            return post.caption.toLowerCase().includes('energia') || 
-                   post.caption.toLowerCase().includes('disposição') ||
-                   post.caption.toLowerCase().includes('cansado');
-          } else if (activeCategory === 'beauty') {
-            return post.caption.toLowerCase().includes('cabelo') || 
-                   post.caption.toLowerCase().includes('pele') ||
-                   post.caption.toLowerCase().includes('unha');
-          } else if (activeCategory === 'immunity') {
-            return post.caption.toLowerCase().includes('imunidade') || 
-                   post.caption.toLowerCase().includes('gripe') ||
-                   post.caption.toLowerCase().includes('doença');
-          }
-          return false;
-        });
-  
-  // Posts visíveis após filtragem e paginação
-  const currentPosts = filteredPosts.slice(0, visiblePosts);
+  // Posts visíveis após paginação - limitado a 8 (2 linhas)
+  const currentPosts = filteredPosts.slice(0, Math.min(visiblePosts, 8));
   
   // Efeito para fechar o modal com tecla ESC
   useEffect(() => {
@@ -278,12 +249,65 @@ const UGCGallerySection: React.FC = () => {
   };
   
   return (
-    <section id="ugc-gallery" className="py-20 bg-gradient-to-b from-white to-juvelina-mint/5 relative overflow-hidden" ref={ref}>
-      {/* Padrão de fundo sutil */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 17.32v34.64L30 60 0 51.96V17.32L30 0zm0 10.39L8.66 22.17v26.66L30 60l21.34-11.17V22.17L30 10.39z' fill='%23A9683D' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-        backgroundSize: '60px 60px',
-      }}></div>
+    <section id="ugc-gallery" className="py-20 bg-gradient-to-b from-juvelina-mint/20 via-juvelina-mint/10 to-juvelina-mint/20 relative overflow-hidden" ref={ref}>
+      {/* Background orgânico dinâmico */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Padrão de folhas flutuantes */}
+        <motion.div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 5c15 15 30 25 30 40 0 15-15 25-30 25s-30-10-30-25c0-15 15-25 30-40z' fill='%23A9683D' fill-opacity='0.6' fill-rule='evenodd'/%3E%3Cpath d='M20 45c10 10 20 15 20 25 0 10-10 15-20 15s-20-5-20-15c0-10 10-15 20-25z' fill='%23C2F7BC' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundSize: '120px 120px',
+          }}
+          animate={{
+            backgroundPosition: ['0px 0px', '60px 60px', '0px 0px'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        
+        {/* Efeito de gradiente orgânico animado */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-juvelina-mint/5 via-transparent to-juvelina-mint/10"
+          animate={{
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* Círculos flutuantes */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-juvelina-mint/20"
+            style={{
+              width: `${40 + i * 20}px`,
+              height: `${40 + i * 20}px`,
+              left: `${Math.random() * 80 + 10}%`,
+              top: `${Math.random() * 80 + 10}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, 20, 0],
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 10 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 1.5,
+            }}
+          />
+        ))}
+      </div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
@@ -298,29 +322,6 @@ const UGCGallerySection: React.FC = () => {
           </p>
         </div>
         
-        {/* Filtros de categoria */}
-        <div className="flex justify-center mb-10 overflow-x-auto hide-scrollbar">
-          <div className="inline-flex bg-white rounded-full shadow-md p-1.5">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                className={`px-4 py-2 rounded-full transition-all whitespace-nowrap ${
-                  activeCategory === category.id
-                    ? 'bg-juvelina-gold text-white'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                }`}
-                onClick={() => {
-                  setActiveCategory(category.id);
-                  setVisiblePosts(8); // Resetar paginação ao trocar categoria
-                }}
-              >
-                {category.id === 'instagram' && <Instagram size={16} className="inline mr-1" />}
-                {category.id === 'tiktok' && <TikTokIcon size={16} className="inline mr-1" />}
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
         
         {/* Grid de posts */}
         <div 
@@ -454,33 +455,8 @@ const UGCGallerySection: React.FC = () => {
           </AnimatePresence>
         </div>
         
-        {/* Botão para carregar mais */}
-        {visiblePosts < filteredPosts.length && (
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={loadMorePosts}
-              disabled={isLoading}
-              className={`bg-white border border-juvelina-gold text-juvelina-gold hover:bg-juvelina-gold hover:text-white transition-colors px-6 py-3 rounded-full font-medium flex items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-juvelina-gold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Carregando...
-                </>
-              ) : (
-                <>
-                  <Camera size={18} />
-                  Ver mais posts
-                </>
-              )}
-            </button>
-          </div>
-        )}
         
-        {/* CTA para compartilhar */}
+        {/* CTA para Instagram */}
         <motion.div 
           className="mt-16 bg-gradient-to-r from-juvelina-gold to-juvelina-gold/80 rounded-xl p-8 text-white text-center max-w-3xl mx-auto shadow-lg"
           initial={{ opacity: 0, y: 30 }}
@@ -488,30 +464,20 @@ const UGCGallerySection: React.FC = () => {
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.7 }}
         >
-          <h3 className="text-2xl font-bold mb-2">Faça Parte da Nossa Comunidade</h3>
+          <Instagram size={48} className="mx-auto mb-4" />
+          <h3 className="text-2xl font-bold mb-2">Siga-nos no Instagram</h3>
           <p className="mb-6">
-            Compartilhe sua transformação com Juvelina usando a hashtag <span className="font-bold">#JuvelinaOrganics</span> e apareça em nossa galeria!
+            Acompanhe mais transformações reais e dicas de bem-estar na nossa página oficial
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <a 
-              href="https://www.instagram.com/juvelinaorganics" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white text-juvelina-gold px-6 py-2 rounded-full hover:bg-opacity-90 transition-colors font-medium flex items-center gap-2"
-            >
-              <Instagram size={18} />
-              Instagram
-            </a>
-            <a 
-              href="https://www.tiktok.com/@juvelinaorganics" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white text-juvelina-gold px-6 py-2 rounded-full hover:bg-opacity-90 transition-colors font-medium flex items-center gap-2"
-            >
-              <TikTokIcon size={18} />
-              TikTok
-            </a>
-          </div>
+          <a 
+            href="https://www.instagram.com/juvelinaorganics" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex bg-white text-juvelina-gold px-8 py-3 rounded-full hover:bg-opacity-90 transition-colors font-medium items-center gap-2"
+          >
+            <Instagram size={20} />
+            @juvelinaorganics
+          </a>
         </motion.div>
       </div>
       
