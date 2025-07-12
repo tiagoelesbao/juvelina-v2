@@ -6,11 +6,20 @@
 
 .ingredients-section {
   position: relative;
-  padding: 1rem 0 8rem; /* Padding ajustado para melhor espaçamento */
+  padding: 3rem 0 4rem; /* Aumentar padding inferior para mais espaço antes da transição */
   background-color: #A9683D;
   overflow: hidden;
+  width: 100%;
   min-height: 100vh;
-  margin-top: -2px;
+  margin-top: -40px; /* Margin-top suave para não cortar a wave transition */
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .ingredients-section {
+    padding: 2rem 0 3rem; /* Mais espaço inferior no mobile também */
+    margin-top: -30px; /* Suave no mobile para não cortar a wave */
+  }
 }
 
 /* Background orgânico com textura */
@@ -41,6 +50,11 @@
   mix-blend-mode: multiply;
 }
 
+/* Container principal - espaçamento balanceado */
+.ingredients-section .container {
+  padding-top: 0; /* Remover padding extra, deixar o padding da section funcionar */
+}
+
 /* Badge de conexão com benefício */
 .ingredients-connection-badge {
   background: rgba(255, 255, 255, 0.95);
@@ -48,7 +62,7 @@
   padding: 0.75rem 1.5rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
   border: 2px solid #C2F7BC;
-  margin-bottom: 1.5rem; /* Espaçamento adequado */
+  margin-bottom: 0.25rem; /* Espaçamento mínimo */
   display: inline-block;
 }
 
@@ -187,7 +201,7 @@
 /* Container do CTA - NOVO */
 .ingredients-cta-container {
   margin-top: 4rem;
-  margin-bottom: 4rem;
+  margin-bottom: 8rem; /* Mais espaço antes da transição */
   text-align: center;
 }
 
@@ -221,14 +235,18 @@
   bottom: -2px;
   left: 0;
   right: 0;
+  width: 100%;
+  max-width: 100%;
   height: 240px;
   pointer-events: none;
+  overflow: hidden;
+  z-index: 10; /* Garantir z-index adequado */
 }
 
-/* Mobile optimizations */
+/* Otimizações mobile */
 @media (max-width: 768px) {
-  .ingredients-section {
-    padding: 4rem 0 6rem;
+  .ingredients-section .container {
+    padding-top: 0; /* Remover padding extra no mobile também */
   }
   
   .ingredients-connection-badge {
@@ -257,7 +275,7 @@
   
   .ingredients-cta-container {
     margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 6rem; /* Mais espaço no mobile também */
   }
 }
 

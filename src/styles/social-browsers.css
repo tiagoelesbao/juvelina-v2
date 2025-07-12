@@ -1,0 +1,241 @@
+/* 
+ * Adaptações específicas para navegadores de redes sociais
+ * Instagram, TikTok, YouTube, Pinterest, Twitter/X, Facebook, LinkedIn, Snapchat, WhatsApp
+ */
+
+/* =================================
+   NAVEGADORES IN-APP GERAIS
+   ================================= */
+
+.in-app-browser {
+  /* Ajustes globais para todos os navegadores in-app */
+  --safe-area-inset-top: 80px;
+  --safe-area-inset-bottom: 100px;
+}
+
+.in-app-browser body {
+  /* Prevenir overflow em navegadores in-app */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =================================
+   INSTAGRAM BROWSER
+   ================================= */
+
+.instagram-browser {
+  --safe-area-inset-top: 88px; /* Header do Instagram + status bar */
+  --safe-area-inset-bottom: 120px; /* Controles do Instagram */
+}
+
+.instagram-browser .benefits-section,
+.instagram-browser .ingredients-section {
+  /* Ajustar seções para não conflitar com UI do Instagram */
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* =================================
+   TIKTOK BROWSER
+   ================================= */
+
+.tiktok-browser {
+  --safe-area-inset-top: 90px; /* Header do TikTok */
+  --safe-area-inset-bottom: 110px; /* Controles do TikTok */
+}
+
+.tiktok-browser .hero-section {
+  /* Hero section adaptada para TikTok */
+  min-height: calc(100vh - 200px);
+}
+
+/* =================================
+   YOUTUBE BROWSER
+   ================================= */
+
+.youtube-browser {
+  --safe-area-inset-top: 85px; /* Header do YouTube */
+  --safe-area-inset-bottom: 95px; /* Controles do YouTube */
+}
+
+/* =================================
+   FACEBOOK BROWSER
+   ================================= */
+
+.facebook-browser {
+  --safe-area-inset-top: 85px; /* Header do Facebook */
+  --safe-area-inset-bottom: 105px; /* Controles do Facebook */
+}
+
+/* =================================
+   TWITTER/X BROWSER
+   ================================= */
+
+.twitter-browser {
+  --safe-area-inset-top: 80px; /* Header do Twitter */
+  --safe-area-inset-bottom: 90px; /* Controles do Twitter */
+}
+
+/* =================================
+   PINTEREST BROWSER
+   ================================= */
+
+.pinterest-browser {
+  --safe-area-inset-top: 85px; /* Header do Pinterest */
+  --safe-area-inset-bottom: 100px; /* Controles do Pinterest */
+}
+
+/* =================================
+   LINKEDIN BROWSER
+   ================================= */
+
+.linkedin-browser {
+  --safe-area-inset-top: 85px; /* Header do LinkedIn */
+  --safe-area-inset-bottom: 95px; /* Controles do LinkedIn */
+}
+
+/* =================================
+   SNAPCHAT BROWSER
+   ================================= */
+
+.snapchat-browser {
+  --safe-area-inset-top: 90px; /* Header do Snapchat */
+  --safe-area-inset-bottom: 110px; /* Controles do Snapchat */
+}
+
+/* =================================
+   WHATSAPP BROWSER
+   ================================= */
+
+.whatsapp-browser {
+  --safe-area-inset-top: 80px; /* Header do WhatsApp */
+  --safe-area-inset-bottom: 90px; /* Controles do WhatsApp */
+}
+
+/* =================================
+   MODAIS EM NAVEGADORES IN-APP
+   ================================= */
+
+.in-app-browser [role="dialog"],
+.in-app-browser .modal {
+  /* Garantir que modais não conflitem com UI da rede social */
+  max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 2rem) !important;
+}
+
+/* Modal de compra específico */
+.in-app-browser .purchase-modal {
+  top: var(--safe-area-inset-top) !important;
+  bottom: var(--safe-area-inset-bottom) !important;
+}
+
+/* =================================
+   HEADER E NAVEGAÇÃO
+   ================================= */
+
+.in-app-browser .header {
+  /* Header do site ajustado para não conflitar */
+  top: var(--safe-area-inset-top);
+  position: sticky;
+  z-index: 100; /* Menor que UI da rede social */
+}
+
+/* =================================
+   BOTÕES DE AÇÃO
+   ================================= */
+
+.in-app-browser .cta-button,
+.in-app-browser .purchase-button {
+  /* Botões importantes com maior visibilidade */
+  box-shadow: 0 8px 25px rgba(169, 104, 61, 0.4);
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+/* =================================
+   SEÇÕES PRINCIPAIS
+   ================================= */
+
+.in-app-browser .hero-section {
+  /* Ajustar hero para não ser cortada */
+  padding-top: calc(var(--safe-area-inset-top) + 2rem);
+  min-height: calc(100vh - var(--safe-area-inset-top));
+}
+
+.in-app-browser .benefits-to-ingredients-transition {
+  /* Transições ajustadas */
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* =================================
+   SCROLL E PERFORMANCE
+   ================================= */
+
+.in-app-browser * {
+  /* Otimizar scroll em navegadores in-app */
+  -webkit-overflow-scrolling: touch;
+}
+
+.in-app-browser .scroll-container {
+  /* Containers de scroll otimizados */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =================================
+   AJUSTES PARA ORIENTAÇÃO
+   ================================= */
+
+@media (orientation: landscape) {
+  .in-app-browser {
+    --safe-area-inset-top: 60px;
+    --safe-area-inset-bottom: 80px;
+  }
+  
+  .in-app-browser .hero-section {
+    min-height: calc(100vh - 60px);
+  }
+}
+
+/* =================================
+   AJUSTES PARA DIFERENTES TAMANHOS
+   ================================= */
+
+/* Telas pequenas (iPhone SE, etc.) */
+@media (max-height: 667px) {
+  .in-app-browser {
+    --safe-area-inset-top: 70px;
+    --safe-area-inset-bottom: 80px;
+  }
+}
+
+/* Telas grandes (iPhone Pro Max, etc.) */
+@media (min-height: 844px) {
+  .in-app-browser {
+    --safe-area-inset-top: 90px;
+    --safe-area-inset-bottom: 110px;
+  }
+}
+
+/* =================================
+   FALLBACKS E COMPATIBILIDADE
+   ================================= */
+
+/* Fallback para navegadores que não suportam CSS custom properties */
+@supports not (--css-custom-properties: true) {
+  .in-app-browser .hero-section {
+    padding-top: 90px;
+    min-height: calc(100vh - 90px);
+  }
+  
+  .in-app-browser [role="dialog"] {
+    max-height: calc(100vh - 180px) !important;
+  }
+}
+
+/* Ensure no horizontal scroll */
+.in-app-browser body,
+.in-app-browser html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}

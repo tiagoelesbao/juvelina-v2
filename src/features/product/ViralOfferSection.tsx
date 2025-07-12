@@ -12,9 +12,9 @@ interface ViralOfferSectionProps {
 const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => {
   // Estado para controlar a contagem regressiva
   const [timeLeft, setTimeLeft] = useState({
-    hours: 4,
-    minutes: 59,
-    seconds: 59
+    hours: 5,
+    minutes: 30,
+    seconds: 0
   });
   
   // Estado para controlar o número de unidades disponíveis
@@ -174,19 +174,19 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
               </div>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6 p-8">
+            <div className="grid md:grid-cols-5 gap-6 md:gap-8 p-6 md:p-8">
               {/* Coluna da Esquerda - Imagem do Produto */}
-              <div className="md:col-span-1">
-                <div className="relative mx-auto max-w-xs">
+              <div className="md:col-span-2 flex flex-col items-center">
+                <div className="relative w-48 md:w-56">
                   <img 
-                    src="https://images.unsplash.com/photo-1607006333439-505849ef4f76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" 
-                    alt="Juvelina Multivitamínico Líquido" 
+                    src="/images/juvelina-bottle-2.png" 
+                    alt="Juvelina Organics - Cabelo, Pele & Unhas - Vitamina Matinal" 
                     className="w-full h-auto rounded-lg shadow-lg"
                   />
                   
                   {/* Badge de desconto */}
                   <motion.div
-                    className="absolute -top-3 -right-3 bg-red-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-lg"
                     animate={{ 
                       scale: [1, 1.05, 1],
                       boxShadow: [
@@ -202,7 +202,7 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
                     }}
                   >
                     <div className="text-center leading-none">
-                      <span className="text-lg font-bold">{discountPercentage}%</span>
+                      <span className="text-base md:text-lg font-bold">{discountPercentage}%</span>
                       <br />
                       <span className="text-xs">OFF</span>
                     </div>
@@ -210,13 +210,13 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
                 </div>
                 
                 {/* Selos de credibilidade */}
-                <div className="flex justify-center gap-3 mt-4">
+                <div className="flex justify-center gap-2 mt-4 flex-wrap">
                   {[
-                    { icon: <CheckCircle size={16} />, label: "Testado" },
-                    { icon: <CheckCircle size={16} />, label: "Natural" },
-                    { icon: <CheckCircle size={16} />, label: "Vegano" }
+                    { icon: <CheckCircle size={14} />, label: "Testado" },
+                    { icon: <CheckCircle size={14} />, label: "Natural" },
+                    { icon: <CheckCircle size={14} />, label: "Vegano" }
                   ].map((badge, index) => (
-                    <div key={index} className="bg-gray-100 px-2 py-1 rounded text-xs flex items-center gap-1 text-gray-700">
+                    <div key={index} className="bg-juvelina-mint/20 px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 text-juvelina-emerald font-medium">
                       {badge.icon}
                       <span>{badge.label}</span>
                     </div>
@@ -225,21 +225,27 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
               </div>
               
               {/* Coluna do Meio - Detalhes da Oferta */}
-              <div className="md:col-span-2">
-                <h3 className="text-2xl font-bold mb-3">Juvelina Organics - Multivitamínico Líquido</h3>
+              <div className="md:col-span-3">
+                <div className="mb-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Juvelina Organics</h3>
+                  <p className="text-base text-gray-600 font-medium">Cabelo, Pele & Unhas - Vitamina Matinal</p>
+                </div>
                 
-                <div className="flex items-baseline mb-4">
-                  <div className="text-gray-400 line-through text-xl">R$ 179,90</div>
-                  <div className="text-3xl font-bold text-juvelina-gold ml-3">R$ {(179.9 * (1 - discountPercentage/100)).toFixed(2).replace('.', ',')}</div>
-                  <span className="text-sm text-gray-500 ml-2">/frasco</span>
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-6">
+                  <div className="text-gray-400 line-through text-lg md:text-xl">R$ 179,90</div>
+                  <div className="text-2xl md:text-3xl font-bold text-juvelina-gold">R$ {(179.9 * (1 - discountPercentage/100)).toFixed(2).replace('.', ',')}</div>
+                  <span className="text-sm text-gray-500">/frasco de 1000ml</span>
                 </div>
                 
                 {/* Detalhes da Oferta */}
-                <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                  <div className="text-sm text-gray-600 mb-3">A oferta inclui:</div>
+                <div className="bg-gradient-to-r from-juvelina-mint/10 to-juvelina-gold/10 p-5 rounded-xl mb-6 border border-juvelina-mint/20">
+                  <div className="text-sm font-semibold text-juvelina-emerald mb-4 flex items-center gap-2">
+                    <Gift size={16} />
+                    A oferta inclui:
+                  </div>
                   <ul className="space-y-3">
                     {[
-                      "1 frasco de Juvelina Multivitamínico Líquido (30 dias de uso)",
+                      "1 frasco de Juvelina Multivitamínico Líquido (1000ml - 30 dias)",
                       "Frete Grátis para todo Brasil",
                       "Garantia de 30 dias ou seu dinheiro de volta",
                       "Acesso ao Guia de Bem-Estar Juvelina (PDF)",
@@ -247,16 +253,16 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
                     ].filter(Boolean).map((item, index) => (
                       <motion.li 
                         key={index}
-                        className="flex items-start gap-2"
+                        className="flex items-start gap-3"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 + index * 0.1, duration: 0.5 }}
                       >
-                        <CheckCircle className="text-green-500 mt-0.5 flex-shrink-0" size={16} />
-                        <span className="text-gray-700">
+                        <CheckCircle className="text-juvelina-emerald mt-0.5 flex-shrink-0" size={18} />
+                        <span className="text-gray-700 text-sm">
                           {item}
                           {index === 4 && (
-                            <span className="text-red-500 font-medium"> NOVO!</span>
+                            <span className="text-red-500 font-bold text-xs ml-1 bg-red-50 px-2 py-0.5 rounded-full"> NOVO!</span>
                           )}
                         </span>
                       </motion.li>
@@ -265,36 +271,36 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
                 </div>
                 
                 {/* Timer */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+                  <div className="flex items-center justify-center gap-2 text-gray-700 mb-4">
                     <Clock size={18} className="text-juvelina-gold" />
-                    <span className="font-medium">Oferta termina em:</span>
+                    <span className="font-semibold text-sm">Oferta termina em:</span>
                   </div>
                   
                   <div className="flex gap-2 justify-center">
                     {/* Horas */}
-                    <div className="bg-juvelina-gold text-white py-2 px-3 rounded-lg shadow-md">
-                      <div className="text-2xl font-bold">
+                    <div className="bg-gradient-to-b from-juvelina-gold to-juvelina-gold/90 text-white py-3 px-3 rounded-xl shadow-lg min-w-[60px] text-center">
+                      <div className="text-xl md:text-2xl font-bold">
                         {String(timeLeft.hours).padStart(2, '0')}
                       </div>
                       <div className="text-xs">Horas</div>
                     </div>
                     
-                    <div className="text-2xl font-bold self-center">:</div>
+                    <div className="text-xl md:text-2xl font-bold self-center text-juvelina-gold">:</div>
                     
                     {/* Minutos */}
-                    <div className="bg-juvelina-gold text-white py-2 px-3 rounded-lg shadow-md">
-                      <div className="text-2xl font-bold">
+                    <div className="bg-gradient-to-b from-juvelina-gold to-juvelina-gold/90 text-white py-3 px-3 rounded-xl shadow-lg min-w-[60px] text-center">
+                      <div className="text-xl md:text-2xl font-bold">
                         {String(timeLeft.minutes).padStart(2, '0')}
                       </div>
                       <div className="text-xs">Minutos</div>
                     </div>
                     
-                    <div className="text-2xl font-bold self-center">:</div>
+                    <div className="text-xl md:text-2xl font-bold self-center text-juvelina-gold">:</div>
                     
                     {/* Segundos */}
-                    <div className="bg-juvelina-gold text-white py-2 px-3 rounded-lg shadow-md">
-                      <div className="text-2xl font-bold">
+                    <div className="bg-gradient-to-b from-juvelina-gold to-juvelina-gold/90 text-white py-3 px-3 rounded-xl shadow-lg min-w-[60px] text-center">
+                      <div className="text-xl md:text-2xl font-bold">
                         {String(timeLeft.seconds).padStart(2, '0')}
                       </div>
                       <div className="text-xs">Segundos</div>
@@ -303,40 +309,49 @@ const ViralOfferSection: React.FC<ViralOfferSectionProps> = ({ onCtaClick }) => 
                 </div>
                 
                 {/* Botão CTA */}
-                <AnimatedButton
-                  onClick={onCtaClick}
-                  color="gold"
-                  size="lg"
-                  className="w-full mb-4"
-                >
-                  <ShoppingCart size={20} />
-                  <span className="font-bold">Garantir Minha Juvelina Agora</span>
-                </AnimatedButton>
+                <div className="space-y-3 mb-6">
+                  <AnimatedButton
+                    onClick={onCtaClick}
+                    color="gold"
+                    size="lg"
+                    className="w-full"
+                  >
+                    <ShoppingCart size={20} />
+                    <span className="font-bold">Garantir Minha Juvelina Agora</span>
+                  </AnimatedButton>
+                  
+                  <div className="text-center text-xs text-gray-500">
+                    💳 Parcelamento em até 12x sem juros
+                  </div>
+                </div>
                 
                 {/* Compras recentes */}
-                <div className="bg-juvelina-mint/10 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="bg-gradient-to-r from-juvelina-mint/10 to-juvelina-emerald/10 p-4 rounded-xl border border-juvelina-mint/20">
+                  <div className="flex items-center gap-2 mb-3">
                     <Users size={16} className="text-juvelina-emerald" />
-                    <span className="text-sm font-medium text-gray-700">Compras recentes</span>
+                    <span className="text-sm font-semibold text-juvelina-emerald">Atividade em tempo real</span>
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   </div>
                   
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                  <div className="space-y-2 max-h-36 overflow-y-auto">
                     <AnimatePresence>
                       {notifications.map((notification) => (
                         <motion.div
                           key={notification.id}
-                          className="flex items-center gap-2 text-xs bg-white p-2 rounded"
+                          className="flex items-center gap-3 text-xs bg-white p-3 rounded-lg shadow-sm border border-gray-50"
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="font-medium">{notification.name}</span>
-                          <span className="text-gray-500">
-                            {notification.action} {notification.action === 'assinou' ? 'o plano mensal' : 'Juvelina'}
-                          </span>
-                          <span className="text-gray-400 ml-auto">há {notification.time} min</span>
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <div className="flex-1">
+                            <span className="font-semibold text-gray-800">{notification.name}</span>
+                            <span className="text-gray-600 ml-1">
+                              {notification.action} {notification.action === 'assinou' ? 'o plano mensal' : 'Juvelina'}
+                            </span>
+                          </div>
+                          <span className="text-gray-400 text-xs">há {notification.time} min</span>
                         </motion.div>
                       ))}
                     </AnimatePresence>

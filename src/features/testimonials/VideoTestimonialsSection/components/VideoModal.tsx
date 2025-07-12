@@ -524,7 +524,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ video, onClose, onCtaClick }) =
                       </p>
                       <div className="flex items-center gap-2">
                         <div className="scale-90">{renderStars(5)}</div>
-                        <span className="text-xs text-gray-500">(12.5k avaliações)</span>
+                        <span className="text-xs text-gray-500">(2.8k avaliações)</span>
                       </div>
                       
                       <div className="mt-1 space-y-0.5">

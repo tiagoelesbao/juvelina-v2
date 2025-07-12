@@ -347,6 +347,14 @@ export default defineConfig({
     cors: true,
     hmr: {
       overlay: true,
+      protocol: 'ws',
+      host: 'localhost',
+      port: 3000,
+      clientPort: 3000,
+    },
+    watch: {
+      usePolling: true,
+      interval: 100,
     },
     headers: {
       // Headers para desenvolvimento

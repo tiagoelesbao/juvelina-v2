@@ -213,19 +213,6 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
     
     setIsTransitioning(true);
     
-    // Scroll suave para o topo da seção
-    const section = document.getElementById('beneficios');
-    if (section) {
-      const headerOffset = 120;
-      const elementPosition = section.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
-    
     setTimeout(() => {
       setActiveTab(newTab);
       setIsTransitioning(false);
@@ -279,81 +266,101 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
       <AnimatePresence>
         {showDetailModal && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleCloseModal}
           >
             <motion.div
-              className={`bg-white rounded-2xl ${isMobile ? 'max-w-lg w-full max-h-[90vh] overflow-y-auto' : 'max-w-4xl w-full'}`}
+              className={`bg-white rounded-2xl ${
+                isMobile 
+                  ? 'w-[calc(100%-2rem)] max-w-lg mx-4 max-h-[calc(100vh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)]' 
+                  : 'max-w-4xl w-full max-h-[90vh]'
+              } overflow-hidden flex flex-col`}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
+              style={{
+                marginTop: isMobile 
+                  ? (document.documentElement.classList.contains('in-app-browser') ? '80px' : '60px')
+                  : '0',
+                marginBottom: isMobile 
+                  ? (document.documentElement.classList.contains('in-app-browser') ? '100px' : '80px')
+                  : '0',
+              }}
             >
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <img 
                   src={getOptimizedImageUrl(benefit.image)}
                   alt={benefit.title}
-                  className="w-full h-48 sm:h-64 object-cover rounded-t-2xl"
+                  className={`w-full ${isMobile ? 'h-32' : 'h-48 sm:h-64'} object-cover`}
                   loading="lazy"
                 />
                 <button
                   onClick={handleCloseModal}
-                  className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full p-2 hover:bg-white transition shadow-lg"
+                  className="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-full p-1.5 hover:bg-white transition shadow-lg"
                   aria-label="Fechar modal"
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
               
-              <div className="p-6 sm:p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  {benefit.icon}
-                  <h2 className="text-2xl sm:text-3xl font-bold text-juvelina-gold">{benefit.title}</h2>
+              <div className={`${isMobile ? 'p-4' : 'p-6 sm:p-8'} overflow-y-auto flex-1`}>
+                <div className="flex items-center gap-3 mb-4">
+                  {React.cloneElement(benefit.icon, {
+                    className: isMobile ? 'h-8 w-8 text-juvelina-gold' : 'h-10 w-10 text-juvelina-gold'
+                  })}
+                  <h2 className={`${isMobile ? 'text-xl' : 'text-2xl sm:text-3xl'} font-bold text-juvelina-gold`}>
+                    {benefit.title}
+                  </h2>
                 </div>
                 
-                <p className="text-base sm:text-lg text-gray-700 mb-6">{benefit.description}</p>
+                <p className={`${isMobile ? 'text-sm' : 'text-base sm:text-lg'} text-gray-700 mb-4`}>
+                  {benefit.description}
+                </p>
                 
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className={`${isMobile ? 'space-y-4' : 'grid md:grid-cols-2 gap-6'} mb-4`}>
                   <div>
-                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Ingredientes Principais</h3>
-                    <ul className="space-y-2">
-                      {benefit.detailedInfo.ingredients.map((ingredient, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <CheckCircle size={16} className="text-juvelina-gold flex-shrink-0" />
-                          <span className="text-sm sm:text-base">{ingredient}</span>
+                    <h3 className={`font-bold ${isMobile ? 'text-base' : 'text-lg sm:text-xl'} mb-2 text-juvelina-emerald`}>
+                      Ingredientes Principais
+                    </h3>
+                    <ul className="space-y-1">
+                      {benefit.detailedInfo.ingredients.slice(0, isMobile ? 3 : 4).map((ingredient, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle size={14} className="text-juvelina-gold flex-shrink-0 mt-0.5" />
+                          <span className={`${isMobile ? 'text-xs' : 'text-sm sm:text-base'}`}>{ingredient}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   
                   <div>
-                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">Evidência Científica</h3>
-                    <p className="text-sm sm:text-base text-gray-700 italic bg-juvelina-mint/20 p-4 rounded-lg">
+                    <h3 className={`font-bold ${isMobile ? 'text-base' : 'text-lg sm:text-xl'} mb-2 text-juvelina-emerald`}>
+                      Evidência Científica
+                    </h3>
+                    <p className={`${isMobile ? 'text-xs' : 'text-sm sm:text-base'} text-gray-700 italic bg-juvelina-mint/20 p-3 rounded-lg`}>
                       "{benefit.detailedInfo.scientificEvidence}"
                     </p>
                   </div>
                 </div>
                 
-                <div>
-                  <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">O que nossos clientes dizem</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
-                      <motion.div 
-                        key={idx} 
-                        className="bg-gray-50 p-4 rounded-lg"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                      >
-                        <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
-                        <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
-                      </motion.div>
-                    ))}
+                {!isMobile && (
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl mb-3 text-juvelina-emerald">
+                      O que nossos clientes dizem
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {benefit.detailedInfo.testimonials.map((testimonial, idx) => (
+                        <div key={idx} className="bg-gray-50 p-4 rounded-lg">
+                          <p className="text-sm sm:text-base text-gray-700 mb-2">"{testimonial.text}"</p>
+                          <p className="text-xs sm:text-sm text-juvelina-gold font-medium">- {testimonial.name}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -600,18 +607,90 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ onBenefitChange }) =>
       </section>
       
       {/* Transição orgânica melhorada */}
-      <div className="benefits-to-ingredients-transition">
-        <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%">
-          <defs>
-            <filter id="benefits-wave">
-              <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" />
-              <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" />
-            </filter>
-          </defs>
-          <path d="M0,80 C200,40 400,120 600,80 C800,40 1000,120 1200,80 C1300,60 1400,70 1440,80 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.3"/>
-          <path d="M0,120 C300,80 600,160 900,120 C1100,90 1300,130 1440,120 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)" opacity="0.5"/>
-          <path d="M0,160 C400,140 800,180 1200,160 C1320,155 1400,158 1440,160 L1440,240 L0,240 Z" fill="#A9683D" filter="url(#benefits-wave)"/>
-        </svg>
+      <div className="benefits-to-ingredients-transition" style={{ 
+        position: 'relative',
+        width: '100vw',
+        height: '240px',
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+        background: 'linear-gradient(to bottom, #ffffff 0%, #A9683D 100%)',
+        overflow: 'hidden',
+        maxWidth: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{
+          position: 'absolute',
+          width: '200%',
+          height: '100%',
+          left: '-50%',
+          top: 0
+        }}>
+          <svg 
+            viewBox="0 0 4000 240" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg" 
+            preserveAspectRatio="none" 
+            width="100%" 
+            height="100%"
+          >
+            <defs>
+              <filter id="benefits-wave-clean">
+                <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" seed="5" />
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" />
+              </filter>
+            </defs>
+            
+            {/* Onda superior sutil */}
+            <path 
+              d="M-500,80 C200,40 400,120 600,80 C800,40 1000,120 1200,80 C1600,40 2000,120 2400,80 C2800,40 3200,120 3600,80 C3800,60 4000,70 4500,80 L4500,240 L-500,240 Z" 
+              fill="#A9683D" 
+              filter="url(#benefits-wave-clean)" 
+              opacity="0.3"
+            >
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                from="0 0"
+                to="800 0"
+                dur="40s"
+                repeatCount="indefinite"
+              />
+            </path>
+            
+            {/* Onda média */}
+            <path 
+              d="M-500,120 C300,80 600,160 900,120 C1100,90 1300,130 1500,120 C1800,80 2100,160 2400,120 C2700,80 3000,160 3300,120 C3600,80 3900,160 4500,120 L4500,240 L-500,240 Z" 
+              fill="#A9683D" 
+              filter="url(#benefits-wave-clean)" 
+              opacity="0.5"
+            >
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                from="0 0"
+                to="-600 0"
+                dur="35s"
+                repeatCount="indefinite"
+              />
+            </path>
+            
+            {/* Onda principal */}
+            <path 
+              d="M-500,160 C400,140 800,180 1200,160 C1600,140 2000,180 2400,160 C2800,140 3200,180 3600,160 C3800,155 4000,158 4500,160 L4500,240 L-500,240 Z" 
+              fill="#A9683D"
+              filter="url(#benefits-wave-clean)"
+            >
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                from="0 0"
+                to="400 0"
+                dur="30s"
+                repeatCount="indefinite"
+              />
+            </path>
+          </svg>
+        </div>
       </div>
       
       {/* Modal de Detalhes */}

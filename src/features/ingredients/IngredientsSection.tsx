@@ -215,7 +215,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         <div className="container mx-auto px-4 relative z-10">
           {/* Header da seção */}
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-4 md:mb-4 sm:mb-2"
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
@@ -290,7 +290,7 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
           </motion.div>
 
           {/* Grid de categorias */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="grid md:grid-cols-3 gap-8 mb-6 md:mb-6 sm:mb-4">
             {ingredientCategories.map((category, index) => (
               <motion.div
                 key={category.id}
@@ -463,16 +463,16 @@ const IngredientsSection: React.FC<IngredientsSectionProps> = ({ highlightBenefi
         
         {/* Transição orgânica inferior */}
         <div className="ingredients-organic-transition">
-          <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%">
+          <svg viewBox="0 0 1440 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="100%" style={{ display: 'block' }}>
             <defs>
-              <filter id="organic-wave">
+              <filter id="organic-wave-ingredients">
                 <feTurbulence baseFrequency="0.015" numOctaves="2" result="turbulence" />
                 <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="12" />
               </filter>
             </defs>
-            <path d="M0,120 C200,80 400,160 600,120 C800,80 1000,160 1200,120 C1300,100 1400,110 1440,120 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)" opacity="0.3"/>
-            <path d="M0,150 C300,110 600,190 900,150 C1100,120 1300,160 1440,150 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)" opacity="0.5"/>
-            <path d="M0,190 C400,170 800,210 1200,190 C1320,185 1400,188 1440,190 L1440,240 L0,240 Z" fill="#ffffff" filter="url(#organic-wave)"/>
+            <path d="M-10,120 C200,80 400,160 600,120 C800,80 1000,160 1200,120 C1300,100 1400,110 1450,120 L1450,240 L-10,240 Z" fill="#ffffff" filter="url(#organic-wave-ingredients)" opacity="0.3"/>
+            <path d="M-10,150 C300,110 600,190 900,150 C1100,120 1300,160 1450,150 L1450,240 L-10,240 Z" fill="#ffffff" filter="url(#organic-wave-ingredients)" opacity="0.5"/>
+            <path d="M-10,190 C400,170 800,210 1200,190 C1320,185 1400,188 1450,190 L1450,240 L-10,240 Z" fill="#ffffff" filter="url(#organic-wave-ingredients)"/>
           </svg>
         </div>
       </section>

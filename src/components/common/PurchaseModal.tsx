@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, CheckCircle, Clock, Shield } from 'lucide-react';
+import useSocialBrowserDetection from '../../hooks/ui/useSocialBrowserDetection';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -38,6 +39,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   const [exitIntentShown, setExitIntentShown] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  
+  // Hook para detectar navegadores de redes sociais
+  const socialBrowser = useSocialBrowserDetection();
   
   // Criar ou encontrar o container do portal
   useEffect(() => {
@@ -209,27 +213,38 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           {isMobile ? (
             // VERSÃO MOBILE CORRIGIDA
             <motion.div
-              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex items-center justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
+              style={{
+                // Ajustes específicos para navegadores de redes sociais usando hook
+                paddingTop: `${socialBrowser.safeAreaTop}px`,
+                paddingBottom: `${socialBrowser.safeAreaBottom}px`,
+                paddingLeft: '1rem',
+                paddingRight: '1rem',
+              }}
             >
               <motion.div
                 ref={modalRef}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform-gpu overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl transform-gpu overflow-hidden flex flex-col"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 style={{
-                  maxHeight: 'calc(100vh - 2rem)',
+                  width: 'calc(100% - 2rem)',
+                  maxWidth: '28rem',
+                  // Altura ajustada dinamicamente para cada navegador
+                  maxHeight: `calc(100vh - ${socialBrowser.safeAreaTop + socialBrowser.safeAreaBottom + 20}px)`,
+                  margin: '0',
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header - ajustado para mobile */}
-                <div className="bg-juvelina-gold text-white px-4 py-3 rounded-t-2xl relative">
+                <div className="bg-juvelina-gold text-white px-4 py-3 flex-shrink-0">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-base sm:text-lg font-bold truncate pr-8 max-w-[80%]">{getTitle()}</h3>
+                    <h3 className="text-base font-bold truncate pr-8 max-w-[80%]">{getTitle()}</h3>
                     <button
                       onClick={onClose}
                       className="text-white hover:text-gray-200 transition-colors absolute right-3 top-3 p-1"
@@ -247,7 +262,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 </div>
                 
                 {/* Conteúdo principal - com scroll e padding ajustado */}
-                <div className="overflow-y-auto max-h-[calc(100vh-16rem)]" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="overflow-y-auto flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <div className="p-4 sm:p-5">
                     {/* Descrição compacta */}
                     <p className="text-sm text-gray-700 mb-4">
@@ -377,16 +392,16 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 </div>
                 
                 {/* Botão de ação principal - com padding adequado */}
-                <div className="p-4 sm:p-5 pt-2 bg-gray-50 border-t border-gray-100">
+                <div className="p-4 pt-2 bg-gray-50 border-t border-gray-100 flex-shrink-0">
                   <button 
                     className="w-full py-3 bg-juvelina-gold text-white rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:bg-juvelina-gold/90 transition-colors active:scale-[0.98]"
                   >
                     <ShoppingCart size={18} />
-                    <span className="text-sm sm:text-base">Garantir Meu Juvelina Agora</span>
+                    <span className="text-sm">Garantir Meu Juvelina Agora</span>
                   </button>
                   
                   {/* Elementos de confiança - responsivos */}
-                  <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3 text-xs text-gray-600">
+                  <div className="flex items-center justify-center gap-3 mt-3 text-xs text-gray-600">
                     <div className="flex items-center gap-1">
                       <Shield size={12} className="text-juvelina-gold" />
                       <span>Pagamento Seguro</span>

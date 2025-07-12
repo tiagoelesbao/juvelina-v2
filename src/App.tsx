@@ -11,6 +11,7 @@ import {
 
 // Componentes essenciais (não lazy) - Hero e Header devem carregar imediatamente
 import { AnnouncementBar, Header, PurchaseModal } from './components/common';
+import SocialBrowserBanner from './components/common/SocialBrowserBanner';
 import HeroSection from './features/hero';
 import LoadingSection from './components/ui/LoadingSection';
 import ScrollToTop from './components/ui/ScrollToTop';
@@ -273,6 +274,7 @@ function App() {
   return (
     <PerformanceContext.Provider value={performanceContextValue}>
       <div className="min-h-screen bg-white overflow-x-hidden optimized-scroll">
+        <SocialBrowserBanner />
         <AnnouncementBar />
         <Header onCtaClick={handleCtaClick} />
         
